@@ -1,0 +1,2060 @@
+---
+title: "data-clean"
+author: "Janette Avelar"
+date: '2023-04-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(rio)
+library(tidyverse)
+library(DT)
+library(datawizard)
+dat <- import(here("data", "raw-2.csv"))
+```
+
+# Changing response types [string -> numeric]
+
+First adding NAs for missing data
+
+```{r address}
+#1 NA - add NA values
+#school_address
+#school_city
+#school_state
+dat <- dat %>% 
+  mutate(school_address = na_if(school_address, ""),
+         school_city = na_if(school_city, ""),
+         school_state = na_if(school_state, ""),
+         school_district = na_if(school_district, ""),
+         website = na_if(website, ""),
+         school_descriptor_other_text = na_if(school_descriptor_other_text, ""),
+         `co-leaders_other_leaders_text` = na_if(`co-leaders_other_leaders_text`, ""),
+         focus_other_student_group_text = na_if(focus_other_student_group_text, ""),
+         inclusive_other_student_group_text = na_if(inclusive_other_student_group_text, ""),
+         self_reported_grades_other_text = na_if(self_reported_grades_other_text, ""),
+         self_reported_locale_other_text = na_if(self_reported_locale_other_text, ""))
+```
+
+*Note*: School district may need further cleaning - I'm hesitant to rewrite data that respondents filled in so I did not coerce NA values, but if we do any analysis with districts it's important to know that some of those responses were indicating NA.
+
+
+School descriptor
+1 = Public district school
+2 = Public charter school
+3 = Independent (private) school
+
+```{r school_descriptor}
+dat <- dat %>% 
+  mutate(school_descriptor = case_when(
+    school_descriptor == "Public district school" ~ 1,
+    school_descriptor == "Public charter school" ~ 2,
+    school_descriptor == "Independent (private) school" ~ 3
+  ))
+```
+
+Practices
+create core_ and time_ variables
+
+```{r core}
+core <- dat %>% 
+  select(school_id, starts_with("practices_")) %>% 
+  rename_with( .fn = function(.x){str_replace(.x, "practices_", "core_")},
+               .cols=starts_with("practices_")) %>% 
+  mutate(across(starts_with("core_"), ~case_when(
+                                        . == "Less than a year" ~ 1,
+                                        . == "1-2 years" ~ 1,
+                                        . == "3-4 years" ~ 1,
+                                        . == "5+ years" ~ 1,
+                                        . == "Not sure" ~ 1,
+                                        . == 1 ~ 0,
+                                        . == 0 ~ 0,
+                                        TRUE ~ 0
+    
+  )))
+dat <- full_join(dat, core, by = "school_id")
+```
+
+```{r time}
+# "0 = Not a core practice
+# 1 = Less than a year
+# 2 = 1-2 years
+# 3 = 3-4 years
+# 4 = 5+ years
+# 5 = Unsure"
+time <- dat %>% 
+  select(school_id, starts_with("practices")) %>% 
+  rename_with( .fn = function(.x){str_replace(.x, "practices_", "time_")},
+               .cols = starts_with("practices_")) %>% 
+  mutate(across(starts_with("time_"), ~case_when(
+    . == 1 ~ 0,
+    . == 0 ~ 0,
+    . == "Less than a year" ~ 1,
+    . == "1-2 years" ~ 2,
+    . == "3-4 years" ~ 3,
+    . == "5+ years" ~ 4,
+    . == "Not sure" ~ 5
+  )))
+dat <- full_join(dat, time, by = "school_id")
+```
+
+Fix practices
+
+```{r practices}
+dat <- dat %>% 
+  mutate(across(starts_with("practices_"), ~case_when(
+    . == 1 ~ 1,
+    . == 0 ~ 0,
+    . == "Less than a year" ~ 1,
+    . == "1-2 years" ~ 1,
+    . == "3-4 years" ~ 1,
+    . == "5+ years" ~ 1,
+    . == "Not sure" ~ 1
+  )))
+```
+
+Leaps
+
+```{r numeric leaps}
+dat <- dat %>% 
+  mutate(leaps_affirmation = case_when(
+    leaps_affirmation == "" ~ 0,
+    leaps_affirmation == "Assimilation & Marginalization → Affirmation of Self & Others" ~ 1
+  ),
+  leaps_anytime_anywhere = case_when(
+    leaps_anytime_anywhere == "" ~ 0,
+    leaps_anytime_anywhere == "Siloed Schooling → Anytime, Anywhere Learning" ~ 1
+  ),
+  leaps_connection = case_when(
+    leaps_connection == "" ~ 0,
+    leaps_connection == "Isolation → Connection & Community" ~ 1
+  ),
+  leaps_customization = case_when(
+    leaps_customization == "" ~ 0,
+    leaps_customization == "Inflexible Systems → Customization" ~ 1
+  ),
+  leaps_high_expectations = case_when(
+    leaps_high_expectations == "" ~ 0,
+    leaps_high_expectations == "Unequal Expectations & Opportunities → High Expectations with Unlimited Opportunities" ~ 1
+  ),
+  leaps_interest = case_when(
+    leaps_interest == "No, I am not interested" ~ 0,
+    leaps_interest == "Yes, I would like to learn more" ~ 1
+  ),
+  leaps_relevance = case_when(
+    leaps_relevance == "" ~ 0,
+    leaps_relevance == "Irrelevance → Relevance" ~ 1
+  ),
+  leaps_rigorous_learning = case_when(
+    leaps_rigorous_learning == "" ~ 0,
+    leaps_rigorous_learning == "Rote Activities →  Rigorous Learning" ~ 1
+  ),
+  leaps_self_direction = case_when(
+    leaps_self_direction == "" ~ 0,
+    leaps_self_direction == "Passive Compliance → Active Self-Direction" ~ 1
+  ),
+  leaps_social_consciousness = case_when(
+    leaps_social_consciousness == "" ~ 0,
+    leaps_social_consciousness == "Reinforcement of the Status Quo → Social Consciousness & Action" ~ 1
+  ),
+  leaps_whole_child = case_when(
+    leaps_whole_child == "" ~ 0,
+    leaps_whole_child == "Narrow Focus → Whole-Child Focus" ~ 1
+  )) %>% 
+  mutate(across(starts_with("leaps_rank_"), ~replace(., is.na(.), 0)))
+```
+
+Learner Demographic Data
+
+```{r demo}
+dat <- dat %>% 
+  mutate(self_reported_learner_none_collected = case_when(
+    self_reported_learner_none_collected == "" ~ 1,
+    self_reported_learner_none_collected == "We do not collect learner demographic data" ~ 0
+  ))
+```
+
+NCES ID
+
+```{r nces}
+#rename var
+#introduce NA
+dat <- dat %>% 
+  rename(nces_id = `NCES School ID`) %>% 
+  mutate(nces_id = na_if(nces_id, ""))
+```
+
+Additional Leaders
+
+Important note about decision-making: I chose to code blanks as NA assuming it indicates the question was not displayed to the respondent (e.g., everyone has a response for up to leader10, but not everyone reported 10 leaders.)
+
+```{r more leaders}
+dat <- dat %>% 
+  mutate(additional_leaders_qty = case_when(
+    additional_leaders_qty == "No additional primary leaders" ~ 0,
+    additional_leaders_qty == 1 ~ 1,
+    additional_leaders_qty == 2 ~ 2, 
+    additional_leaders_qty == 3 ~ 3,
+    additional_leaders_qty == 4 ~ 4,
+    additional_leaders_qty == 5 ~ 5,
+    additional_leaders_qty == 6 ~ 6,
+    additional_leaders_qty == 7 ~ 7,
+    additional_leaders_qty == 8 ~ 8,
+    additional_leaders_qty == 9 ~ 9,
+    additional_leaders_qty == "10 or more" ~ 10
+  ))
+# leader 1 gender
+dat <- dat %>% 
+  mutate(leader1_gender = case_when(
+    leader1_gender == "Man,,,,," ~ "1",
+    leader1_gender == ",Woman,,,," ~ "2",
+    leader1_gender == ",,,,Prefer to self-identify:," ~ "5",
+    leader1_gender == ",,,,,Prefer not to say" ~ "0",
+    leader1_gender == ",,Nonbinary or gender non-conforming,,," ~ "3",
+    leader1_gender == "Man,Woman,,,," ~ "1,2",
+    leader1_gender == "Man,Woman,Nonbinary or gender non-conforming,Transgender,," ~ "1,2,3,4"
+  ),
+  `leader1_gender_self-identify_text` = na_if(`leader1_gender_self-identify_text`, 0))
+# leader 1 race
+dat <- dat %>% 
+  mutate(leader1_race = case_when(
+    leader1_race == ",,Black or African American,,,,," ~ "3",
+    leader1_race == ",,,,,White,," ~ "6",
+    leader1_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader1_race == "American Indian or Alaska Native,Asian,Black or African American,Hispanic or Latinx,Native Hawaiian or Pacific     Islander,White,," ~ "1,2,3,4,5,6",
+    leader1_race == "American Indian or Alaska Native,,,,,,," ~ "1",
+    leader1_race == ",,Black or African American,,,White,," ~ "3,6",
+    leader1_race == ",,Black or African American,Hispanic or Latinx,,,," ~ "3,4",
+    leader1_race == ",,,Hispanic or Latinx,,White,," ~ "4,6",
+    leader1_race == ",,Black or African American,Hispanic or Latinx,,White,," ~ "3,4,6",
+    leader1_race == ",,,,,,Prefer to self-identify:," ~ "7",
+    leader1_race == "American Indian or Alaska Native,,Black or African American,,,,," ~ "1,3",
+    leader1_race == ",,,,,,,Prefer not to say" ~ "0",
+    leader1_race == "American Indian or Alaska Native,,Black or African American,Hispanic or Latinx,,White,," ~ "1,3,4,6",
+    leader1_race == ",Asian,Black or African American,,,White,," ~ "2,3,6",
+    leader1_race == ",Asian,,,,,," ~ "2",
+    leader1_race == "American Indian or Alaska Native,Asian,,Hispanic or Latinx,,White,," ~ "1,2,4,6",
+    leader1_race == ",Asian,Black or African American,Hispanic or Latinx,,White,," ~ "2,3,4,6",
+    leader1_race == "American Indian or Alaska Native,,,Hispanic or Latinx,,,," ~ "1,4",
+    leader1_race == ",Asian,,,,White,," ~ "2,6",
+    leader1_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5",
+    leader1_race == "American Indian or Alaska Native,,,,,White,," ~ "1,6"),
+`leader1_race_self-identify_text` = na_if(`leader1_race_self-identify_text`, ""))
+#leader 2 gender
+dat <- dat %>% 
+  mutate(leader2_gender = case_when(
+    #leader2_gender == ",,,,," ~ "0",
+    leader2_gender == ",Woman,,,," ~ "2",
+    leader2_gender == "Man,,,,," ~ "1",
+    leader2_gender == ",,,,,Prefer not to say" ~ "0",
+    leader2_gender == ",,,,Don’t know," ~ "5",
+    leader2_gender == "Man,Woman,,,," ~ "1,2",
+    leader2_gender == ",,Nonbinary or gender non-conforming,,," ~ "3",
+    leader2_gender == "Man,Woman,Nonbinary or gender non-conforming,,," ~ "1,2,3"
+  ))
+#leader 2 race
+dat <- dat %>% 
+  mutate(leader2_race = case_when(
+    #leader2_race == ",,,,,,," ~ "0",
+    leader2_race == ",,Black or African American,,,,," ~ "3",
+    leader2_race == ",Asian,,,,,," ~ "2",
+    leader2_race == ",,,,,White,," ~ "6",
+    leader2_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader2_race == "American Indian or Alaska Native,,,,,,," ~ "1",
+    leader2_race == ",,Black or African American,,,White,," ~ "3,6",
+    leader2_race == ",,,,,White,,Prefer not to say" ~ "6,0",
+    leader2_race == "American Indian or Alaska Native,,Black or African American,,,,," ~ "1,3",
+    leader2_race == ",,,,,,Don’t know," ~ "7",
+    leader2_race == ",,,,,,,Prefer not to say" ~ "0",
+    leader2_race == ",,,Hispanic or Latinx,,White,," ~ "4",
+    leader2_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5"
+  ))
+#leader 3 gender
+dat <- dat %>% 
+  mutate(leader3_gender = case_when(
+    #leader3_gender == ",,,,," ~ "0",
+    leader3_gender == ",Woman,,,," ~ "2",
+    leader3_gender == "Man,,,,," ~ "1",
+    leader3_gender == ",,,,,Prefer not to say" ~ "0"
+  ))
+#leader 3 race
+dat <- dat %>% 
+  mutate(leader3_race = case_when(
+    #leader3_race == ",,,,,,," ~ "0",
+    leader3_race == ",,Black or African American,,,,," ~ "3",
+    leader3_race == ",,,,,White,," ~ "6",
+    leader3_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader3_race == "American Indian or Alaska Native,,,,,,," ~ "1",
+    leader3_race == ",,,,Native Hawaiian or Pacific Islander,White,," ~ "5,6",
+    leader3_race == ",Asian,,,,,," ~ "2",
+    leader3_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5",
+    leader3_race == ",,,,,,Don’t know," ~ "7",
+    leader3_race == ",,Black or African American,Hispanic or Latinx,,,," ~ "3,4",
+    leader3_race == ",,,Hispanic or Latinx,,White,," ~ "4,6",
+    leader3_race == ",,,,,,,Prefer not to say" ~ "0"
+  ))
+#leader 4 gender
+dat <- dat %>% 
+  mutate(leader4_gender = case_when(
+    #leader4_gender == ",,,,," ~ "0",
+    leader4_gender == ",Woman,,,," ~ "2",
+    leader4_gender == "Man,,,,," ~ "1",
+    leader4_gender == ",,,,Don’t know," ~ "5",
+    leader4_gender == ",,,,,Prefer not to say" ~ "0"
+  ))
+#leader 4 race
+dat <- dat %>% 
+  mutate(leader4_race = case_when(
+    #leader4_race == ",,,,,,," ~ "0",
+    leader4_race == ",,Black or African American,,,,," ~ "3",
+    leader4_race == ",,,,,White,," ~ "6",
+    leader4_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader4_race == "American Indian or Alaska Native,,,,,,," ~ "1",
+    leader4_race == "American Indian or Alaska Native,,,Hispanic or Latinx,,,," ~ "1,4",
+    leader4_race == ",,,,,,Don’t know," ~ "7",
+    leader4_race == ",Asian,Black or African American,,,,," ~ "2,3",
+    leader4_race == ",,,,,,,Prefer not to say" ~ "0",
+    leader4_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5",
+    leader4_race == ",Asian,,,,,," ~ "2"
+  ))
+#leader 5 gender
+dat <- dat %>% 
+  mutate(leader5_gender = case_when(
+    #leader5_gender == ",,,,," ~ "0",
+    leader5_gender == ",Woman,,,," ~ "2",
+    leader5_gender == "Man,,,,," ~ "1",
+    leader5_gender == ",,Nonbinary or gender non-conforming,,," ~ "3",
+    leader5_gender == ",,,,,Prefer not to say" ~ "0",
+    leader5_gender == ",,,,Don’t know," ~ "5"
+  ))
+#leader 5 race
+dat <- dat %>% 
+  mutate(leader5_race = case_when(
+    #leader5_race == ",,,,,,," ~ "0",
+    leader5_race == ",,Black or African American,,,,," ~ "3",
+    leader5_race == ",,,,,White,," ~ "6",
+    leader5_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5",
+    leader5_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader5_race == ",Asian,,,,,," ~ "2",
+    leader5_race == ",,,Hispanic or Latinx,,White,," ~ "4,6",
+    leader5_race == "American Indian or Alaska Native,,Black or African American,,,,," ~ "1,3",
+    leader5_race == "American Indian or Alaska Native,,,Hispanic or Latinx,,,," ~ "1,4",
+    leader5_race == ",,,,,,Don’t know," ~ "7",
+    leader5_race == ",,,,,,,Prefer not to say" ~ "0"
+  ))
+#leader 6 gender
+dat <- dat %>% 
+  mutate(leader6_gender = case_when(
+    #leader6_gender == ",,,,," ~ "0",
+    leader6_gender == ",Woman,,,," ~ "2",
+    leader6_gender == "Man,,,,," ~ "1",
+    leader6_gender == ",,Nonbinary or gender non-conforming,,," ~ "3",
+    leader6_gender == ",,,,,Prefer not to say" ~ "0",
+    leader6_gender == ",,,,Don’t know," ~ "5"
+  ))
+#leader 6 race
+dat <- dat %>% 
+  mutate(leader6_race = case_when(
+    #leader6_race == ",,,,,,," ~ "0"
+    leader6_race == ",,,,,White,," ~ "6",
+    leader6_race == ",Asian,,,,,," ~ "2",
+    leader6_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5",
+    leader6_race == ",,Black or African American,,,,," ~ "3",
+    leader6_race == "American Indian or Alaska Native,,,Hispanic or Latinx,,,," ~ "1,4",
+    leader6_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader6_race == ",,,,,,Don’t know," ~ "5",
+    leader6_race == ",,,,,,,Prefer not to say" ~ "0"
+  ))
+#leader 7 gender
+dat <- dat %>% 
+  mutate(leader7_gender = case_when(
+    #leader7_gender == ",,,,," ~ "0",
+    leader7_gender == ",Woman,,,," ~ "2",
+    leader7_gender == "Man,,,,," ~ "1",
+    leader7_gender == ",,,,,Prefer not to say" ~ "0"
+  ))
+#leader 7 race
+dat <- dat %>% 
+  mutate(leader7_race = case_when(
+    #leader7_race == ",,,,,,," ~ "0",
+    leader7_race == ",,,,,White,," ~ "6",
+    leader7_race == ",,Black or African American,,,,," ~ "3",
+    leader7_race == ",,,Hispanic or Latinx,,,," ~ "4"
+  ))
+#leader 8 gender
+dat <- dat %>% 
+  mutate(leader8_gender = case_when(
+    #leader8_gender == ",,,,," ~ "0",
+    leader8_gender == "Man,,,,," ~ "1",
+    leader8_gender == ",Woman,,,," ~ "2",
+    leader8_gender == ",,,,,Prefer not to say" ~ "0"
+  ))
+#leader 8 race
+dat <- dat %>% 
+  mutate(leader8_race = case_when(
+    #leader8_race == ",,,,,,," ~ "0",
+    leader8_race == ",,,,,White,," ~ "6",
+    leader8_race == ",,Black or African American,,,,," ~ "3",
+    leader8_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5"
+  ))
+#leader 9 gender
+dat <- dat %>% 
+  mutate(leader9_gender = case_when(
+    #leader9_gender == ",,,,," ~ "0",
+    leader9_gender == ",Woman,,,," ~ "2",
+    leader9_gender == "Man,,,,," ~ "1",
+    leader9_gender == ",,,,,Prefer not to say" ~ "0"
+  ))
+#leader 9 race
+dat <- dat %>% 
+  mutate(leader9_race = case_when(
+    #leader9_race == ",,,,,,," ~ "0",
+    leader9_race == ",,Black or African American,,,,," ~ "3",
+    leader9_race == ",,,,,White,," ~ "6",
+    leader9_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader9_race == ",Asian,,,,,," ~ "2",
+    leader9_race == ",,,,Native Hawaiian or Pacific Islander,,," ~ "5"
+  ))
+#leader 10 gender
+dat <- dat %>% 
+  mutate(leader10_gender = case_when(
+    #leader10_gender == ",,,,," ~ "0",
+    leader10_gender == "Man,,,,," ~ "1",
+    leader10_gender == ",Woman,,,," ~ "2"
+  ))
+#leader 10 race
+dat <- dat %>% 
+  mutate(leader10_race = case_when(
+    #leader10_race == ",,,,,,," ~ "0",
+    leader10_race == ",,,Hispanic or Latinx,,,," ~ "4",
+    leader10_race == ",,,,,White,," ~ "6",
+    leader10_race == ",,Black or African American,,,,," ~ "3"
+  ))
+#leader 11 gender
+dat <- dat %>% 
+  mutate(leader11_gender = case_when(
+    #leader11_gender == ",,,,," ~ "0",
+    leader11_gender == ",Woman,,,," ~ "2",
+    leader11_gender == "Man,,,,," ~ "1"
+  ))
+#leader 11 race
+dat <- dat %>% 
+  mutate(leader11_race = case_when(
+    #leader11_race == ",,,,,,," ~ "0",
+    leader11_race == ",,,,,White,," ~ "6",
+    leader11_race == ",,Black or African American,,,,," ~ "3"
+  ))
+```
+
+Leadership & Teaching Diversity
+
+```{r leadership}
+dat <- dat %>% 
+  mutate(leadership_diversity = case_when(
+    leadership_diversity == "50 - 74% people of color" ~ 3,
+    leadership_diversity == "75 - 100% people of color" ~ 4,
+    leadership_diversity == "0 - 24% people of color" ~ 1,
+    leadership_diversity == "25 - 49% people of color" ~ 2,
+    leadership_diversity == "Prefer not to say" ~ 0
+  ),
+  teaching_diversity = case_when(
+    teaching_diversity == "50 - 74% people of color" ~ 3,
+    teaching_diversity == "0 - 24% people of color" ~ 1,
+    teaching_diversity == "25 - 49% people of color" ~ 2,
+    teaching_diversity == "Prefer not to say" ~ 0,
+    teaching_diversity == "75 - 100% people of color" ~ 4,
+    teaching_diversity == "Not sure" ~ 5
+  ))
+```
+
+Graduate Portrait
+
+Note: wording here differed between survey draft, dictionary, and raw response. Not sure why?
+
+```{r grad portraite}
+dat <- dat %>% 
+  mutate(graduate_portrait_usage = case_when(
+    graduate_portrait_usage == "Not sure" ~ 3,
+    graduate_portrait_usage == "No" ~ 0,
+    graduate_portrait_usage == "Yes, and we use it occasionally" ~ 2, #`Yes, but it does not play a big role in our work` was the raw response
+    graduate_portrait_usage == "Yes, and we rely on it heavily" ~ 1,
+  ),
+  `graduate_portrait_link-description` = case_when(
+    `graduate_portrait_link-description` == "" ~ 0,
+    `graduate_portrait_link-description` == "Provide a link or description" ~ 1
+  ),
+  `graduate_portrait_link-description_text` = na_if(`graduate_portrait_link-description_text`, ""),
+  graduate_portrait_uniqueness = case_when(
+    graduate_portrait_uniqueness == "It's used across our system" ~ 2,
+    graduate_portrait_uniqueness == "It's unique to our school" ~ 1,
+    graduate_portrait_uniqueness == "Not sure" ~ 0
+  ),
+  graduate_portrait_upload = case_when(
+    graduate_portrait_upload == "Upload a document" ~ 1,
+    graduate_portrait_upload == "" ~ 0
+  ),
+  graduate_portrait_upload_file_name = na_if(graduate_portrait_upload_file_name, ""),
+  graduate_portrait_upload_file_type = case_when(
+    graduate_portrait_upload_file_type == "image/png" ~ 2,
+    graduate_portrait_upload_file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ~ 3,
+    graduate_portrait_upload_file_type == "application/pdf" ~ 1,
+    graduate_portrait_upload_file_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" ~ 4,
+    graduate_portrait_upload_file_type == "image/jpeg" ~ 2,
+    graduate_portrait_upload_file_type == "" ~ 0
+  ),
+  graduate_portrait_upload_id = na_if(graduate_portrait_upload_id, ""))
+```
+
+Impact & Innovation
+
+```{r impact}
+dat <- dat %>% 
+  mutate(`impact_link-description` = case_when(
+    `impact_link-description` == "" ~ 0,
+    `impact_link-description` == "Provide a link or description" ~ 1
+  ),
+  `impact_link-description_text` = na_if(`impact_link-description_text`, ""),
+  impact_upload = case_when(
+    impact_upload == "" ~ 0,
+    impact_upload == "Upload a document" ~ 1
+  ),
+  impact_upload_file_name = na_if(impact_upload_file_name, ""),
+  impact_upload_id = na_if(impact_upload_id, ""),
+  impact_upload_type = case_when(
+    impact_upload_type == "" ~ 0,
+    impact_upload_type == "application/pdf" ~ 1,
+    impact_upload_type == "image/png" ~ 2,
+    impact_upload_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ~ 3
+  ),
+  innovation_initiative = case_when(
+    innovation_initiative == "Not sure" ~ 2,
+    innovation_initiative == "Yes" ~ 1,
+    innovation_initiative == "No" ~ 0
+  ),
+  innovation_initiative_importance = case_when(
+    innovation_initiative_importance == "Very important" ~ 5,
+    innovation_initiative_importance == "Fairly important" ~ 3,
+    innovation_initiative_importance == "Important" ~ 4,
+    innovation_initiative_importance == "Slightly important" ~ 2,
+    innovation_initiative_importance == "Not important" ~ 1
+  ),
+  innovation_initiative_text = na_if(innovation_initiative_text, ""),
+  waiver_application = case_when(
+    waiver_application == "Not sure" ~ 4,                                                           
+    waiver_application == "No" ~ 0,                                                               
+    waiver_application == "Yes, we considered applying for a waiver, did not ultimately choose to apply" ~ 3,
+    waiver_application == "Yes, we have received a waiver" ~ 1,                                              
+    waiver_application == "Yes, we applied for a waiver, but did not receive it" ~ 2
+  ),
+  `state-level_policies` = na_if(`state-level_policies`, ""),
+  central_direction = case_when(
+    central_direction == "" ~ 0,
+    central_direction == "Direction and vision for your innovative design" ~ 1
+  ),
+  central_exemptions = case_when(
+    central_exemptions == "" ~ 0,
+    central_exemptions == "Exemptions from district policies and regulatory requirements" ~ 1
+  ),
+  central_funding = case_when(
+    central_funding == "" ~ 0,
+    central_funding == "Funding for your innovative design" ~ 1
+  ),
+  `central_n-a` = case_when(
+    `central_n-a` == "" ~ 1,
+    `central_n-a` == "N/A (we don’t have a district or charter central office)" ~ 0
+  ),
+  central_navigation = case_when(
+    central_navigation == "" ~ 0,
+    central_navigation == "Help navigating state policies and regulatory requirements" ~ 1
+  ),
+  central_other = case_when(
+    central_other == "" ~ 0,
+    central_other == "Other:" ~ 1
+  ),
+  central_other_text = na_if(central_other_text, ""),
+  central_peer = case_when(
+    central_peer == "" ~ 0,
+    central_peer == "Peer connections or cohorts (e.g., professional learning communities)" ~ 1
+  ),
+  `central_people-capacity` = case_when(
+    `central_people-capacity` == "" ~ 0,
+    `central_people-capacity` == "People/capacity (time from people in the central office) focused on your innovation" ~ 1
+  ),
+  central_public_support = case_when(
+    central_public_support == "" ~ 0,
+    central_public_support == "Public support and encouragement for your work" ~ 1
+  ),
+  `central_tools-supports` = case_when(
+    `central_tools-supports` == "" ~ 0,
+    `central_tools-supports` == "Tools/supports (e.g., curriculum, guidance docs) focused on your innovation" ~ 1
+  ),
+  network_direction = case_when(
+    network_direction == "" ~ 0,
+    network_direction == "Direction and vision for your innovative design" ~ 1
+  ),
+  network_exemptions = case_when(
+    network_exemptions == "" ~ 0,
+    network_exemptions == "Exemptions from state policies and regulatory requirements" ~ 1
+  ),
+  network_funding = case_when(
+    network_funding == "" ~ 0,
+    network_funding == "Funding for your innovative design" ~ 1
+  ),
+  network_navigation = case_when(
+    network_navigation == "" ~ 0,
+    network_navigation == "Help navigating state policies and regulatory requirements" ~ 1
+  ),
+  network_other = case_when(
+    network_other == "" ~ 0,
+    network_other == "Other:" ~ 1
+  ),
+  network_other_text = na_if(network_other_text, ""),
+  network_peer = case_when(
+    network_peer == "" ~ 0,
+    network_peer == "Peer connections or cohorts (e.g., professional learning communities)" ~ 1
+  ),
+  `network_people-capacity` = case_when(
+    `network_people-capacity` == "" ~ 0,
+    `network_people-capacity` == "People/capacity (time from people in the network) focused on your innovation" ~ 1
+  ),
+  network_public_support = case_when(
+    network_public_support == "" ~ 0,
+    network_public_support == "Public support and encouragement for your work" ~ 1
+  ),
+  `network_tools-supports` = case_when(
+    `network_tools-supports` == "" ~ 0,
+    `network_tools-supports` == "Tools/supports (e.g., curriculum, guidance docs) focused on your innovation" ~ 1
+  ),
+  larger_network = case_when(
+    larger_network == "Yes" ~ 1,
+    larger_network == "No" ~ 0,
+    larger_network == "Not sure" ~ 2
+  ),
+  larger_network_importance = case_when(
+    #no instances of not important
+    larger_network_importance == "Slightly important" ~ 2,
+    larger_network_importance == "Fairly important" ~ 3,
+    larger_network_importance == "Important" ~ 4,
+    larger_network_importance == "Very important" ~ 5
+  ),
+  larger_network_name = na_if(larger_network_name, ""))
+```
+
+Models & Materials
+
+```{r mods & mats}
+dat <- dat %>% 
+  mutate(across(starts_with("model_usage_"), ~case_when(
+    . == "Not at all" ~ 0,
+    . == "Somewhat" ~ 1,
+    . == "To a large extent" ~ 2
+  )),
+  mutate(across(starts_with(c("partnership_materials", "vendor_materials", "created_materials")), ~case_when(
+    . != "" ~ 1,
+    . == "" ~ 0
+  )))) %>% 
+  mutate(political_impact = case_when(
+    political_impact == "Strongly disagree" ~ 1,
+    political_impact == "Disagree" ~ 2,
+    political_impact == "Neither agree nor disagree" ~ 3,
+    political_impact == "Agree" ~ 4,
+    political_impact == "Strongly agree" ~ 5
+  ),
+  canopy_value = case_when(
+    canopy_value == "Not valuable" ~ 1,
+    canopy_value == "Slightly valuable" ~ 2,
+    canopy_value == "Fairly valuable" ~ 3,
+    canopy_value == "Valuable" ~ 4,
+    canopy_value == "Very valuable" ~ 5
+  ),
+  canopy_value_text = na_if(canopy_value_text, ""))
+```
+
+Fix invalid names
+
+```{r invalid}
+dat <- dat %>% 
+  janitor::clean_names()
+```
+
+# Adding new variables
+
+```{r grades}
+dat <- dat %>% 
+  #start with grade level var
+  mutate(grades_prek = ifelse(self_reported_grades_pre_k == 1, 1, 0), #PK = offers PK
+         #elementary = ANY grades 1-5
+         grades_elementary = case_when(self_reported_grades_1st == 1 |
+                                       self_reported_grades_2nd == 1 |
+                                       self_reported_grades_3rd == 1 |
+                                       self_reported_grades_4th == 1 |
+                                       self_reported_grades_5th == 1 ~ 1,
+                                       TRUE ~ 0),
+         #middle = grades 7 AND 8
+         grades_middle = case_when(self_reported_grades_7th == 1 & self_reported_grades_8th == 1 ~ 1,
+                                   TRUE ~ 0),
+         #high = ANY grades 10-12
+         grades_high = case_when(self_reported_grades_10th == 1 |
+                                 self_reported_grades_11th == 1 |
+                                 self_reported_grades_12th == 1 ~ 1,
+                                 TRUE ~ 0),
+         pct_bipoc = 100 - self_reported_race_white) %>% 
+  group_by(school_id) %>% 
+  #multiple locales var
+  mutate(self_reported_locale_sum = sum(self_reported_locale_other + self_reported_locale_rural + self_reported_locale_suburban + self_reported_locale_urban),
+         self_reported_locale_multiple = case_when(
+           self_reported_locale_sum > 1 ~ 1,
+           self_reported_locale_sum <= 1 ~ 0
+         )) %>% 
+  select(-self_reported_locale_sum) %>% 
+  #leader demographics vars
+  # need to figure out how to create the new columns in the same argument - right now it's just replacing the existing columns, but this is the bones
+  mutate(across(ends_with("gender"), ~case_when(
+    grepl("[,]", ., ignore.case = TRUE) ~ 1,
+    . == "0" ~ 0,
+    . == "1" ~ 0,
+    . == "2" ~ 0,
+    . == "3" ~ 0,
+    . == "4" ~ 0,
+    . == "5" ~ 0
+  ), .names = "{.col}_multiple")) %>% 
+  mutate(across(ends_with("race"), ~case_when(
+    grepl("[,]", ., ignore.case = TRUE) ~ 1,
+    . == "0" ~ 0,
+    . == "1" ~ 0,
+    . == "2" ~ 0,
+    . == "3" ~ 0,
+    . == "4" ~ 0,
+    . == "5" ~ 0,
+    . == "6" ~ 0,
+    . == "7" ~ 0
+  ), .names = "{.col}_multiple")) %>% 
+  ungroup()
+```
+
+# Public-facing subset
+
+```{r public}
+public_dat <- dat %>% 
+  select(
+nominator,
+school_id,
+nces_id,
+school_name,
+school_address,
+school_city,
+school_state,
+school_district,
+website,
+school_descriptor,
+school_descriptor_homeschool,
+school_descriptor_hybrid,
+school_descriptor_microschool,
+school_descriptor_other,
+school_descriptor_other_text,
+school_descriptor_sws,
+school_descriptor_virtual,
+leaps_rank_affirmation,
+leaps_rank_anytime_anywhere,
+leaps_rank_connection,
+leaps_rank_customization,
+leaps_rank_high_expectations,
+leaps_rank_relevance,
+leaps_rank_rigorous_learning,
+leaps_rank_self_direction,
+leaps_rank_social_consciousness,
+leaps_rank_whole_child,
+leaps_affirmation,
+leaps_anytime_anywhere,
+leaps_connection,
+leaps_customization,
+leaps_high_expectations,
+leaps_interest,
+leaps_relevance,
+leaps_rigorous_learning,
+leaps_self_direction,
+leaps_social_consciousness,
+leaps_whole_child,
+practices_a_la_carte,
+practices_accommodations,
+practices_adult_wellness,
+practices_advancement_mastery,
+practices_advisories,
+practices_all_courses_designed_for_inclusion,
+practices_anti_racist,
+practices_assessments_agency,
+practices_assessments_bilingual,
+practices_assessments_career,
+practices_assessments_deeper,
+practices_assessments_sel,
+practices_blended_learning,
+practices_career_prep,
+practices_co_leaders,
+practices_community_leaders,
+practices_community_partnerships,
+practices_community_supports,
+practices_competency_education,
+practices_competency_framework,
+practices_culturally_responsive,
+practices_design_marginalized,
+practices_design_thinking,
+practices_disaggregated_participation_data,
+practices_dual_language,
+practices_early_college,
+practices_elimination_tracking,
+practices_enriched_virtual,
+practices_expanded_open_hours,
+practices_extended_learning,
+practices_families_leaders,
+practices_flex,
+practices_flexible_facilities,
+practices_flexible_staffing,
+practices_flipped_classroom,
+practices_grading_mastery,
+practices_heritage_language,
+practices_hiring_equity,
+practices_industry_credentials,
+practices_industry_leaders,
+practices_interdisciplinary,
+practices_interoperability,
+practices_learning_paths,
+practices_makerspace,
+practices_mental_health,
+practices_mentoring,
+practices_mtss_academics,
+practices_multi_age,
+practices_opportunities_mastery,
+practices_other_leaders,
+practices_pbl,
+practices_peer_to_peer,
+practices_performance_assessment,
+practices_physical_well_being,
+practices_place_based,
+practices_reallocation_resources,
+practices_restorative,
+practices_sel_curriculum,
+practices_sel_integrated,
+practices_service_learning,
+practices_social_justice,
+practices_station_rotation,
+practices_student_conferences,
+practices_student_data,
+practices_student_goals,
+practices_student_pace,
+practices_student_projects,
+practices_students_leaders,
+practices_teachers_leaders,
+practices_translanguaging,
+practices_trauma_informed,
+practices_tutoring,
+practices_udl,
+core_a_la_carte,
+core_accommodations,
+core_adult_wellness,
+core_advancement_mastery,
+core_advisories,
+core_all_courses_designed_for_inclusion,
+core_anti_racist,
+core_assessments_agency,
+core_assessments_bilingual,
+core_assessments_career,
+core_assessments_deeper,
+core_assessments_sel,
+core_blended_learning,
+core_career_prep,
+core_co_leaders,
+core_community_leaders,
+core_community_partnerships,
+core_community_supports,
+core_competency_education,
+core_competency_framework,
+core_culturally_responsive,
+core_design_marginalized,
+core_design_thinking,
+core_disaggregated_participation_data,
+core_dual_language,
+core_early_college,
+core_elimination_tracking,
+core_enriched_virtual,
+core_expanded_open_hours,
+core_extended_learning,
+core_families_leaders,
+core_flex,
+core_flexible_facilities,
+core_flexible_staffing,
+core_flipped_classroom,
+core_grading_mastery,
+core_heritage_language,
+core_hiring_equity,
+core_industry_credentials,
+core_industry_leaders,
+core_interdisciplinary,
+core_interoperability,
+core_learning_paths,
+core_makerspace,
+core_mental_health,
+core_mentoring,
+core_mtss_academics,
+core_multi_age,
+core_opportunities_mastery,
+core_other_leaders,
+core_pbl,
+core_peer_to_peer,
+core_performance_assessment,
+core_physical_well_being,
+core_place_based,
+core_reallocation_resources,
+core_restorative,
+core_sel_curriculum,
+core_sel_integrated,
+core_service_learning,
+core_social_justice,
+core_station_rotation,
+core_student_conferences,
+core_student_data,
+core_student_goals,
+core_student_pace,
+core_student_projects,
+core_students_leaders,
+core_teachers_leaders,
+core_translanguaging,
+core_trauma_informed,
+core_tutoring,
+core_udl,
+time_a_la_carte,
+time_accommodations,
+time_adult_wellness,
+time_advancement_mastery,
+time_advisories,
+time_all_courses_designed_for_inclusion,
+time_anti_racist,
+time_assessments_agency,
+time_assessments_bilingual,
+time_assessments_career,
+time_assessments_deeper,
+time_assessments_sel,
+time_blended_learning,
+time_career_prep,
+time_co_leaders,
+time_community_leaders,
+time_community_partnerships,
+time_community_supports,
+time_competency_education,
+time_competency_framework,
+time_culturally_responsive,
+time_design_marginalized,
+time_design_thinking,
+time_disaggregated_participation_data,
+time_dual_language,
+time_early_college,
+time_elimination_tracking,
+time_enriched_virtual,
+time_expanded_open_hours,
+time_extended_learning,
+time_families_leaders,
+time_flex,
+time_flexible_facilities,
+time_flexible_staffing,
+time_flipped_classroom,
+time_grading_mastery,
+time_heritage_language,
+time_hiring_equity,
+time_industry_credentials,
+time_industry_leaders,
+time_interdisciplinary,
+time_interoperability,
+time_learning_paths,
+time_makerspace,
+time_mental_health,
+time_mentoring,
+time_mtss_academics,
+time_multi_age,
+time_opportunities_mastery,
+time_other_leaders,
+time_pbl,
+time_peer_to_peer,
+time_performance_assessment,
+time_physical_well_being,
+time_place_based,
+time_reallocation_resources,
+time_restorative,
+time_sel_curriculum,
+time_sel_integrated,
+time_service_learning,
+time_social_justice,
+time_station_rotation,
+time_student_conferences,
+time_student_data,
+time_student_goals,
+time_student_pace,
+time_student_projects,
+time_students_leaders,
+time_teachers_leaders,
+time_translanguaging,
+time_trauma_informed,
+time_tutoring,
+time_udl,
+co_leaders_other_leaders_text,
+focus_bipoc,
+focus_economic_disadvantage,
+focus_emergent_bilingual,
+focus_foster,
+focus_homeless,
+focus_interrupted,
+focus_juvenile_justice,
+focus_multilingual,
+focus_newcomer,
+focus_other_student_group,
+focus_other_student_group_text,
+focus_swd,
+inclusive_emergent_bilingual,
+inclusive_juvenile_justice,
+inclusive_newcomer,
+inclusive_other_student_group,
+inclusive_other_student_group_text,
+inclusive_swd,
+self_reported_ela,
+self_reported_ell,
+self_reported_frpl,
+self_reported_grades_pre_k,
+self_reported_grades_kindergarten,
+self_reported_grades_1st,
+self_reported_grades_2nd,
+self_reported_grades_3rd,
+self_reported_grades_4th,
+self_reported_grades_5th,
+self_reported_grades_6th,
+self_reported_grades_7th,
+self_reported_grades_8th,
+self_reported_grades_9th,
+self_reported_grades_10th,
+self_reported_grades_11th,
+self_reported_grades_12th,
+self_reported_grades_past_12th,
+self_reported_grades_other,
+self_reported_grades_other_text,
+grades_prek,
+grades_elementary,
+grades_middle,
+grades_high,
+self_reported_learner_none_collected,
+self_reported_locale_other,
+self_reported_locale_other_text,
+self_reported_locale_rural,
+self_reported_locale_suburban,
+self_reported_locale_urban,
+self_reported_locale_multiple,
+self_reported_math,
+self_reported_race_aian,
+self_reported_race_asian,
+self_reported_race_black,
+self_reported_race_hispanic,
+self_reported_race_multiple,
+self_reported_race_nhpi,
+self_reported_race_none_collected,
+self_reported_race_white,
+self_reported_swd,
+self_reported_total_enrollment,
+additional_leaders_qty,
+graduate_portrait_usage,
+graduate_portrait_link_description,
+graduate_portrait_link_description_text,
+graduate_portrait_uniqueness,
+graduate_portrait_upload,
+graduate_portrait_upload_file_name,
+graduate_portrait_upload_file_type,
+graduate_portrait_upload_id,
+graduate_portrait_upload_size,
+student_experience,
+impact_link_description,
+impact_link_description_text,
+impact_upload,
+impact_upload_file_name,
+impact_upload_id,
+impact_upload_size,
+impact_upload_type,
+model_usage_bpl,
+model_usage_ele,
+model_usage_ib,
+model_usage_ntn,
+model_usage_oc,
+model_usage_sl,
+partnership_materials_bilingual,
+partnership_materials_career_readiness,
+partnership_materials_deeper_learning,
+partnership_materials_performance_based,
+partnership_materials_self_directed,
+partnership_materials_social_emotional_skills,
+vendor_materials_bilingual,
+vendor_materials_career_readiness,
+vendor_materials_deeper_learning,
+vendor_materials_performance_based,
+vendor_materials_self_directed,
+vendor_materials_social_emotional_skills,
+created_materials_bilingual,
+created_materials_career_readiness,
+created_materials_deeper_learning,
+created_materials_performance_based,
+created_materials_self_directed,
+created_materials_social_emotional_skills,
+public_contact_name,
+public_contact_role,
+public_contact_email
+  )
+#export
+# export(public_dat, "public-facing-dataset.csv")
+
+#check export
+# public_chk <- as.data.frame(colnames(public_dat))
+# export(public_chk, "public-check.csv")
+```
+
+# Final Internal Dataset
+
+```{r confidential}
+internal_dat <- dat %>% 
+  select(
+nominator,
+school_id,
+school_name,
+school_address,
+school_city,
+school_state,
+school_district,
+website,
+school_descriptor,
+school_descriptor_homeschool,
+school_descriptor_hybrid,
+school_descriptor_microschool,
+school_descriptor_other,
+school_descriptor_other_text,
+school_descriptor_sws,
+school_descriptor_virtual,
+practices_a_la_carte,
+practices_accommodations,
+practices_adult_wellness,
+practices_advancement_mastery,
+practices_advisories,
+practices_all_courses_designed_for_inclusion,
+practices_anti_racist,
+practices_assessments_agency,
+practices_assessments_bilingual,
+practices_assessments_career,
+practices_assessments_deeper,
+practices_assessments_sel,
+practices_blended_learning,
+practices_career_prep,
+practices_co_leaders,
+practices_community_leaders,
+practices_community_partnerships,
+practices_community_supports,
+practices_competency_education,
+practices_competency_framework,
+practices_culturally_responsive,
+practices_design_marginalized,
+practices_design_thinking,
+practices_disaggregated_participation_data,
+practices_dual_language,
+practices_early_college,
+practices_elimination_tracking,
+practices_enriched_virtual,
+practices_expanded_open_hours,
+practices_extended_learning,
+practices_families_leaders,
+practices_flex,
+practices_flexible_facilities,
+practices_flexible_staffing,
+practices_flipped_classroom,
+practices_grading_mastery,
+practices_heritage_language,
+practices_hiring_equity,
+practices_industry_credentials,
+practices_industry_leaders,
+practices_interdisciplinary,
+practices_interoperability,
+practices_learning_paths,
+practices_makerspace,
+practices_mental_health,
+practices_mentoring,
+practices_mtss_academics,
+practices_multi_age,
+practices_opportunities_mastery,
+practices_other_leaders,
+practices_pbl,
+practices_peer_to_peer,
+practices_performance_assessment,
+practices_physical_well_being,
+practices_place_based,
+practices_reallocation_resources,
+practices_restorative,
+practices_sel_curriculum,
+practices_sel_integrated,
+practices_service_learning,
+practices_social_justice,
+practices_station_rotation,
+practices_student_conferences,
+practices_student_data,
+practices_student_goals,
+practices_student_pace,
+practices_student_projects,
+practices_students_leaders,
+practices_teachers_leaders,
+practices_translanguaging,
+practices_trauma_informed,
+practices_tutoring,
+practices_udl,
+co_leaders_other_leaders_text,
+focus_bipoc,
+focus_economic_disadvantage,
+focus_emergent_bilingual,
+focus_foster,
+focus_homeless,
+focus_interrupted,
+focus_juvenile_justice,
+focus_multilingual,
+focus_newcomer,
+focus_other_student_group,
+focus_other_student_group_text,
+focus_swd,
+inclusive_emergent_bilingual,
+inclusive_juvenile_justice,
+inclusive_newcomer,
+inclusive_other_student_group,
+inclusive_other_student_group_text,
+inclusive_swd,
+leaps_rank_affirmation,
+leaps_rank_anytime_anywhere,
+leaps_rank_connection,
+leaps_rank_customization,
+leaps_rank_high_expectations,
+leaps_rank_relevance,
+leaps_rank_rigorous_learning,
+leaps_rank_self_direction,
+leaps_rank_social_consciousness,
+leaps_rank_whole_child,
+leaps_affirmation,
+leaps_anytime_anywhere,
+leaps_connection,
+leaps_customization,
+leaps_high_expectations,
+leaps_interest,
+leaps_relevance,
+leaps_rigorous_learning,
+leaps_self_direction,
+leaps_social_consciousness,
+leaps_whole_child,
+self_reported_ela,
+self_reported_ell,
+self_reported_frpl,
+self_reported_grades_pre_k,
+self_reported_grades_kindergarten,
+self_reported_grades_1st,
+self_reported_grades_2nd,
+self_reported_grades_3rd,
+self_reported_grades_4th,
+self_reported_grades_5th,
+self_reported_grades_6th,
+self_reported_grades_7th,
+self_reported_grades_8th,
+self_reported_grades_9th,
+self_reported_grades_10th,
+self_reported_grades_11th,
+self_reported_grades_12th,
+self_reported_grades_past_12th,
+self_reported_grades_other,
+self_reported_grades_other_text,
+self_reported_learner_none_collected,
+self_reported_locale_other,
+self_reported_locale_other_text,
+self_reported_locale_rural,
+self_reported_locale_suburban,
+self_reported_locale_urban,
+self_reported_math,
+self_reported_race_aian,
+self_reported_race_asian,
+self_reported_race_black,
+self_reported_race_hispanic,
+self_reported_race_multiple,
+self_reported_race_nhpi,
+self_reported_race_none_collected,
+self_reported_race_white,
+self_reported_swd,
+self_reported_total_enrollment,
+nces_id,
+additional_leaders_qty,
+leader1_gender,
+leader1_gender_self_identify_text,
+leader1_race,
+leader1_race_self_identify_text,
+leader2_gender,
+leader2_race,
+leader3_gender,
+leader3_race,
+leader4_gender,
+leader4_race,
+leader5_gender,
+leader5_race,
+leader6_gender,
+leader6_race,
+leader7_gender,
+leader7_race,
+leader8_gender,
+leader8_race,
+leader9_gender,
+leader9_race,
+leader10_gender,
+leader10_race,
+leader11_gender,
+leader11_race,
+leadership_diversity,
+teaching_diversity,
+graduate_portrait_usage,
+graduate_portrait_link_description,
+graduate_portrait_link_description_text,
+graduate_portrait_uniqueness,
+graduate_portrait_upload,
+graduate_portrait_upload_file_name,
+graduate_portrait_upload_file_type,
+graduate_portrait_upload_id,
+graduate_portrait_upload_size,
+student_experience,
+impact_link_description,
+impact_link_description_text,
+impact_upload,
+impact_upload_file_name,
+impact_upload_id,
+impact_upload_size,
+impact_upload_type,
+innovation_initiative,
+innovation_initiative_importance,
+innovation_initiative_text,
+waiver_application,
+state_level_policies,
+enroll_auto_apply,
+enroll_auto_residential,
+enroll_criteria_apply,
+enroll_district_only,
+enroll_random_lotto_apply,
+enroll_weighted_lotto_apply,
+central_direction,
+central_exemptions,
+central_funding,
+central_n_a,
+central_navigation,
+central_other,
+central_other_text,
+central_peer,
+central_people_capacity,
+central_public_support,
+central_tools_supports,
+network_direction,
+network_exemptions,
+network_funding,
+network_navigation,
+network_other,
+network_other_text,
+network_peer,
+network_people_capacity,
+network_public_support,
+network_tools_supports,
+larger_network,
+larger_network_importance,
+larger_network_name,
+model_usage_bpl,
+model_usage_ele,
+model_usage_ib,
+model_usage_ntn,
+model_usage_oc,
+model_usage_sl,
+partnership_materials_bilingual,
+partnership_materials_career_readiness,
+partnership_materials_deeper_learning,
+partnership_materials_performance_based,
+partnership_materials_self_directed,
+partnership_materials_social_emotional_skills,
+vendor_materials_bilingual,
+vendor_materials_career_readiness,
+vendor_materials_deeper_learning,
+vendor_materials_performance_based,
+vendor_materials_self_directed,
+vendor_materials_social_emotional_skills,
+created_materials_bilingual,
+created_materials_career_readiness,
+created_materials_deeper_learning,
+created_materials_performance_based,
+created_materials_self_directed,
+created_materials_social_emotional_skills,
+political_impact,
+canopy_value,
+canopy_value_text,
+public_contact_name,
+public_contact_role,
+public_contact_email,
+respondent_name,
+respondent_role,
+respondent_email,
+grades_prek,
+grades_elementary,
+grades_middle,
+grades_high,
+pct_bipoc,
+self_reported_locale_multiple,
+leader1_gender_multiple,
+leader1_race_multiple,
+leader2_gender_multiple,
+leader2_race_multiple,
+leader3_gender_multiple,
+leader3_race_multiple,
+leader4_gender_multiple,
+leader4_race_multiple,
+leader5_gender_multiple,
+leader5_race_multiple,
+leader6_gender_multiple,
+leader6_race_multiple,
+leader7_gender_multiple,
+leader7_race_multiple,
+leader8_gender_multiple,
+leader8_race_multiple,
+leader9_gender_multiple,
+leader9_race_multiple,
+leader10_gender_multiple,
+leader10_race_multiple,
+leader11_gender_multiple,
+leader11_race_multiple,
+core_a_la_carte,
+core_accommodations,
+core_adult_wellness,
+core_advancement_mastery,
+core_advisories,
+core_all_courses_designed_for_inclusion,
+core_anti_racist,
+core_assessments_agency,
+core_assessments_bilingual,
+core_assessments_career,
+core_assessments_deeper,
+core_assessments_sel,
+core_blended_learning,
+core_career_prep,
+core_co_leaders,
+core_community_leaders,
+core_community_partnerships,
+core_community_supports,
+core_competency_education,
+core_competency_framework,
+core_culturally_responsive,
+core_design_marginalized,
+core_design_thinking,
+core_disaggregated_participation_data,
+core_dual_language,
+core_early_college,
+core_elimination_tracking,
+core_enriched_virtual,
+core_expanded_open_hours,
+core_extended_learning,
+core_families_leaders,
+core_flex,
+core_flexible_facilities,
+core_flexible_staffing,
+core_flipped_classroom,
+core_grading_mastery,
+core_heritage_language,
+core_hiring_equity,
+core_industry_credentials,
+core_industry_leaders,
+core_interdisciplinary,
+core_interoperability,
+core_learning_paths,
+core_makerspace,
+core_mental_health,
+core_mentoring,
+core_mtss_academics,
+core_multi_age,
+core_opportunities_mastery,
+core_other_leaders,
+core_pbl,
+core_peer_to_peer,
+core_performance_assessment,
+core_physical_well_being,
+core_place_based,
+core_reallocation_resources,
+core_restorative,
+core_sel_curriculum,
+core_sel_integrated,
+core_service_learning,
+core_social_justice,
+core_station_rotation,
+core_student_conferences,
+core_student_data,
+core_student_goals,
+core_student_pace,
+core_student_projects,
+core_students_leaders,
+core_teachers_leaders,
+core_translanguaging,
+core_trauma_informed,
+core_tutoring,
+core_udl,
+time_a_la_carte,
+time_accommodations,
+time_adult_wellness,
+time_advancement_mastery,
+time_advisories,
+time_all_courses_designed_for_inclusion,
+time_anti_racist,
+time_assessments_agency,
+time_assessments_bilingual,
+time_assessments_career,
+time_assessments_deeper,
+time_assessments_sel,
+time_blended_learning,
+time_career_prep,
+time_co_leaders,
+time_community_leaders,
+time_community_partnerships,
+time_community_supports,
+time_competency_education,
+time_competency_framework,
+time_culturally_responsive,
+time_design_marginalized,
+time_design_thinking,
+time_disaggregated_participation_data,
+time_dual_language,
+time_early_college,
+time_elimination_tracking,
+time_enriched_virtual,
+time_expanded_open_hours,
+time_extended_learning,
+time_families_leaders,
+time_flex,
+time_flexible_facilities,
+time_flexible_staffing,
+time_flipped_classroom,
+time_grading_mastery,
+time_heritage_language,
+time_hiring_equity,
+time_industry_credentials,
+time_industry_leaders,
+time_interdisciplinary,
+time_interoperability,
+time_learning_paths,
+time_makerspace,
+time_mental_health,
+time_mentoring,
+time_mtss_academics,
+time_multi_age,
+time_opportunities_mastery,
+time_other_leaders,
+time_pbl,
+time_peer_to_peer,
+time_performance_assessment,
+time_physical_well_being,
+time_place_based,
+time_reallocation_resources,
+time_restorative,
+time_sel_curriculum,
+time_sel_integrated,
+time_service_learning,
+time_social_justice,
+time_station_rotation,
+time_student_conferences,
+time_student_data,
+time_student_goals,
+time_student_pace,
+time_student_projects,
+time_students_leaders,
+time_teachers_leaders,
+time_translanguaging,
+time_trauma_informed,
+time_tutoring,
+time_udl
+  )
+#export
+export(internal_dat, "confidential-dataset.csv")
+#create subsets
+confidential <- internal_dat %>% 
+  select(
+school_id, #KEY
+leader1_gender,
+leader1_gender_self_identify_text,
+leader1_race,
+leader1_race_self_identify_text,
+leader2_gender,
+leader2_race,
+leader3_gender,
+leader3_race,
+leader4_gender,
+leader4_race,
+leader5_gender,
+leader5_race,
+leader6_gender,
+leader6_race,
+leader7_gender,
+leader7_race,
+leader8_gender,
+leader8_race,
+leader9_gender,
+leader9_race,
+leader10_gender,
+leader10_race,
+leader11_gender,
+leader11_race,
+leadership_diversity,
+teaching_diversity,
+innovation_initiative,
+innovation_initiative_importance,
+innovation_initiative_text,
+waiver_application,
+state_level_policies,
+enroll_auto_apply,
+enroll_auto_residential,
+enroll_criteria_apply,
+enroll_district_only,
+enroll_random_lotto_apply,
+enroll_weighted_lotto_apply,
+central_direction,
+central_exemptions,
+central_funding,
+central_n_a,
+central_navigation,
+central_other,
+central_other_text,
+central_peer,
+central_people_capacity,
+central_public_support,
+central_tools_supports,
+network_direction,
+network_exemptions,
+network_funding,
+network_navigation,
+network_other,
+network_other_text,
+network_peer,
+network_people_capacity,
+network_public_support,
+network_tools_supports,
+larger_network,
+larger_network_importance,
+larger_network_name,
+political_impact,
+canopy_value,
+canopy_value_text,
+respondent_name,
+respondent_role,
+respondent_email,
+leader1_gender_multiple,
+leader1_race_multiple,
+leader2_gender_multiple,
+leader2_race_multiple,
+leader3_gender_multiple,
+leader3_race_multiple,
+leader4_gender_multiple,
+leader4_race_multiple,
+leader5_gender_multiple,
+leader5_race_multiple,
+leader6_gender_multiple,
+leader6_race_multiple,
+leader7_gender_multiple,
+leader7_race_multiple,
+leader8_gender_multiple,
+leader8_race_multiple,
+leader9_gender_multiple,
+leader9_race_multiple,
+leader10_gender_multiple,
+leader10_race_multiple,
+leader11_gender_multiple,
+leader11_race_multiple
+  )
+#goals & impact data
+impact <- internal_dat %>% 
+  select(
+school_id, #KEY
+focus_bipoc,
+focus_economic_disadvantage,
+focus_emergent_bilingual,
+focus_foster,
+focus_homeless,
+focus_interrupted,
+focus_juvenile_justice,
+focus_multilingual,
+focus_newcomer,
+focus_other_student_group,
+focus_other_student_group_text,
+focus_swd,
+inclusive_emergent_bilingual,
+inclusive_juvenile_justice,
+inclusive_newcomer,
+inclusive_other_student_group,
+inclusive_other_student_group_text,
+inclusive_swd,
+leaps_rank_affirmation,
+leaps_rank_anytime_anywhere,
+leaps_rank_connection,
+leaps_rank_customization,
+leaps_rank_high_expectations,
+leaps_rank_relevance,
+leaps_rank_rigorous_learning,
+leaps_rank_self_direction,
+leaps_rank_social_consciousness,
+leaps_rank_whole_child,
+leaps_affirmation,
+leaps_anytime_anywhere,
+leaps_connection,
+leaps_customization,
+leaps_high_expectations,
+leaps_interest,
+leaps_relevance,
+leaps_rigorous_learning,
+leaps_self_direction,
+leaps_social_consciousness,
+leaps_whole_child,
+graduate_portrait_usage,
+graduate_portrait_link_description,
+graduate_portrait_link_description_text,
+graduate_portrait_uniqueness,
+graduate_portrait_upload,
+graduate_portrait_upload_file_name,
+graduate_portrait_upload_file_type,
+graduate_portrait_upload_id,
+graduate_portrait_upload_size,
+student_experience,
+impact_link_description,
+impact_link_description_text,
+impact_upload,
+impact_upload_file_name,
+impact_upload_id,
+impact_upload_size,
+impact_upload_type,
+model_usage_bpl,
+model_usage_ele,
+model_usage_ib,
+model_usage_ntn,
+model_usage_oc,
+model_usage_sl,
+partnership_materials_bilingual,
+partnership_materials_career_readiness,
+partnership_materials_deeper_learning,
+partnership_materials_performance_based,
+partnership_materials_self_directed,
+partnership_materials_social_emotional_skills,
+vendor_materials_bilingual,
+vendor_materials_career_readiness,
+vendor_materials_deeper_learning,
+vendor_materials_performance_based,
+vendor_materials_self_directed,
+vendor_materials_social_emotional_skills,
+created_materials_bilingual,
+created_materials_career_readiness,
+created_materials_deeper_learning,
+created_materials_performance_based,
+created_materials_self_directed,
+created_materials_social_emotional_skills
+  )
+
+#school data
+schools <- internal_dat %>% 
+  select(
+school_id, # KEY
+nominator,
+school_name,
+school_address,
+school_city,
+school_state,
+school_district,
+website,
+school_descriptor,
+school_descriptor_homeschool,
+school_descriptor_hybrid,
+school_descriptor_microschool,
+school_descriptor_other,
+school_descriptor_other_text,
+school_descriptor_sws,
+school_descriptor_virtual,
+co_leaders_other_leaders_text,
+self_reported_ela,
+self_reported_ell,
+self_reported_frpl,
+self_reported_grades_pre_k,
+self_reported_grades_kindergarten,
+self_reported_grades_1st,
+self_reported_grades_2nd,
+self_reported_grades_3rd,
+self_reported_grades_4th,
+self_reported_grades_5th,
+self_reported_grades_6th,
+self_reported_grades_7th,
+self_reported_grades_8th,
+self_reported_grades_9th,
+self_reported_grades_10th,
+self_reported_grades_11th,
+self_reported_grades_12th,
+self_reported_grades_past_12th,
+self_reported_grades_other,
+self_reported_grades_other_text,
+self_reported_learner_none_collected,
+self_reported_locale_other,
+self_reported_locale_other_text,
+self_reported_locale_rural,
+self_reported_locale_suburban,
+self_reported_locale_urban,
+self_reported_math,
+self_reported_race_aian,
+self_reported_race_asian,
+self_reported_race_black,
+self_reported_race_hispanic,
+self_reported_race_multiple,
+self_reported_race_nhpi,
+self_reported_race_none_collected,
+self_reported_race_white,
+self_reported_swd,
+self_reported_total_enrollment,
+nces_id,
+additional_leaders_qty,
+public_contact_name,
+public_contact_role,
+public_contact_email,
+grades_prek,
+grades_elementary,
+grades_middle,
+grades_high,
+pct_bipoc,
+self_reported_locale_multiple
+  )
+
+# Tagging data
+tags <- internal_dat %>% 
+  select(
+school_id, #KEY
+practices_a_la_carte,
+practices_accommodations,
+practices_adult_wellness,
+practices_advancement_mastery,
+practices_advisories,
+practices_all_courses_designed_for_inclusion,
+practices_anti_racist,
+practices_assessments_agency,
+practices_assessments_bilingual,
+practices_assessments_career,
+practices_assessments_deeper,
+practices_assessments_sel,
+practices_blended_learning,
+practices_career_prep,
+practices_co_leaders,
+practices_community_leaders,
+practices_community_partnerships,
+practices_community_supports,
+practices_competency_education,
+practices_competency_framework,
+practices_culturally_responsive,
+practices_design_marginalized,
+practices_design_thinking,
+practices_disaggregated_participation_data,
+practices_dual_language,
+practices_early_college,
+practices_elimination_tracking,
+practices_enriched_virtual,
+practices_expanded_open_hours,
+practices_extended_learning,
+practices_families_leaders,
+practices_flex,
+practices_flexible_facilities,
+practices_flexible_staffing,
+practices_flipped_classroom,
+practices_grading_mastery,
+practices_heritage_language,
+practices_hiring_equity,
+practices_industry_credentials,
+practices_industry_leaders,
+practices_interdisciplinary,
+practices_interoperability,
+practices_learning_paths,
+practices_makerspace,
+practices_mental_health,
+practices_mentoring,
+practices_mtss_academics,
+practices_multi_age,
+practices_opportunities_mastery,
+practices_other_leaders,
+practices_pbl,
+practices_peer_to_peer,
+practices_performance_assessment,
+practices_physical_well_being,
+practices_place_based,
+practices_reallocation_resources,
+practices_restorative,
+practices_sel_curriculum,
+practices_sel_integrated,
+practices_service_learning,
+practices_social_justice,
+practices_station_rotation,
+practices_student_conferences,
+practices_student_data,
+practices_student_goals,
+practices_student_pace,
+practices_student_projects,
+practices_students_leaders,
+practices_teachers_leaders,
+practices_translanguaging,
+practices_trauma_informed,
+practices_tutoring,
+practices_udl,
+core_a_la_carte,
+core_accommodations,
+core_adult_wellness,
+core_advancement_mastery,
+core_advisories,
+core_all_courses_designed_for_inclusion,
+core_anti_racist,
+core_assessments_agency,
+core_assessments_bilingual,
+core_assessments_career,
+core_assessments_deeper,
+core_assessments_sel,
+core_blended_learning,
+core_career_prep,
+core_co_leaders,
+core_community_leaders,
+core_community_partnerships,
+core_community_supports,
+core_competency_education,
+core_competency_framework,
+core_culturally_responsive,
+core_design_marginalized,
+core_design_thinking,
+core_disaggregated_participation_data,
+core_dual_language,
+core_early_college,
+core_elimination_tracking,
+core_enriched_virtual,
+core_expanded_open_hours,
+core_extended_learning,
+core_families_leaders,
+core_flex,
+core_flexible_facilities,
+core_flexible_staffing,
+core_flipped_classroom,
+core_grading_mastery,
+core_heritage_language,
+core_hiring_equity,
+core_industry_credentials,
+core_industry_leaders,
+core_interdisciplinary,
+core_interoperability,
+core_learning_paths,
+core_makerspace,
+core_mental_health,
+core_mentoring,
+core_mtss_academics,
+core_multi_age,
+core_opportunities_mastery,
+core_other_leaders,
+core_pbl,
+core_peer_to_peer,
+core_performance_assessment,
+core_physical_well_being,
+core_place_based,
+core_reallocation_resources,
+core_restorative,
+core_sel_curriculum,
+core_sel_integrated,
+core_service_learning,
+core_social_justice,
+core_station_rotation,
+core_student_conferences,
+core_student_data,
+core_student_goals,
+core_student_pace,
+core_student_projects,
+core_students_leaders,
+core_teachers_leaders,
+core_translanguaging,
+core_trauma_informed,
+core_tutoring,
+core_udl,
+time_a_la_carte,
+time_accommodations,
+time_adult_wellness,
+time_advancement_mastery,
+time_advisories,
+time_all_courses_designed_for_inclusion,
+time_anti_racist,
+time_assessments_agency,
+time_assessments_bilingual,
+time_assessments_career,
+time_assessments_deeper,
+time_assessments_sel,
+time_blended_learning,
+time_career_prep,
+time_co_leaders,
+time_community_leaders,
+time_community_partnerships,
+time_community_supports,
+time_competency_education,
+time_competency_framework,
+time_culturally_responsive,
+time_design_marginalized,
+time_design_thinking,
+time_disaggregated_participation_data,
+time_dual_language,
+time_early_college,
+time_elimination_tracking,
+time_enriched_virtual,
+time_expanded_open_hours,
+time_extended_learning,
+time_families_leaders,
+time_flex,
+time_flexible_facilities,
+time_flexible_staffing,
+time_flipped_classroom,
+time_grading_mastery,
+time_heritage_language,
+time_hiring_equity,
+time_industry_credentials,
+time_industry_leaders,
+time_interdisciplinary,
+time_interoperability,
+time_learning_paths,
+time_makerspace,
+time_mental_health,
+time_mentoring,
+time_mtss_academics,
+time_multi_age,
+time_opportunities_mastery,
+time_other_leaders,
+time_pbl,
+time_peer_to_peer,
+time_performance_assessment,
+time_physical_well_being,
+time_place_based,
+time_reallocation_resources,
+time_restorative,
+time_sel_curriculum,
+time_sel_integrated,
+time_service_learning,
+time_social_justice,
+time_station_rotation,
+time_student_conferences,
+time_student_data,
+time_student_goals,
+time_student_pace,
+time_student_projects,
+time_students_leaders,
+time_teachers_leaders,
+time_translanguaging,
+time_trauma_informed,
+time_tutoring,
+time_udl
+  )
+#rename internal
+full <- internal_dat
+
+#save dictionary
+#NOTE: INTERNAL DICTIONARY
+dictionary <- import(here("data", "data-dictionary-internal.csv"))
+
+#save R dataset
+# save(dictionary, confidential, impact, schools, tags, full,
+#      file = "complete_canopy_2023.RData")
+```
+

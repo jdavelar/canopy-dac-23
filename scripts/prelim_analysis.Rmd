@@ -1,0 +1,294 @@
+---
+title: "Data Release Analysis"
+author: "Janette Avelar"
+date: '2023-03-22'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(rio)
+library(tidyverse)
+library(DT)
+dat <- import(here("data", "raw-ip.csv"))
+```
+
+# Q1: Which states are represented or not?
+
+Note that we have 3 unknowns in the data. These may have been introduced in the raw data, because I do not remember there being missing state values when cleaning the data. Either these schools chose to delete the pre-filled state, or we did not have data to begin with. Something to look into.
+
+```{r states}
+# ("N states in sample
+# List of those not represented
+# List (if any) U.S. territories represented")
+#pull unique states
+samp_states <- dat %>% 
+  select(school_state) %>% 
+  mutate(value = rep(1, 251)) %>% 
+  group_by(school_state) %>% 
+  summarize(N = sum(value)) %>% 
+  mutate(school_state = case_when(school_state == "" ~ "Unknown",
+                                TRUE ~ as.character(school_state))) %>% 
+  rename(`State` = school_state)
+#table
+datatable(samp_states)
+```
+
+In total: 42 states were represented + D.C.
+No U.S. territories are represented this round.
+
+*States not represented:*  
+* Alaska  
+* Mississippi   
+* Montana  
+* Nebraska  
+* Oklahoma  
+* Oregon  
+* West Virginia  
+* Wyoming  
+
+
+# Q2: What's the breakdown of schools in the data by locale?
+
+
+```{r locale}
+#(N schools per geographic locale (urban, suburban, rural, multiple))
+locale <- dat %>% 
+  select(self_reported_locale_rural, self_reported_locale_suburban, self_reported_locale_urban, self_reported_locale_other) %>% 
+  rename("rural" = self_reported_locale_rural,
+         "suburban" = self_reported_locale_suburban,
+         "urban" = self_reported_locale_urban,
+         "other" = self_reported_locale_other) %>% 
+  mutate(Rural = if_else(rural == 1 & suburban == 0 & urban == 0 & other == 0, 1, 0),
+         Suburban = if_else(suburban == 1 & rural == 0 & urban == 0 & other == 0, 1, 0),
+         Urban = if_else(urban == 1 & rural == 0 & suburban == 0 & other == 0, 1, 0),
+         Other = if_else(other == 1, 1, 0),
+         Mixed = case_when(rural == 1 & suburban == 1 ~ 1,
+                           rural == 1 & urban == 1 ~ 1,
+                           urban == 1 & suburban == 1 ~ 1,
+                           urban == 1 & suburban == 1 & rural == 1 ~ 1,
+                         TRUE ~ 0)) %>% 
+  select(!c(rural, suburban, urban, other)) %>% 
+  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+    pivot_longer(everything(),
+               names_to = "Geographic Locale",
+               values_to = "N")
+#table
+datatable(locale, rownames = FALSE)
+```
+
+## How do schools that identified as Other describe their locale?
+
+```{r locale - other}
+#others
+locale_other <- dat %>% 
+  select(school_name, self_reported_locale_other_text) %>% 
+  filter(self_reported_locale_other_text != "") %>% 
+  rename("Self-identified locale" = self_reported_locale_other_text,
+         "School Name" = school_name)
+#table
+datatable(locale_other)
+```
+
+Note that the numbers are slightly wonky if you read the descriptions that schools chose to include--though Gem Prep Nampa and SEEQS identified themselves as `Other`, what they disclosed does not actually categorize them differently. Thus, suburban should be 1 higher (N = 32 because of Gem Prep) and urban should be 1 higher (N = 142 because of SEEQS).
+
+# Q3: What's the breakdown of schools in the data by level?
+
+
+```{r level}
+#(N schools across levels (elementary, middle, high))
+level <- dat %>% 
+  select(school_id, starts_with("self_reported_grades_")) %>% 
+  mutate(grades_prek = ifelse(self_reported_grades_pre_k == 1, 1, 0), #PK = offers PK
+         #elementary = ANY grades 1-5
+         grades_elementary = case_when(self_reported_grades_1st == 1 |
+                                       self_reported_grades_2nd == 1 |
+                                       self_reported_grades_3rd == 1 |
+                                       self_reported_grades_4th == 1 |
+                                       self_reported_grades_5th == 1 ~ 1,
+                                       TRUE ~ 0),
+         #middle = grades 7 AND 8
+         grades_middle = case_when(self_reported_grades_7th == 1 & self_reported_grades_8th == 1 ~ 1,
+                                   TRUE ~ 0),
+         #high = ANY grades 10-12
+         grades_high = case_when(self_reported_grades_10th == 1 |
+                                 self_reported_grades_11th == 1 |
+                                 self_reported_grades_12th == 1 ~ 1,
+                                 TRUE ~ 0)) %>% 
+  select(grades_prek, grades_elementary, grades_middle, grades_high) %>% 
+  rename("Prekindergarten" = grades_prek,
+         "Elementary" = grades_elementary,
+         "Middle" = grades_middle,
+         "High" = grades_high) %>% 
+  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+  pivot_longer(everything(),
+               names_to = "School level",
+               values_to = "N")
+#table
+datatable(level, rownames = FALSE)
+```
+
+
+# Q4: What's the breakdown of schools in the data by school type?
+
+
+```{r type}
+#(N schools across school types (charter, district, independent))
+# NOTE TO SELF TO MAKE A FUNCTION FROM THE ACTION BELOW
+type <- dat %>% 
+  select(school_descriptor) %>% 
+  mutate(value = rep(1, 251)) %>% 
+  group_by(school_descriptor) %>% 
+  summarize(N = sum(value)) %>% 
+  rename("School Type" = school_descriptor)
+#table
+datatable(type, rownames = FALSE)
+```
+
+
+# Q5: What's the racial/ethnic breakdown of Canopy school leadership teams?
+
+
+```{r school leadership}
+#(Sample demographics - school leadership team)
+lead_team <- dat %>% 
+  select(leadership_diversity) %>% 
+  mutate(value = rep(1, 251)) %>% 
+  group_by(leadership_diversity) %>% 
+  summarize(N = sum(value)) %>% 
+  rename("School Leadership Team Diversity" = leadership_diversity)
+#table
+datatable(lead_team, rownames = FALSE)
+```
+
+
+# Q6: What are the frequencies of all practices?
+
+
+```{r practices, warning = FALSE}
+#(N and % selected practices)
+# need to pivot everything wide first
+prac <- dat %>% 
+  select(starts_with("practices_"))
+#replace values
+prac[ prac == "Less than a year" ] <- 1
+prac[ prac == "1-2 years" ] <- 1
+prac[ prac == "3-4 years" ] <- 1
+prac[ prac == "5+ years" ] <- 1
+#convert to numeric and generate frequencies
+prac <- prac %>% 
+  sapply(., as.numeric) %>% 
+  as.data.frame() %>% 
+  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+  pivot_longer(everything(),
+               names_to = "Practice",
+               values_to = "N") %>% 
+  group_by(Practice) %>% 
+  mutate(Pct = paste0(round(N/251*100, 2), "%"))
+#table
+datatable(prac)
+```
+
+
+## How many practices did schools typically select?
+
+Average over the whole sample is ~34 tags.
+
+```{r}
+avg_prac <- dat %>% 
+  select(school_id, starts_with("practices_")) %>% 
+  mutate(across(starts_with("practices_"), ~case_when(. == "Less than a year" ~ 1,
+                                         . == "1-2 years" ~ 1,
+                                         . == "3-4 years" ~ 1,
+                                         . == "5+ years" ~ 1,
+                                         . == 1 ~ 1,
+                                         . == 0 ~ 0,
+                                        TRUE ~ 0))) %>% 
+  group_by(school_id) %>% 
+  mutate(sum_tag = rowSums(across(starts_with("practices_")))) %>% 
+  ungroup() %>% 
+  select(!starts_with("practices_")) %>% 
+  summarize(`Average N Tags Selected` = mean(sum_tag))
+#table
+datatable(avg_prac, rownames = FALSE)
+```
+
+
+# Q7: What are the frequencies of core practices?
+
+
+```{r core}
+#(N and % core practices)
+core_prac <- dat %>% 
+  select(starts_with("practices")) %>% 
+  mutate(across(everything(), ~case_when(. == "Less than a year" ~ 1,
+                                         . == "1-2 years" ~ 1,
+                                         . == "3-4 years" ~ 1,
+                                         . == "5+ years" ~ 1,
+                                        TRUE ~ 0))) %>% 
+    summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+  pivot_longer(everything(),
+               names_to = "Core practice",
+               values_to = "N") %>% 
+  group_by(`Core practice`) %>% 
+  mutate(Pct = paste0(round(N/251*100, 2), "%"))
+#table
+datatable(core_prac)
+```
+
+
+# Q8: How long have schools been implementing each core practice?
+
+
+```{r core time}
+#(N and % implementation time)
+time_prac <- dat %>% 
+  select(starts_with("practices_")) %>% 
+  mutate_at(vars(starts_with("practices_")), str_replace, "1$", "0") %>% 
+  pivot_longer(everything(),
+               names_to = "Practice",
+               values_to = "N") %>% 
+  mutate(`Less than a year` = case_when(N == "Less than a year" ~ 1, TRUE ~ 0),
+         `1-2 years` = case_when(N == "1-2 years" ~ 1, TRUE ~ 0),
+         `3-4 years` = case_when(N == "3-4 years" ~ 1, TRUE ~ 0),
+         `5+ years` = case_when(N == "5+ years" ~ 1, TRUE ~ 0)) %>% 
+  select(!N) %>% 
+  group_by(Practice) %>% 
+  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE)))
+#table
+datatable(time_prac)
+```
+
+
+# Q9: Which core practices have been implemented most since AY20 
+i.e., What did schools start implementing post-COVID?
+
+The average number of schools selecting a given core 3-4 years ago (roughly around COVID) was 3.84. Therefore, I dropped any practices that less than 4 schools selected in order for us to look at the "above average" values. The table will allow you to filter by ascending or descending order if you want to see which ones were at the very top.
+
+This left us with 27 practices with the following `Top 5`:
+* Project-based learning (N = 20)  
+* Culturally responsive practices (N = 17)  
+* Restorative practices (N = 16)  
+* Competency based education (N = 15)  
+* Multi-tiered systems of support (N = 10)  
+
+For reference, a total of 214 schools indicated these practices were core practices implemented 3-4 years (i.e., percentage is pulled from total schools that selected a tag and indicated implementing 3-4 years ago, rather than the total number of schools N = 251).
+
+```{r core since covid}
+covid_core <- time_prac %>% 
+  select(!c(`Less than a year`, `5+ years`, `1-2 years`)) %>% 
+  filter(`3-4 years` > 4) %>% 
+  mutate(Pct = paste0(round(`3-4 years`/sum(`3-4 years`)*100, 2), "%"))
+#table
+datatable(covid_core)
+```
+
