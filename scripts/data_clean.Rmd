@@ -693,13 +693,23 @@ dat <- dat %>%
                                        self_reported_grades_5th == 1 ~ 1,
                                        TRUE ~ 0),
          #middle = grades 7 AND 8
-         grades_middle = case_when(self_reported_grades_7th == 1 & self_reported_grades_8th == 1 ~ 1,
-                                   TRUE ~ 0),
+         grades_middle = case_when(self_reported_grades_7th == 1 | 
+                                  (self_reported_grades_8th == 1 & self_reported_grades_9th == 0) |
+                                  (self_reported_grades_6th == 1 & self_reported_grades_5th == 0) ~ 1,
+                                     TRUE ~ 0),
          #high = ANY grades 10-12
          grades_high = case_when(self_reported_grades_10th == 1 |
                                  self_reported_grades_11th == 1 |
                                  self_reported_grades_12th == 1 ~ 1,
                                  TRUE ~ 0),
+         ######## MANUAL CODING FOR 2 CASES THAT SLIP THROUGH #############
+         grades_high = case_when(school_id == 753 ~ 1, #University High
+                                 TRUE ~ grades_high),
+         grades_prek = case_when(school_id == 771 ~ 1, #Keres
+                                 TRUE ~ grades_prek),
+         grades_elementary = case_when(
+                                 school_id == 771 ~ 1,
+                                 TRUE ~ grades_elementary),
          pct_bipoc = 100 - self_reported_race_white) %>% 
   group_by(school_id) %>% 
   #multiple locales var
@@ -1571,7 +1581,7 @@ time_tutoring,
 time_udl
   )
 #export
-export(internal_dat, "confidential-dataset.csv")
+# export(internal_dat, "confidential-dataset.csv")
 #create subsets
 confidential <- internal_dat %>% 
   select(
@@ -2052,9 +2062,92 @@ full <- internal_dat
 #save dictionary
 #NOTE: INTERNAL DICTIONARY
 dictionary <- import(here("data", "data-dictionary-internal.csv"))
+#update description for `grades_middle` following level modification
+dictionary[282,2] <- "Indicates whether the learning environment serves middle grades 7 and middle grades 6 or 8."
 
 #save R dataset
 # save(dictionary, confidential, impact, schools, tags, full,
 #      file = "complete_canopy_2023.RData")
+```
+
+#Running data checks post-level fix
+
+```{r}
+# load(here("data", "complete_canopy_2023.RData"))
+# 
+# schl_chk <- schools %>%
+#   select(school_name, school_id, starts_with("grades_"), starts_with("self_reported_g")) %>%
+#   # filter(school_id == 771 |
+#   #          school_id == 753 |
+#   #          school_id == 743 |
+#   #          school_id == 665 |
+#   #          school_id == 635 |
+#   #          school_id == 707) %>%
+#     mutate(grades_prek = ifelse(self_reported_grades_pre_k == 1, 1, 0), #PK = offers PK
+#          #elementary = ANY grades 1-5
+#          grades_elementary = case_when(self_reported_grades_1st == 1 |
+#                                        self_reported_grades_2nd == 1 |
+#                                        self_reported_grades_3rd == 1 |
+#                                        self_reported_grades_4th == 1 |
+#                                        self_reported_grades_5th == 1 ~ 1,
+#                                        TRUE ~ 0),
+#          #middle = grades 7 AND 8
+#          grades_middle = case_when(self_reported_grades_7th == 1 | 
+#                                   (self_reported_grades_8th == 1 & self_reported_grades_9th == 0) |
+#                                   (self_reported_grades_6th == 1 & self_reported_grades_5th == 0) ~ 1,
+#                                      TRUE ~ 0),
+#          #high = ANY grades 10-12
+#          grades_high = case_when(self_reported_grades_10th == 1 |
+#                                  self_reported_grades_11th == 1 |
+#                                  self_reported_grades_12th == 1 ~ 1,
+#                                  TRUE ~ 0)) %>% 
+#   select(school_name, starts_with("grades"))
+#          #######individual cases#########
+# test <- schools %>% 
+#   select(school_name, school_id, starts_with("grades"), starts_with("self_reported_g")) %>% 
+#     mutate(grades_prek = ifelse(self_reported_grades_pre_k == 1, 1, 0), #PK = offers PK
+#          #elementary = ANY grades 1-5
+#          grades_elementary = case_when(self_reported_grades_1st == 1 |
+#                                        self_reported_grades_2nd == 1 |
+#                                        self_reported_grades_3rd == 1 |
+#                                        self_reported_grades_4th == 1 |
+#                                        self_reported_grades_5th == 1 ~ 1,
+#                                        TRUE ~ 0),
+#          #middle = grades 7 AND 8
+#          grades_middle = case_when(self_reported_grades_7th == 1 | 
+#                                   (self_reported_grades_8th == 1 & self_reported_grades_9th == 0) |
+#                                   (self_reported_grades_6th == 1 & self_reported_grades_5th == 0) ~ 1,
+#                                      TRUE ~ 0),
+#          #high = ANY grades 10-12
+#          grades_high = case_when(self_reported_grades_10th == 1 |
+#                                  self_reported_grades_11th == 1 |
+#                                  self_reported_grades_12th == 1 ~ 1,
+#                                  TRUE ~ 0),
+#          ####add
+#           grades_high = case_when(school_id == 753 ~ 1, #University High
+#                               TRUE ~ grades_high),
+#           grades_prek = case_when(school_id == 771 ~ 1, #Keres
+#                               TRUE ~ grades_prek),
+#           grades_elementary = case_when(school_id == 771 ~ 1,
+#                               TRUE ~ grades_elementary)) %>% 
+#   select(school_name, starts_with("grades_")) %>% 
+#   left_join(schl_chk, by = "school_name") %>% 
+#   mutate(match_pk = case_when(
+#     grades_prek.x == grades_prek.y ~ "Yes",
+#     TRUE ~ "No"),
+#     match_elem = case_when(
+#       grades_elementary.x == grades_elementary.y ~ "Yes",
+#       TRUE ~ "No"),
+#     match_middle = case_when(
+#       grades_middle.x == grades_middle.y ~ "Yes",
+#       TRUE ~ "No"),
+#     match_high = case_when(
+#       grades_high.x == grades_high.y ~ "Yes",
+#       TRUE ~ "No")) %>% 
+#   filter(match_pk == "No" |
+#          match_elem == "No" |
+#          match_middle == "No" |
+#          match_high == "No")
+# #Keres & University High are the only ones
 ```
 
