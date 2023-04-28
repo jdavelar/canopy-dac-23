@@ -1,0 +1,66 @@
+---
+title: "School Leader Analysis"
+author: "Anwesha Guha"
+date: '2023-04-23'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(pacman)
+p_load(here, rio, tidyverse, DT, janitor)
+```
+
+Where are schools innovating?
+
+# Setup
+
+Let's see what variables we are working with.
+```{r}
+confidential_names <- tibble(variable.names(confidential))
+```
+
+
+# Q1: What are the racial/ethnic and gender identities of the primary school leader? (How many schools are led by school leaders of different racial/ethnic identities?)
+
+```{r}
+leader_char <- dat %>% 
+  select(leader1_gender, leader1_gender_multiple, leader1_race, leader1_race_multiple, school_name, `NCES School ID`) %>% 
+  janitor::clean_names()
+```
+
+**Not totally sure about the gender and race vars. Are they correct? Double check this before I drop the extra punctuation.**
+
+## Gender
+
+```{r}
+leader_char <- confidential %>% 
+  mutate(leader1_gender = recode(leader1_gender,
+            "1" = "Man",
+            "2" = "Woman",
+            "5" = as.character(leader1_gender_self_identify_text),
+            "0" = "Prefer not to say",
+            "3" = "Non-binary/gender-nonconforming",
+            "1,2" = "Man and/or Woman",
+            "1,2,3,4" = "Man, Woman, Nonbinary/gender non-conforming, and/or Transgender"
+  ))
+
+#looks like self-identify text might have been reported in the wrong column, so recoding that one manually
+leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
+```
+
+
+# Q2: What are the racial/ethnic and gender identities of all Canopy school leaders? (How many schools are led by school leaders of different racial/ethnic identities?)
+
+# Q3: Are BIPOC school leaders more likely to be found in certain types of schools (e.g. urban, charter, ...)?
+
+# Q4: How representative are Canopy school leaders of the student populations they serve?
