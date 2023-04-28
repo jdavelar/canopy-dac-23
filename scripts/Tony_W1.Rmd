@@ -1,0 +1,208 @@
+---
+title: "Tony_week1"
+author: "Tony Daza"
+date: "2023-04-28"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Week 1 Reflections   
+
+**Week 1 Reflection**    
+
+Week 1 was a little hectic as I was asked to prepared a last minute presentation for a conference so in truth, I did not have a chance to dive into the data as much as I would have liked.  
+
+**Questions about the data**   
+
+I am not entirely sure if I should be using the confidential-dataset, the public-dataset, or data from the data cleaning Rmd. 
+
+I am struggling with interpreting the race data in the internal data set for school leaders. 
+
+
+**Specific findings**   
+
+One finding is that I need to figure out if schools really have zero percent BIPOC students or if it is a reporting issue. There seem to be a lot of schools that report zero percent for the different racial groups. 
+
+
+
+```{r import, include=FALSE}
+library(tidyverse)
+library(rio)
+library(here)
+library(reshape2)
+library(cowplot)
+
+
+dat_pub <- import(here("data/public-facing-dataset.csv"))
+
+dat_con <- import(here("data/confidential-dataset.csv"))
+
+
+```
+
+
+# Student Demographic Data  
+## Student Race/Ethnicity  
+
+### Frequency Graphs  
+
+```{r demog}
+
+summary(dat_con[157:166])
+
+
+hist(dat_con$self_reported_race_white, col = "cornflowerblue", 
+     main = paste("Histogram of Percent White"),
+     xlab = "Percent White", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+
+hist(dat_con$self_reported_race_black , col = "darkorchid2", 
+     main = paste("Histogram of Percent Black"),
+     xlab = "Percent Black", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+hist(dat_con$self_reported_race_hispanic , col = "chocolate2", 
+     main = paste("Histogram of Percent Hispanic"),
+     xlab = "Percent Hispanic", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+hist(dat_con$self_reported_race_asian , col = "seagreen2", 
+     main = paste("Histogram of Percent Asian"),
+     xlab = "Percent Asian", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+hist(dat_con$self_reported_race_aian , col = "royalblue2", 
+     main = paste("Histogram of Percent Native American"),
+     xlab = "Percent Native American", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+hist(dat_con$self_reported_race_multiple , col = "orangered1", 
+     main = paste("Histogram of Percent Multiple Races"),
+     xlab = "Percent Multiple Races", 
+     ylab = "Number of Schools",
+     axes = TRUE, plot = TRUE, labels = FALSE)
+
+
+
+```
+
+
+**It seems like the schools reporting zero percent of each ethnicity is larger than expected for all groups**
+
+
+```{r barplot}
+
+barplot(table(dat_con$self_reported_race_black), col = "darkorchid2", 
+        main = "Percent of Black Students",
+        xlab = "Percent Black Students",
+        ylab = "Number of Schools")
+
+
+```
+
+Same information, different format. I think the barplot potentially shows the range better.
+
+
+**Last year they used violin plots**
+
+```{r violin plot}
+
+ggplot(data = dat_con, aes(x = "", y = self_reported_race_black, fill = self_reported_race_black)) +
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = 21) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(x = "", y = "Number of Schools") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+
+```
+
+I am not super familiar with violin plots so I need to revise this. I want all the schools to be in one plot though.
+
+```{r violin data, eval=FALSE, include=FALSE}
+# Selecting just the student race data and school name
+dat_con_short <- dat_con[c(3,157:162,164)]
+
+vio_blk <- ggplot(data = dat_con_short, aes(x = "", y = self_reported_race_black, fill = self_reported_race_black)) +
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = 21) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(x = "", y = "Number of Schools") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+vio_asian <- ggplot(data = dat_con, aes(x = "", y = self_reported_race_black, fill = self_reported_race_black)) +
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = 21) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(x = "", y = "Number of Schools") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+
+plot_grid(vio_race + facet_wrap(~Race, scales = "free_y"), ncol = 1)
+
+# Realized there was a better way.
+```
+
+### Violin Plots  
+
+**This should show all of the violin plots together**  
+
+It might make sense to collapse non-white into one group for a visualization as well.  
+
+I don't like how the scales are different but it is a work in progress.  
+
+```{r orchestra}
+
+# Selecting just the student race data and school name
+dat_con_short <- dat_con[c(3,157:162,164)]
+
+# Creating a long version of the data
+dat_con_long <- melt(dat_con_short, id.vars = "school_name", 
+                    variable.name = "Race", 
+                    value.name = "Percentage")
+
+# Removing the prefix in front of the race data
+dat_con_long$Race <- gsub("^self_reported_race_", "", dat_con_long$Race)
+
+
+# Violin plots, but it is by school so it needs to be merged to clean it.
+ vio_race <- ggplot(data = dat_con_long, aes(x = " ", y = Percentage, fill = Race)) +
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
+  labs(x = "School", y = "Percentage", fill = "Race") +
+  theme_classic()
+
+plot_grid(vio_race + facet_wrap(~Race, scales = "free_y"), ncol = 1)
+
+
+
+```
+
+# School Leader Demographics   
+## School Leader Race Data   
+
+**This is a work in progress**
+I am struggling with interpreting the race data in the internal data set. 
+
