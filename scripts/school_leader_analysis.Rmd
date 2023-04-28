@@ -8,7 +8,7 @@ output:
     toc_float: true
     theme: flatly
     highlight: tango
-    code_folding: hide
+    code_folding: show
 editor_options: 
   chunk_output_type: console
 ---
@@ -18,6 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(pacman)
 p_load(here, rio, tidyverse, DT, janitor)
+
+load(here("data", "complete_canopy_2023.RData"))
 ```
 
 Where are schools innovating?
@@ -32,17 +34,11 @@ confidential_names <- tibble(variable.names(confidential))
 
 # Q1: What are the racial/ethnic and gender identities of the primary school leader? (How many schools are led by school leaders of different racial/ethnic identities?)
 
-```{r}
-leader_char <- dat %>% 
-  select(leader1_gender, leader1_gender_multiple, leader1_race, leader1_race_multiple, school_name, `NCES School ID`) %>% 
-  janitor::clean_names()
-```
-
-**Not totally sure about the gender and race vars. Are they correct? Double check this before I drop the extra punctuation.**
 
 ## Gender
 
 ```{r}
+# Renaming for visualization/interpretation
 leader_char <- confidential %>% 
   mutate(leader1_gender = recode(leader1_gender,
             "1" = "Man",
@@ -51,16 +47,92 @@ leader_char <- confidential %>%
             "0" = "Prefer not to say",
             "3" = "Non-binary/gender-nonconforming",
             "1,2" = "Man and/or Woman",
-            "1,2,3,4" = "Man, Woman, Nonbinary/gender non-conforming, and/or Transgender"
+            "1,2,3,4" = "All and/or Transgender"
   ))
 
 #looks like self-identify text might have been reported in the wrong column, so recoding that one manually
 leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
 ```
 
+```{r}
+leader_char %>% 
+  group_by(leader1_gender) %>% 
+  summarise(n = n()) %>% 
+  datatable()
+```
+
+```{r}
+gender_plot <- leader_char %>% 
+  group_by(leader1_gender) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(leader1_gender, n)) +
+  geom_bar(stat = "identity", aes(fill = leader1_gender), show.legend = FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank()) +
+  geom_text(aes(label=n), vjust=0) +
+  geom_text(aes(label=leader1_gender), vjust=-1.5)  +
+  scale_fill_viridis_d()
+
+gender_plot
+```
+
+## Race
+
+```{r}
+leader_char <- leader_char %>% 
+  mutate(leader1_race = recode(leader1_race,
+            "0" = "Prefer not to say",                               
+            "1" = "American Indian or Alaska Native",
+            "2" = "Asian",
+            "3" = "Black or African American",
+            "4" = "Hispanic or Latinx",
+            "5" = "Native Hawaiian or Pacific Islander",
+            "6" = "White",
+            "7" = as.character(leader1_race_self_identify_text),
+            "1,2,4,6" = "American Indian or Alaska Native, Asian, Hispanic or Latinx, White",
+            "1,3" = "American Indian or Alaska Native, Black or African American",
+            "1,3,4,6" = "American Indian or Alaska Native, Black or African American, Hispanic or Latinx, White",
+            "1,4" = "American Indian or Alaska Native, Hispanic or Latinx",
+            "1,6" = "American Indian or Alaska Native, White",
+            "2,3,4,6" = "Asian, Black or African American, Hispanic or Latinx, White",
+            "2,3,6" = "Asian,Black or African American, White",
+            "2,6" = "Asian, White",
+            "3,4" = "Black or African American, Hispanic or Latinx",
+            "3,4,6" = "Black or African American, Hispanic or Latinx, White",
+            "3,6" = "Black or African American, White",
+            "4,6" = "Hispanic or Latinx, White"
+              ))
+
+leader_char <- leader_char %>% 
+  mutate(leader1_race_agg = recode(leader1_race,
+            "0" = "Prefer not to say",
+            "1" = "American Indian or Alaska Native",
+            "2" = "Asian",
+            "3" = "Black or African American",
+            "4" = "Hispanic or Latinx",
+            "5" = "Native Hawaiian or Pacific Islander",
+            "6" = "White",
+            "7" = as.character(leader1_gender_self_identify_text)
+              ))
+```
+
+```{r}
+leader_char %>% 
+  group_by(leader1_race) %>% 
+  summarise(n = n()) %>% 
+  datatable()
+```
+
+```{r}
+# table(leader_char$leader1_race_agg)
+```
+
+
 
 # Q2: What are the racial/ethnic and gender identities of all Canopy school leaders? (How many schools are led by school leaders of different racial/ethnic identities?)
 
+
 # Q3: Are BIPOC school leaders more likely to be found in certain types of schools (e.g. urban, charter, ...)?
+
 
 # Q4: How representative are Canopy school leaders of the student populations they serve?
