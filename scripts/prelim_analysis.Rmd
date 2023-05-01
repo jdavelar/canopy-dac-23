@@ -20,6 +20,8 @@ library(rio)
 library(tidyverse)
 library(DT)
 dat <- import(here("data", "raw-ip.csv"))
+load(here("data", "complete_canopy_2023.Rdata"))
+source(here("scripts", "branding.R"))
 ```
 
 # Q1: Which states are represented or not?
@@ -292,3 +294,19 @@ covid_core <- time_prac %>%
 datatable(covid_core)
 ```
 
+#testing branding
+```{r}
+tag_bar <- tags %>% 
+  select(school_id, starts_with("practices_")) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "selected") %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(selected)) %>% 
+  head(n = 4)
+
+ggplot(tag_bar, aes(x = tag, y = n, fill = tag)) +
+  geom_col() +
+  scale_x_discrete(labels = label_tags(wrap = 10)) +
+  scale_fill_manual(values = transcend_cols)
+```

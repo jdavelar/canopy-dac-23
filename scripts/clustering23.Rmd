@@ -17,7 +17,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 library(pacman)
 p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
-# source(here("scripts/branding.R"))
+source(here("scripts/branding.R"))
 # Error in source(here("scripts/branding.R")) : 
 #   /Users/aguha/Documents/r_projects/canopy-dac-23/scripts/branding.R:77:3: unexpected string constant
 # 76:   "Other Geographic Locale" = "self_reported_locale_other"
@@ -55,6 +55,7 @@ plot_tag_cor <- function(cor_mat, title = "") {
           )
 }
 ```
+
 ```{r, message=FALSE}
 cor_plot <- plot_tag_cor(practices_cor, 
                          title = "Correlation heat map for all tags") +
@@ -62,6 +63,7 @@ cor_plot <- plot_tag_cor(practices_cor,
 
 ggplotly(cor_plot)
 ```
+
 ```{r, message=FALSE}
 jac_plot <- plot_tag_cor(as.matrix(practices_jac), 
                          title = "Jaccard similarity for all tags") +

@@ -6,6 +6,7 @@ library(ggthemes)
 library(glue)
 library(here)
 library(systemfonts)
+library(scales)
 load(here("data", "complete_canopy_2023.RData"))
 
 ## FONTS
@@ -49,6 +50,7 @@ scale_x_tag = function(...) scale_x_discrete(labels = label_tags())
 scale_y_tag = function(...) scale_y_discrete(labels = label_tags())
 
 
+
 # Demographic labels ####
 
 dem_labs = c(
@@ -89,8 +91,9 @@ dem_labs_rv = names(dem_labs)
 names(dem_labs_rv) = dem_labs
 
 label_dems = function(dems) coalesce(dem_labs_rv[dems], dems)
-scale_x_demo = scale_x_discrete(labels = dem_labs_rv)
-
+#scale_x_demo = scale_x_discrete(labels = dem_labs_rv)
+scale_x_demo = scale_x_discrete(labels = function(x) lapply(strwrap(dem_labs_rv, width = 10, simplify = FALSE), paste, collapse="\n"))
+# scale_x_discrete(labels = label_wrap(10))
 
 ## Percent bin labels ####
 label_percent_bins = function(breaks) {
@@ -141,10 +144,10 @@ label_percent_bins = function(breaks) {
 
 # main Transcend colors
 transcend_cols = c(
-  blue = "#1A4C81",
-  teal = "#59C3B4",
-  red = "#EF464B",
-  `light blue` = "#ADE0EE"
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
 )
 
 transcend_cols_noname = function(col) {
