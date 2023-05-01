@@ -53,6 +53,7 @@ leader_char <- confidential %>%
 #looks like self-identify text might have been reported in the wrong column, so recoding that one manually
 leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
 ```
+Multiple genders
 
 ```{r}
 leader_char %>% 
@@ -78,6 +79,7 @@ gender_plot
 
 ## Race
 
+Break into multiple columns into individual races
 ```{r}
 leader_char <- leader_char %>% 
   mutate(leader1_race = recode(leader1_race,
