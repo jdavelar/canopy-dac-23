@@ -7,8 +7,8 @@ library(glue)
 library(here)
 library(systemfonts)
 load(here("data", "complete_canopy_2023.RData"))
-## FONTS
 
+## FONTS
 if(!all(c("Open Sans", "Bebas Neue") %in% system_fonts()$family)) {
   ## Please download and install two fonts:
   ## Open Sans: https://fonts.google.com/specimen/Open+Sans
@@ -24,26 +24,29 @@ if(!all(c("Open Sans", "Bebas Neue") %in% system_fonts()$family)) {
 
 # Tag labels ###
 tag_labels = dictionary %>%
-  select(tag = `Variable name`, label = `Clean Label`)
+  select(tag = `Variable Name`, label = `Clean Label`)
 
-label_tags = function(x, capitalize = "none", wrap) {
-  if(any(!x %in% tag_labels$tag)) warning("Missing tag label")
-  labels = tag_labels$label[match(x, tag_labels$tag)]
-  labels[is.na(labels)] = x[is.na(labels)]
-  if(capitalize == "title") {
-    labels = str_to_title(labels)
+label_tags = function(capitalize = "none", wrap = Inf) {
+  scales:::force_all(capitalize, wrap)
+  function(x) {
+    if(any(!x %in% tag_labels$tag)) warning("Missing tag label")
+    labels = tag_labels$label[match(x, tag_labels$tag)]
+    labels[is.na(labels)] = x[is.na(labels)]
+    if(capitalize == "title") {
+      labels = str_to_title(labels)
+    }
+    if(capitalize == "first") {
+      labels = str_to_sentence(labels)
+    }
+    if(is.finite(wrap)) {
+      labels = str_wrap(labels, width = wrap)
+    }
+    return(labels)
   }
-  if(capitalize == "first") {
-    labels = str_to_sentence(labels)
-  }
-  if(!missing(wrap)) {
-    labels = str_wrap(labels, width = wrap)
-  }
-  return(labels)
 }
 
-scale_x_tag = function(...) scale_x_discrete(labels = label_tags)
-scale_y_tag = function(...) scale_y_discrete(labels = label_tags)
+scale_x_tag = function(...) scale_x_discrete(labels = label_tags())
+scale_y_tag = function(...) scale_y_discrete(labels = label_tags())
 
 
 # Demographic labels ####
@@ -73,7 +76,7 @@ dem_labs = c(
   "Suburban schools" = "self_reported_locale_suburban",
   "Rural schools" = "self_reported_locale_rural",
   "Mixed Geographic schools" = "self_reported_locale_multiple",
-  "Other Geographic Locale" = "self_reported_locale_other"
+  "Other Geographic Locale" = "self_reported_locale_other",
   "Homeschools" = "school_descriptor_homeschool",
   "Hybrid schools" = "school_descriptor_hybrid",
   "Microschools" = "school_descriptor_microschool",
