@@ -18,10 +18,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(pacman)
 p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
 source(here("scripts/branding.R"))
-# Error in source(here("scripts/branding.R")) : 
-#   /Users/aguha/Documents/r_projects/canopy-dac-23/scripts/branding.R:77:3: unexpected string constant
-# 76:   "Other Geographic Locale" = "self_reported_locale_other"
-# 77:   "Homeschools"
 load(here("data/complete_canopy_2023.RData"))
 ```
 
@@ -43,11 +39,11 @@ plot_tag_cor <- function(cor_mat, title = "") {
     scale_fill_distiller(type = "div", limits = c(-1, 1), expand = c(0, 0)) +
     labs(title = title,
          fill = "Correlation") +
-    #scale_x_discrete(labels = label_tags) +
-    #scale_y_discrete(labels = label_tags) +
+#    scale_x_discrete(labels = label_tags) +
+#    scale_y_discrete(labels = label_tags) +
     labs(x = "", y = "") + 
-    #scale_fill_cc_gradient + 
-#    theme_transcend_sparse + 
+#    scale_fill_cc_gradient + 
+    theme_transcend_sparse + 
     theme(axis.text.x = element_blank(), 
           axis.text.y = element_blank(),
           panel.border = element_blank(),
@@ -105,7 +101,7 @@ jacc_corr %>%
 
 ```{r, fig.width = 12}
 corr_hist <- ggplot(jacc_corr, aes(x = correlation)) +
-  geom_histogram(binwidth = 0.03 #, fill = transcend_cols["blue"]
+  geom_histogram(binwidth = 0.03#, fill = transcend_cols["blue"]
                  ) +
   geom_vline(aes(xintercept = mean(correlation)), 
              #color = transcend_cols["red"], 
@@ -114,16 +110,15 @@ corr_hist <- ggplot(jacc_corr, aes(x = correlation)) +
                 label = paste("Average:",round(mean(correlation), 2))), 
             hjust = -.1, check_overlap = TRUE, vjust = 1.1, 
             family = "Open Sans") + 
-#  bar_y_scale_count +
+  bar_y_scale_count +
   scale_x_continuous(limits = c(-1, 1), expand = expansion(0, 0)) +
   labs(title = "Distribution of pairwise tag correlations", 
        y = "Count of Tag Pairs",
        x = "Correlation") +
-  theme(plot.margin = margin(t = 8, r = 12, b = 8, l = 8, unit = "pt")) +
-  theme_minimal()
+  theme(plot.margin = margin(t = 8, r = 12, b = 8, l = 8, unit = "pt"))
 
 jacc_hist <- ggplot(jacc_corr, aes(x = jaccard)) +
-  geom_histogram(binwidth = 0.03 #, fill = transcend_cols["teal"]
+  geom_histogram(binwidth = 0.03#, fill = transcend_cols["teal"]
                  ) +
   geom_vline(aes(xintercept = mean(jaccard)), 
              #color = transcend_cols["red"], 
@@ -132,13 +127,12 @@ jacc_hist <- ggplot(jacc_corr, aes(x = jaccard)) +
                 label = paste("Average:", round(mean(jaccard), 2))), 
             hjust = -.1, check_overlap = TRUE, vjust = 1.1, 
             family = "Open Sans") + 
-#  bar_y_scale_count +
+  bar_y_scale_count +
   scale_x_continuous(limits = c(0, 1), expand = expansion(0, 0)) +
   labs(title = "Distribution of pairwise tag similarities", 
        y = "Count of Tag Pairs",
        x = "Jaccard Similarity") +
-  theme(plot.margin = margin(t = 8, r = 12, b = 8, l = 8, unit = "pt")) +
-  theme_minimal()
+  theme(plot.margin = margin(t = 8, r = 12, b = 8, l = 8, unit = "pt")) 
 
 corr_hist + jacc_hist
 ```
