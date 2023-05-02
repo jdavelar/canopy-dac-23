@@ -1,0 +1,77 @@
+---
+title: "Advisory Group Analysis"
+author: "Janette Avelar"
+date: '2023-05-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(DT)
+load(here("data", "complete_canopy_2023.Rdata"))
+source(here("scripts", "branding.R"))
+```
+
+# What's the racial/ethnic breakdown of Canopy school teaching teams?
+```{r teaching staff race}
+teach_race <- confidential %>% 
+  select(school_id, teaching_diversity) %>% 
+  filter(!(teaching_diversity == 0)) %>% 
+  filter(!(teaching_diversity == 5)) %>% 
+  mutate(teaching_diversity = case_when(
+    teaching_diversity == 1 ~ "0-24%\nBIPOC",
+    teaching_diversity == 2 ~ "25-49%\nBIPOC",
+    teaching_diversity == 3 ~ "50-74%\nBIPOC",
+    teaching_diversity == 4 ~ "75-100%\nBIPOC"
+  ))
+
+ggplot(teach_race, aes(teaching_diversity, fill = teaching_diversity)) +
+  geom_bar() +
+  scale_fill_manual(values = transcend_cols) +
+  theme(legend.position = "none")
+
+teach_race_table <- teach_race %>% 
+  mutate(rate = rep(1, length(244))) %>% 
+  group_by(teaching_diversity) %>% 
+  summarize(N = sum(rate),
+            Pct = round(N/244, 2))
+datatable(teach_race_table)
+```
+
+# What's the racial/ethnic breakdown of Canopy school leadership teams?
+```{r leadership team race}
+lead_race <- confidential %>% 
+  select(school_id, leadership_diversity) %>% 
+  filter(!(leadership_diversity == 0)) %>% 
+  mutate(leadership_diversity = case_when(
+    leadership_diversity == 1 ~ "0-24%\nBIPOC",
+    leadership_diversity == 2 ~ "25-49%\nBIPOC",
+    leadership_diversity == 3 ~ "50-74%\nBIPOC",
+    leadership_diversity == 4 ~ "75-100%\nBIPOC"
+  ))
+
+ggplot(lead_race, aes(leadership_diversity, fill = leadership_diversity)) +
+  geom_bar() +
+  scale_fill_manual(values = transcend_cols) +
+  theme(legend.position = "none")
+
+lead_race_table <- lead_race %>% 
+  mutate(rate = rep(1, length(251))) %>% 
+  group_by(leadership_diversity) %>% 
+  summarize(N = sum(rate),
+            Pct = round(N/251, 2))
+datatable(lead_race_table)
+```
+
+# How do these demographics compare to previous years?
+Leadership diversity in our pool of Canopy schools increased this year. Last year, 28% of our schools were led by predominantly BIPOC leadership teams. This year, 41% of our schools are led by predominantly BIPOC leadership teams.
+
+**Whoo hoo!**
+
+# Did we meet our goal of oversampling BIPOC-led schools?
+We may be oversampling in relation to national averages (I'm unsure where to find this) but we are not yet representing BIPOC-led schools as the majority of our sample. Still, increasing from 28% to 41% is a step in the right direction.
+
+We hypothesized if we increased our nomination pool than we would see more BIPOC-led schools, given that our BIPOC-led nominating organizations and BIPOC-identifying nominators had historically nominated the majority of our BIPOC-led schools. We did succeed in diversifying our nomination pool, and this seems to have also diversified our school sample.
