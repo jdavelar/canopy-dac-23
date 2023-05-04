@@ -21,6 +21,37 @@ source(here("scripts/branding.R"))
 load(here("data/complete_canopy_2023.RData"))
 ```
 
+# Cluster Analysis 
+
+## Possible cluster interpretations:
+
+* 3 clusters
+  + Competency/mastery
+  + Equity
+  + College and career readiness
+* 4 clusters
+  + Social justice and equity
+  + College and career prep
+  + Interdisciplinary thinking (-not language)
+  + Blended and flexible learning
+* 5 clusters
+  + Blended and flexible learning
+  + Social justice and equity
+  + Leadership/student coleaders
+  + College and career prep
+  + Not language and some interdisciplinary things (possibly based on some things least frequently chosen)
+* 6 clusters
+  + Social justice and equity
+  + Leadership/student coleaders
+  + Competency/mastery
+  + College and career prep  
+  + Blended and flexible learning
+  + Interdisciplinary learning
+  
+Retaining either 3 or 6 clusters seems to have be most clear distinctions.
+
+FA process is below.
+
 # Correlations
 
 First we calculate a correlation matrix for the tags.
@@ -158,9 +189,11 @@ fa_jac <- fa.parallel(jac_mat, fm = "pa", fa = "fa",
 )
 ```
 
-## Parallel Analysis
 
 ```{r}
+# Parallel analysis, doesn't run but can try to figure out if interested
+
+
 # n_i  <- nrow(values_3) # The number of cases in our data
 # n_p <- ncol(values_3) # The number of variables in our data
 # 
@@ -189,15 +222,41 @@ fa_jac <- fa.parallel(jac_mat, fm = "pa", fa = "fa",
 # exceeder
 ```
 
+## Cluster interpretation:
+
+* 3 clusters
+  + Competency/mastery
+  + Equity
+  + College and career readiness
+* 4 clusters
+  + Social justice and equity
+  + College and career prep
+  + Interdisciplinary thinking (-not language)
+  + Blended and flexible learning
+* 5 clusters
+  + Blended and flexible learning
+  + Social justice and equity
+  + Leadership/student coleaders
+  + College and career prep
+  + Not language and some interdisciplinary things (possibly based on some things least frequently chosen)
+* 6 clusters
+  + Social justice and equity
+  + Leadership/student coleaders
+  + Competency/mastery
+  + College and career prep  
+  + Blended and flexible learning
+  + Interdisciplinary learning
+
 ## Retaining 3 clusters
 
 ```{r, include=FALSE}
 ## retain 3 clusters
 # promax vs oblimin rotations?
-efa_2023 <- fa(practices_cor, nfactors = 3, rotate = "oblimin", fm = "minres")
+efa_3 <- fa(practices_cor, nfactors = 3, rotate = "oblimin", fm = "minres")
 
 ## all the junk that prints is well-explained here: https://m-clark.github.io/posts/2020-04-10-psych-explained/
-print(efa_2023, sort = T)
+
+# print(efa_3, sort = T)
 
 write_efa_files <- function(efa, dir, file, threshold = 0.28) {
   efa %>%
@@ -241,28 +300,193 @@ print_efa <- function(
 ```
 
 ```{r}
-efa_2023 %>%
+efa_3 %>%
   model_parameters(sort = TRUE, threshold = "max") %>%
-  write_tsv(here("output", "EFA 2023 Results Max.txt"), na = "") %>%
+#  write_tsv(here("output", "EFA 2023 Results Max.txt"), na = "") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+efa_3 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+#  write_tsv(here("output", "EFA 2023 Results Threshold.txt"), na = "") %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+efa_3 %>%
+  model_parameters(sort = TRUE) %>%
+#  write_tsv(here("output", "EFA 2023 Results All.txt"), na = "") %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+```{r eval=FALSE, include=FALSE}
+jac_mat <- as.matrix(practices_jac) %>% 
+  replace(is.na(.), 0)
+
+efa_3_j <- fa(jac_mat, nfactors = 3, rotate = "oblimin", fm = "minres")
+
+efa_3_j %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+efa_3_j %>%
+  model_parameters(sort = TRUE, threshold = .28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+efa_3_j %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+## Retaining 4 clusters
+
+### Pearson's R with 4
+
+```{r}
+
+efa_4 <- fa(practices_cor, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+# print(efa_4, sort = T)
+
+efa_4 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+```
+
+### Jaccard with 4
+
+```{r eval=FALSE, include=FALSE}
+
+efa_4_j <- fa(practices_jac, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+# print(efa_4_j, sort = T)
+
+efa_4_j %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4_j %>%
+  model_parameters(sort = TRUE, threshold = .28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4_j %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+```
+
+## Retaining 5 clusters
+
+### Pearson's R with 5
+
+```{r}
+
+efa_5 <- fa(practices_cor, nfactors = 5, rotate = "oblimin", fm = "minres")
+
+# print(efa_5, sort = T)
+
+efa_5 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
   datatable(caption = "Max loadings") %>%
   formatRound(digits = 2, columns = 2:8) 
-```
 
-```{r}
-efa_2023 %>%
+efa_5 %>%
   model_parameters(sort = TRUE, threshold = 0.28) %>%
-  write_tsv(here("output", "EFA 2023 Results Threshold.txt"), na = "") %>%
   datatable(caption = "Threshold loadings") %>%
   formatRound(digits = 2, columns = 2:8) 
-```
 
-```{r}
-efa_2023 %>%
+efa_5 %>%
   model_parameters(sort = TRUE) %>%
-  write_tsv(here("output", "EFA 2023 Results All.txt"), na = "") %>%
   datatable(caption = "All loadings") %>%
   formatRound(digits = 2, columns = 2:8) 
+```
 
-# Warning message included below, just in case:
-# DataTables warning: table id=DataTables_Table_0 - Requested unknown parameter '7' for row 0, column 7. For more information about this error, please see http://datatables.net/tn/4
+### Jaccard with 5
+
+```{r eval=FALSE, include=FALSE}
+
+efa_5_j <- fa(practices_jac, nfactors = 5, rotate = "oblimin", fm = "minres")
+
+# print(efa_5_j, sort = T)
+
+efa_5_j %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:8) 
+
+efa_5_j %>%
+  model_parameters(sort = TRUE, threshold = .28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:8) 
+
+efa_5_j %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:8) 
+```
+
+## Retaining 6 clusters
+
+### Pearson's R with 6
+
+```{r}
+
+efa_6 <- fa(practices_cor, nfactors = 6, rotate = "oblimin", fm = "minres")
+
+# print(efa_6, sort = T)
+
+efa_6 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
+
+efa_6 %>%
+  model_parameters(sort = TRUE, threshold = .28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
+
+efa_6 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
+```
+
+### Jaccard with 6
+
+```{r eval=FALSE, include=FALSE}
+
+efa_6_j <- fa(practices_jac, nfactors = 6, rotate = "oblimin", fm = "minres")
+
+# print(efa_6_j, sort = T)
+
+efa_6_j %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
+
+efa_6_j %>%
+  model_parameters(sort = TRUE, threshold = .28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
+
+efa_6_j %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:9) 
 ```
