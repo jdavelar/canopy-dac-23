@@ -1,0 +1,383 @@
+---
+title: "School Leaders Group Analysis"
+author: "Tony Daza"
+date: "2023-05-02"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+**Importing Data**
+```{r import, warning=FALSE, include=FALSE}
+library(rio)
+library(tidyverse)
+
+load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+source("~/Desktop/canopy-dac-23/scripts/branding.R")
+
+```
+
+# Examining School leaders race by locale
+
+```{r inspect, include=FALSE, warning=FALSE, eval=FALSE}
+
+confidential_names <- tibble(variable.names(confidential))
+
+
+```
+
+
+```{r Leader BIPOC, warning=FALSE}
+
+
+leader_race_cols <- c("leader1_race", "leader2_race", "leader3_race", "leader4_race", "leader5_race", "leader6_race", "leader7_race", "leader8_race", "leader9_race", "leader10_race", "leader11_race")
+
+leader_char <- confidential
+
+# Loop to recode race data for all the leaders
+for (col_name in leader_race_cols) {
+  leader_char <- leader_char %>% 
+      mutate(!!col_name := recode(!!sym(col_name),
+            "0" = "Prefer not to say",                               
+            "1" = "American Indian or Alaska Native",
+            "2" = "Asian",
+            "3" = "Black or African American",
+            "4" = "Hispanic or Latinx",
+            "5" = "Native Hawaiian or Pacific Islander",
+            "6" = "White",
+            #"7" = as.character("leader1_self_identify_text"),
+            "1,2,4,6" = "American Indian or Alaska Native, Asian, Hispanic or Latinx, White",
+            "1,3" = "American Indian or Alaska Native, Black or African American",
+            "1,3,4,6" = "American Indian or Alaska Native, Black or African American, Hispanic or Latinx, White",
+            "1,4" = "American Indian or Alaska Native, Hispanic or Latinx",
+            "1,6" = "American Indian or Alaska Native, White",
+            "2,3,4,6" = "Asian, Black or African American, Hispanic or Latinx, White",
+            "2,3,6" = "Asian,Black or African American, White",
+            "2,6" = "Asian, White",
+            "3,4" = "Black or African American, Hispanic or Latinx",
+            "3,4,6" = "Black or African American, Hispanic or Latinx, White",
+            "3,6" = "Black or African American, White",
+            "4,6" = "Hispanic or Latinx, White"
+              ))
+}
+
+# Sorry this is clunky but I was struggling with getting it to work in a loop
+# This just recodes the #7 self identifying text
+
+leader_char <- leader_char %>%
+  mutate(leader1_race =recode(leader1_race,
+                              "7" = as.character(leader1_race_self_identify_text)))
+
+
+
+```
+
+
+```{r school diversity recode, warning=FALSE}
+
+# Recoding the school leadership percentages
+leader_char <- leader_char %>% 
+      mutate(leadership_diversity = recode(leadership_diversity,
+"0" = "Prefer not to say",
+"1" = "0 - 24% people of color",
+"2" = "25 - 49% people of color",
+"3" = "50 - 74% people of color",
+"4" = "75 - 100% people of color",
+"5" = "Not sure",))
+
+
+
+```
+
+
+```{r locale, warning=FALSE}
+
+# Recoding the location variables for rural schools
+schools_char <- schools %>%
+  mutate(rural = recode(self_reported_locale_rural,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+# Recoding the location variables for suburban schools
+schools_char <- schools_char %>%
+  mutate(suburban = recode(self_reported_locale_suburban,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+# Recoding the location variables for urban schools
+schools_char <- schools_char %>%
+  mutate(urban = recode(self_reported_locale_urban,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+
+# Recoding the location variables into one location column
+schools_char <- schools_char %>%
+  mutate(location = case_when(
+    rural == "Yes" & urban == "No" & suburban == "No" ~ "Rural",
+    rural == "No" & urban == "Yes" & suburban == "No" ~ "Urban",
+    rural == "No" & urban == "No" & suburban == "Yes" ~ "Suburban",
+    TRUE ~ "Multiple"  # add an "Other" category for rows that don't fit any of the above conditions
+  ))
+
+
+```
+
+
+From Anwesha's code
+**Recoding gender for the school leaders**
+
+```{r gender, warning=FALSE}
+
+leader_gen_cols <- c("leader1_gender", "leader2_gender", "leader3_gender", "leader4_gender", "leader5_gender", "leader6_gender", "leader7_gender", "leader8_gender", "leader9_gender", "leader10_gender", "leader11_gender")
+
+# Renaming for visualization/interpretation
+for (col_name in leader_gen_cols) {
+leader_char <- leader_char %>% 
+  mutate(!!col_name := recode(!!sym(col_name),
+            "1" = "Man",
+            "2" = "Woman",
+           #"5" = as.character(leader1_gender_self_identify_text),
+            "0" = "Prefer not to say",
+            "3" = "Non-binary/gender-nonconforming",
+            "1,2" = "Man and/or Woman",
+            "1,2,3,4" = "All and/or Transgender"
+  ))
+}
+
+#looks like self-identify text might have been reported in the wrong column, so recoding that one manually
+leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
+
+
+#Once again I was having difficulty with the loop for the self-identifying text
+leader_char <- leader_char %>%
+  mutate(leader1_gender =recode(leader1_gender,
+                              "5" = as.character(leader1_gender_self_identify_text)))
+
+
+```
+
+
+
+
+```{r reduction, warning=FALSE}
+
+# Reducing the datasets and combining into one dataset to answer the question
+school_lead_div <- schools_char %>% select(c(1,3,5:7,20,45:54,64,69))
+
+leader_char_div_gen <- leader_char %>% select(c(1,2,4,6:26))
+
+school_lead_div_gen <- school_lead_div %>% merge(leader_char_div_gen, by="school_id")
+
+
+
+```
+
+
+
+```{r bipoc binary, warning=FALSE}
+
+
+# Split multi-race columns into separate columns
+school_lead_div_wide <- school_lead_div_gen %>% 
+  separate(leader1_race, into = paste0("leader1_race_", 1:4), sep = ",", remove = FALSE) %>%
+  separate(leader2_race, into = paste0("leader2_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader3_race, into = paste0("leader3_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader4_race, into = paste0("leader4_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader5_race, into = paste0("leader5_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader6_race, into = paste0("leader6_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader7_race, into = paste0("leader7_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader8_race, into = paste0("leader8_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader9_race, into = paste0("leader9_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader10_race, into = paste0("leader10_race_", 1:3), sep = ",", remove = FALSE) %>% 
+  separate(leader11_race, into = paste0("leader11_race_", 1:3), sep = ",", remove = FALSE)
+
+
+
+# This changes the columns to factors as I was receiving an error beforehand
+
+col_names <- names(school_lead_div_wide[18:74])
+school_lead_div_wide[col_names] <- lapply(school_lead_div_wide[col_names] , factor)
+
+# Create binary columns for each school leader indicating whether they are BIPOC or not
+# Corrected so that it is counting correctly for individuals with multiple identities but not over counting by double counting each ethnicity
+
+school_lead_div_gen <- school_lead_div_wide %>%
+  mutate(
+  leader1_bipoc = case_when(
+    leader1_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+    leader1_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+    leader1_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+  leader1_race_4 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+    TRUE ~ 0
+  ),
+    leader2_bipoc = case_when(
+      leader2_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader2_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader1_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader3_bipoc = case_when(
+      leader3_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader3_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader3_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader4_bipoc = case_when(
+      leader4_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader4_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader4_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader5_bipoc = case_when(
+      leader5_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader5_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader5_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader6_bipoc = case_when(
+      leader6_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader6_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader6_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader7_bipoc = case_when(
+      leader7_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader7_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader7_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader8_bipoc = case_when(
+      leader8_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader8_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader8_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader9_bipoc = case_when(
+      leader9_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader9_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader9_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader10_bipoc = case_when(
+      leader10_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader10_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader10_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ),
+    leader11_bipoc = case_when(
+      leader11_race_1 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") | 
+      leader11_race_2 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") |
+      leader11_race_3 %in% c("American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latinx", "Native Hawaiian or Pacific Islander") ~ 1,
+      TRUE ~ 0
+    ))
+
+
+# This changes the columns back to character as I was receiving an error when trying to sum the rows
+
+school_lead_div_gen <- school_lead_div_gen %>%
+  mutate(across(leader1_gender:leader11_race, as.character))
+############################################################################
+
+# Summing bipoc leaders per school
+school_lead_div_gen <- school_lead_div_gen %>%
+  mutate(
+    bipoc_leader_count = rowSums(across(leader1_bipoc:leader11_bipoc)))
+
+# Removing the separated race columns
+school_lead_div_gen <- school_lead_div_gen %>% select(-c(21:24,27:29,32:34,37:39,42:44,47:49,52:54,57:59,62:64,67:69,72:74))
+
+# Summing total leader count by school
+school_lead_div_gen <- school_lead_div_gen %>%
+  mutate(total_leader_count = rowSums(across(c(20,22,24,26,28,30,32,34,36,38,40), ~ !is.na(.))))
+
+# Determining bipoc leader percent
+school_lead_div_gen <- school_lead_div_gen %>%
+  mutate(bipoc_leader_pct = bipoc_leader_count / total_leader_count * 100)
+
+```
+
+## Data table BIPOC leaders by Locale
+
+```{r school sum}
+library(DT)
+
+# Count the number of BIPOC school leaders for each school type
+school_lead_div_sum <- school_lead_div_gen %>%
+  group_by(location) %>%
+  summarize(
+    bipoc_leader_count = sum(
+      across(leader1_bipoc:leader11_bipoc)),
+    total_leader_count = sum(across(leader1_race:leader11_race, ~ complete.cases(.)))) %>%
+  mutate(
+    bipoc_leader_pct = round(bipoc_leader_count / total_leader_count * 100, digits =2))
+
+DT::datatable(school_lead_div_sum)
+
+
+```
+
+## Bar graph BIPOC Leader by Locale
+
+```{r school sum graph}
+
+school_lead_div_sum %>%
+  group_by(location) %>%
+  ggplot(aes(x = location, y = bipoc_leader_pct)) +
+  geom_bar(stat = "identity", fill = transcend_cols) +
+  labs(x = "School Location", y = "Percentage of BIPOC School Leaders", 
+       title = "Percentage of BIPOC School Leaders by Location")+
+  scale_y_continuous(limits = c(0,100))+
+  theme_minimal()
+
+```
+
+
+# BIPOC Leader by locale
+## Regression Model BIPOC Leader by Locale
+
+
+```{r locale leader reg}
+
+library(sjPlot)
+
+# Run a linear regression model for location data
+locale_model <- lm(bipoc_leader_pct ~ location, data = school_lead_div_gen)
+
+# Model summary
+summary(locale_model)
+tab_model(locale_model)
+
+
+```
+
+
+## Barplot of BIPOC Leaders by Locale
+
+```{r reg graph}
+# Regression Model graph
+
+school_lead_div_gen %>%
+  ggplot(aes(x = location, y = bipoc_leader_pct)) +
+  geom_boxplot(fill = transcend_cols) +
+  labs(x = "Location", y = "BIPOC Leader Percentage", title = "BIPOC Leader Percentages by Location") +
+  scale_x_discrete(labels = c("Rural", "Suburban", "Urban", "Multiple")) +
+  theme_minimal()
+
+
+
+```
+
+
+
+
+
+
