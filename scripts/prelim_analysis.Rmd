@@ -19,9 +19,11 @@ library(here)
 library(rio)
 library(tidyverse)
 library(DT)
-dat <- import(here("data", "raw-ip.csv"))
+test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
+theme_update(plot.title = element_text(hjust = 0.5))
+dat <- full
 ```
 
 # Q1: Which states are represented or not?
@@ -43,6 +45,22 @@ samp_states <- dat %>%
   rename(`State` = school_state)
 #table
 datatable(samp_states)
+#viz
+plot_states <- samp_states %>% 
+  filter(!is.na(State))
+ggplot(plot_states, aes(reorder(State, -N), N)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_y_continuous(limits=c(0, 25), expand = c(0,0)) +
+  coord_flip() +
+  labs(title = "Canopy Learning Environments by State",
+       x = "",
+       y = "") +
+  geom_text(aes(label = signif(N)), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 3.5,
+            family = "sans")
 ```
 
 In total: 42 states were represented + D.C.
@@ -86,6 +104,23 @@ locale <- dat %>%
                values_to = "N")
 #table
 datatable(locale, rownames = FALSE)
+#viz
+plot_locale <- locale %>% 
+  filter(!(`Geographic Locale` == "Other"))
+ggplot(plot_locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale`)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+  scale_y_continuous(limits=c(0, 150), expand = c(0,0)) +
+  labs(title = "Canopy Learning Environments by Geographic Region",
+       x = "",
+       y = "") +
+  theme(legend.position = "none") +
+    geom_text(aes(label = signif(N)), 
+            nudge_y = 3, 
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
 ```
 
 ## How do schools that identified as Other describe their locale?
@@ -109,24 +144,7 @@ Note that the numbers are slightly wonky if you read the descriptions that schoo
 ```{r level}
 #(N schools across levels (elementary, middle, high))
 level <- dat %>% 
-  select(school_id, starts_with("self_reported_grades_")) %>% 
-  mutate(grades_prek = ifelse(self_reported_grades_pre_k == 1, 1, 0), #PK = offers PK
-         #elementary = ANY grades 1-5
-         grades_elementary = case_when(self_reported_grades_1st == 1 |
-                                       self_reported_grades_2nd == 1 |
-                                       self_reported_grades_3rd == 1 |
-                                       self_reported_grades_4th == 1 |
-                                       self_reported_grades_5th == 1 ~ 1,
-                                       TRUE ~ 0),
-         #middle = grades 7 AND 8
-         grades_middle = case_when(self_reported_grades_7th == 1 & self_reported_grades_8th == 1 ~ 1,
-                                   TRUE ~ 0),
-         #high = ANY grades 10-12
-         grades_high = case_when(self_reported_grades_10th == 1 |
-                                 self_reported_grades_11th == 1 |
-                                 self_reported_grades_12th == 1 ~ 1,
-                                 TRUE ~ 0)) %>% 
-  select(grades_prek, grades_elementary, grades_middle, grades_high) %>% 
+  select(starts_with("grades_")) %>%
   rename("Prekindergarten" = grades_prek,
          "Elementary" = grades_elementary,
          "Middle" = grades_middle,
@@ -137,6 +155,21 @@ level <- dat %>%
                values_to = "N")
 #table
 datatable(level, rownames = FALSE)
+#viz
+ggplot(level, aes(reorder(`School level`, N), N, fill = `School level`)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+  scale_y_continuous(limits=c(0, 155), expand = c(0,0)) +
+  labs(title = "Canopy Learning Environments by Level",
+       x = "",
+       y = "") +
+  theme(legend.position = "none") +
+    geom_text(aes(label = signif(N)), 
+            nudge_y = 3, 
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
 ```
 
 
@@ -148,12 +181,32 @@ datatable(level, rownames = FALSE)
 # NOTE TO SELF TO MAKE A FUNCTION FROM THE ACTION BELOW
 type <- dat %>% 
   select(school_descriptor) %>% 
-  mutate(value = rep(1, 251)) %>% 
+  mutate(value = rep(1, 251),
+         school_descriptor = case_when(
+           school_descriptor == 1 ~ "Public district school",
+           school_descriptor == 2 ~ "Public charter school",
+           school_descriptor == 3 ~ "Independent (private) school"
+         )) %>% 
   group_by(school_descriptor) %>% 
   summarize(N = sum(value)) %>% 
   rename("School Type" = school_descriptor)
 #table
 datatable(type, rownames = FALSE)
+#viz
+ggplot(type, aes(reorder(`School Type`, N), N, fill = `School Type`)) +
+  geom_col() +
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[2], transcend_cols[4])) +
+  scale_y_continuous(limits=c(0, 155), expand = c(0,0)) +
+  labs(title = "Canopy Learning Environments by Type",
+       x = "",
+       y = "") +
+  theme(legend.position = "none") +
+    geom_text(aes(label = signif(N)), 
+            nudge_y = 3, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
 ```
 
 
@@ -164,7 +217,15 @@ datatable(type, rownames = FALSE)
 #(Sample demographics - school leadership team)
 lead_team <- dat %>% 
   select(leadership_diversity) %>% 
-  mutate(value = rep(1, 251)) %>% 
+  mutate(value = rep(1, 251),
+         leadership_diversity = case_when(
+           leadership_diversity == 0 ~ "Prefer not to say",
+           leadership_diversity == 1 ~ "0 - 24% people of color",
+           leadership_diversity == 2 ~ "25 - 49% people of color",
+           leadership_diversity == 3 ~ "50 - 74% people of color",
+           leadership_diversity == 4 ~ "75 - 100% people of color",
+           leadership_diversity == 5 ~ "Not sure"
+         )) %>% 
   group_by(leadership_diversity) %>% 
   summarize(N = sum(value)) %>% 
   rename("School Leadership Team Diversity" = leadership_diversity)
@@ -178,16 +239,8 @@ datatable(lead_team, rownames = FALSE)
 
 ```{r practices, warning = FALSE}
 #(N and % selected practices)
-# need to pivot everything wide first
 prac <- dat %>% 
-  select(starts_with("practices_"))
-#replace values
-prac[ prac == "Less than a year" ] <- 1
-prac[ prac == "1-2 years" ] <- 1
-prac[ prac == "3-4 years" ] <- 1
-prac[ prac == "5+ years" ] <- 1
-#convert to numeric and generate frequencies
-prac <- prac %>% 
+  select(starts_with("practices_")) %>% 
   sapply(., as.numeric) %>% 
   as.data.frame() %>% 
   summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
@@ -208,13 +261,6 @@ Average over the whole sample is ~34 tags.
 ```{r}
 avg_prac <- dat %>% 
   select(school_id, starts_with("practices_")) %>% 
-  mutate(across(starts_with("practices_"), ~case_when(. == "Less than a year" ~ 1,
-                                         . == "1-2 years" ~ 1,
-                                         . == "3-4 years" ~ 1,
-                                         . == "5+ years" ~ 1,
-                                         . == 1 ~ 1,
-                                         . == 0 ~ 0,
-                                        TRUE ~ 0))) %>% 
   group_by(school_id) %>% 
   mutate(sum_tag = rowSums(across(starts_with("practices_")))) %>% 
   ungroup() %>% 
@@ -231,12 +277,7 @@ datatable(avg_prac, rownames = FALSE)
 ```{r core}
 #(N and % core practices)
 core_prac <- dat %>% 
-  select(starts_with("practices")) %>% 
-  mutate(across(everything(), ~case_when(. == "Less than a year" ~ 1,
-                                         . == "1-2 years" ~ 1,
-                                         . == "3-4 years" ~ 1,
-                                         . == "5+ years" ~ 1,
-                                        TRUE ~ 0))) %>% 
+  select(starts_with("core_")) %>% 
     summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
   pivot_longer(everything(),
                names_to = "Core practice",
@@ -254,20 +295,36 @@ datatable(core_prac)
 ```{r core time}
 #(N and % implementation time)
 time_prac <- dat %>% 
-  select(starts_with("practices_")) %>% 
-  mutate_at(vars(starts_with("practices_")), str_replace, "1$", "0") %>% 
-  pivot_longer(everything(),
+  select(starts_with("time_")) %>% 
+    pivot_longer(everything(),
                names_to = "Practice",
                values_to = "N") %>% 
-  mutate(`Less than a year` = case_when(N == "Less than a year" ~ 1, TRUE ~ 0),
-         `1-2 years` = case_when(N == "1-2 years" ~ 1, TRUE ~ 0),
-         `3-4 years` = case_when(N == "3-4 years" ~ 1, TRUE ~ 0),
-         `5+ years` = case_when(N == "5+ years" ~ 1, TRUE ~ 0)) %>% 
+  mutate(`Less than a year` = case_when(N == 1 ~ 1, TRUE ~ 0),
+         `1-2 years` = case_when(N == 2 ~ 1, TRUE ~ 0),
+         `3-4 years` = case_when(N == 3 ~ 1, TRUE ~ 0),
+         `5+ years` = case_when(N == 4 ~ 1, TRUE ~ 0)) %>% 
   select(!N) %>% 
   group_by(Practice) %>% 
   summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE)))
 #table
 datatable(time_prac)
+#viz
+#need long format?
+plot_time_prac <- time_prac %>% 
+  pivot_longer(cols = c(`Less than a year`, `1-2 years`, `3-4 years`, `5+ years`),
+               names_to = "Time",
+               values_to = "N")
+ggplot(plot_time_prac, aes(reorder(Practice, -N), N, fill = Time)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+  scale_y_continuous(limits=c(0, 85), expand = c(0,0)) +
+  labs(title = "Practices by Time Implemented",
+       x = "",
+       y = "") +
+  coord_flip() +
+  scale_x_discrete(labels = label_tags()) +
+  theme(legend.position = "bottom", legend.direction = "horizontal")
+###plan to facet by cluster once cluster analysis presented
 ```
 
 
