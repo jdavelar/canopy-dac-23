@@ -6,9 +6,10 @@ library(ggthemes)
 library(glue)
 library(here)
 library(systemfonts)
+library(scales)
 load(here("data", "complete_canopy_2023.RData"))
-## FONTS
 
+## FONTS
 if(!all(c("Open Sans", "Bebas Neue") %in% system_fonts()$family)) {
   ## Please download and install two fonts:
   ## Open Sans: https://fonts.google.com/specimen/Open+Sans
@@ -24,26 +25,30 @@ if(!all(c("Open Sans", "Bebas Neue") %in% system_fonts()$family)) {
 
 # Tag labels ###
 tag_labels = dictionary %>%
-  select(tag = `Variable name`, label = `Clean Label`)
+  select(tag = `Variable Name`, label = `Clean Label`)
 
-label_tags = function(x, capitalize = "none", wrap) {
-  if(any(!x %in% tag_labels$tag)) warning("Missing tag label")
-  labels = tag_labels$label[match(x, tag_labels$tag)]
-  labels[is.na(labels)] = x[is.na(labels)]
-  if(capitalize == "title") {
-    labels = str_to_title(labels)
+label_tags = function(capitalize = "none", wrap = Inf) {
+  scales:::force_all(capitalize, wrap)
+  function(x) {
+    if(any(!x %in% tag_labels$tag)) warning("Missing tag label")
+    labels = tag_labels$label[match(x, tag_labels$tag)]
+    labels[is.na(labels)] = x[is.na(labels)]
+    if(capitalize == "title") {
+      labels = str_to_title(labels)
+    }
+    if(capitalize == "first") {
+      labels = str_to_sentence(labels)
+    }
+    if(is.finite(wrap)) {
+      labels = str_wrap(labels, width = wrap)
+    }
+    return(labels)
   }
-  if(capitalize == "first") {
-    labels = str_to_sentence(labels)
-  }
-  if(!missing(wrap)) {
-    labels = str_wrap(labels, width = wrap)
-  }
-  return(labels)
 }
 
-scale_x_tag = function(...) scale_x_discrete(labels = label_tags)
-scale_y_tag = function(...) scale_y_discrete(labels = label_tags)
+scale_x_tag = function(...) scale_x_discrete(labels = label_tags())
+scale_y_tag = function(...) scale_y_discrete(labels = label_tags())
+
 
 
 # Demographic labels ####
@@ -73,7 +78,7 @@ dem_labs = c(
   "Suburban schools" = "self_reported_locale_suburban",
   "Rural schools" = "self_reported_locale_rural",
   "Mixed Geographic schools" = "self_reported_locale_multiple",
-  "Other Geographic Locale" = "self_reported_locale_other"
+  "Other Geographic Locale" = "self_reported_locale_other",
   "Homeschools" = "school_descriptor_homeschool",
   "Hybrid schools" = "school_descriptor_hybrid",
   "Microschools" = "school_descriptor_microschool",
@@ -86,8 +91,9 @@ dem_labs_rv = names(dem_labs)
 names(dem_labs_rv) = dem_labs
 
 label_dems = function(dems) coalesce(dem_labs_rv[dems], dems)
-scale_x_demo = scale_x_discrete(labels = dem_labs_rv)
-
+#scale_x_demo = scale_x_discrete(labels = dem_labs_rv)
+scale_x_demo = scale_x_discrete(labels = function(x) lapply(strwrap(dem_labs_rv, width = 10, simplify = FALSE), paste, collapse="\n"))
+# scale_x_discrete(labels = label_wrap(10))
 
 ## Percent bin labels ####
 label_percent_bins = function(breaks) {
@@ -138,10 +144,10 @@ label_percent_bins = function(breaks) {
 
 # main Transcend colors
 transcend_cols = c(
-  blue = "#1A4C81",
-  teal = "#59C3B4",
-  red = "#EF464B",
-  `light blue` = "#ADE0EE"
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
 )
 
 transcend_cols_noname = function(col) {

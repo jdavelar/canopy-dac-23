@@ -1,0 +1,173 @@
+---
+title: "School State and Descriptors "
+author: "Karen Zyskind"
+date: "2023-04-28"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(reshape2)
+library(cowplot)
+library(dplyr)
+library("pacman")
+library("DT")
+pacman::p_load("summarytools")
+source(here("scripts", "branding.R"))
+load(here("data", "complete_canopy_2023.RData"))
+```
+**Questions about the data**   
+I loaded what I think is the branding, but I am not sure if it worked or what I should see. 
+
+##  Question 1 How many schools per state:
+Table shows that the state with the most schools is California (21), followed
+by Colorado (18), Massachusetts (15), and New York also with (15). 
+
+```{r state_counts, echo = FALSE}
+library(dplyr)
+
+state_counts <- schools %>%
+  group_by(school_state) %>%
+  summarize(N_schools = n())
+
+state_counts
+
+# Load the knitr package
+library(knitr)
+
+# Created a table of the number of schools per state
+n_schools <- aggregate(schools$school_name, 
+                       by=list(State=schools$school_state), 
+                       FUN=length)
+
+# Renamed the columns of the new data frame
+names(n_schools) <- c("State", "N_schools")
+
+# Created a table using kable
+kable(n_schools, format = "markdown", caption = "Number of schools per state")
+
+
+```
+
+## Question2 What is the distribution of descriptors by state?
+Arizona, there were 3 schools with the descriptor "hybrid", 2 schools with the descriptor "microschool", 3 schools with the descriptor "other", and so on.
+
+ Massachusetts had the most schools with the "other_text" descriptor (5), while Colorado had the most schools with the "microschool" descriptor (5).
+
+
+```{r descriptor_count, results='asis', echo=FALSE}
+library(dplyr)
+library(DT)
+
+descriptor_count <- schools %>% 
+  group_by(school_state) %>% 
+  summarise(homeschool = sum(school_descriptor_homeschool),
+            hybrid = sum(school_descriptor_hybrid),
+            microschool = sum(school_descriptor_microschool),
+            other = sum(school_descriptor_other),
+            other_text = sum(ifelse(is.na(school_descriptor_other_text), 0, nchar(school_descriptor_other_text) > 0)),
+            sws = sum(school_descriptor_sws),
+            virtual = sum(school_descriptor_virtual))
+
+datatable(descriptor_count, 
+          options = list(pageLength = 10),
+          caption = "Descriptor Counts by State")
+```
+
+
+```{r}
+#OR
+# Created a new data frame with the counts of each descriptor by state
+descriptor_count <- schools %>% 
+  group_by(school_state) %>% 
+  summarise(homeschool = sum(school_descriptor_homeschool),
+            hybrid = sum(school_descriptor_hybrid),
+            microschool = sum(school_descriptor_microschool),
+            other = sum(school_descriptor_other),
+           other_text = sum(ifelse(is.na(school_descriptor_other_text), 0, nchar(school_descriptor_other_text) > 0)),
+            sws = sum(school_descriptor_sws),
+            virtual = sum(school_descriptor_virtual))
+
+# View the new data frame
+descriptor_count
+
+#to see the the description for other text since some schools wrote in their responses 
+schools %>% 
+  group_by(school_state, school_descriptor_other_text) %>% 
+  summarise(n = n()) %>% 
+  arrange(school_state, desc(n))
+
+
+
+
+```
+
+## Question 3 What is the breakdown of the schools by descriptor? 
+```{r}
+
+library(dplyr)
+library(DT)
+
+descriptor_count <- schools %>%
+  select(school_descriptor_homeschool, school_descriptor_hybrid, school_descriptor_microschool, school_descriptor_other, school_descriptor_other_text, school_descriptor_sws, school_descriptor_virtual) %>%
+  summarize(homeschool = sum(school_descriptor_homeschool),
+            hybrid = sum(school_descriptor_hybrid),
+            microschool = sum(school_descriptor_microschool),
+            other = sum(school_descriptor_other),
+            other_text = sum(ifelse(!is.na(school_descriptor_other_text), 1, 0)),
+            sws = sum(school_descriptor_sws),
+            virtual = sum(school_descriptor_virtual))
+
+datatable(descriptor_count, caption = "Counts of School Descriptors")
+
+
+
+
+
+
+```
+## ##How do descriptors match up with school type?
+```{r}
+library(dplyr)
+library(tidyr)
+library(DT)
+
+type <- schools %>%
+  select(school_descriptor, school_descriptor_homeschool, school_descriptor_hybrid, school_descriptor_microschool, school_descriptor_other, school_descriptor_other_text) %>%
+  mutate(homeschool = ifelse(school_descriptor_homeschool == 1, 1, 0),
+         hybrid = ifelse(school_descriptor_hybrid == 1, 1, 0),
+         microschool = ifelse(school_descriptor_microschool == 1, 1, 0),
+         other = ifelse(school_descriptor_other == 1, 1, 0),
+         other_text = ifelse(!is.na(school_descriptor_other_text), 1, 0)) %>%
+  group_by(school_descriptor) %>%
+  summarize(N = n(),
+            homeschool = sum(homeschool),
+            hybrid = sum(hybrid),
+            microschool = sum(microschool),
+            other = sum(other),
+            other_text = sum(other_text)) %>%
+  mutate(School_Type = recode(school_descriptor, "1" = "Charter", "2" = "District", "3" = "Independent")) %>%
+  select(School_Type, N, homeschool, hybrid, microschool, other, other_text)
+
+DT::datatable(type)
+
+type_pivot <- type %>%
+  pivot_longer(cols = c(homeschool, hybrid, microschool, other, other_text), 
+               names_to = "descriptor", values_to = "count") %>%
+  group_by(School_Type, descriptor) %>%
+  summarize(total_count = sum(count))
+
+DT::datatable(type_pivot)
+
+```
+
