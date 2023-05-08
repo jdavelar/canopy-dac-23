@@ -299,11 +299,109 @@ school_lead_div_gen <- school_lead_div_gen %>% select(-c(21:24,27:29,32:34,37:39
 school_lead_div_gen <- school_lead_div_gen %>%
   mutate(total_leader_count = rowSums(across(c(20,22,24,26,28,30,32,34,36,38,40), ~ !is.na(.))))
 
+
+
+```
+
+
+In reviewing this I realized that school leaders who listed race as NA but included a gender, suggesting that they existed, resulted in the school leader not being counted. Unfortunately, this results in the percentages of BIPOC leaders being off. 
+
+
+```{r missing count}
+
+# None of the primary leaders had race but no gender
+race_but_no_gender <- school_lead_div_gen %>% 
+  filter(!is.na(leader1_race) & is.na(leader1_gender))
+
+# 6 of the primary leaders had gender but no race
+# These are the schools that need to be corrected for their counts
+# Plus we need to find the one other school leader that reported gender but not race.
+# Interestingly most of those leaders identify as transgender.
+gender_but_no_race <- school_lead_div_gen %>% 
+  filter(!is.na(leader1_gender) & is.na(leader1_race))
+
+## Found the other school leader
+## Hamilton High School, both school leaders put prefer not to say for gender and school leader 1 also put prefer not to say for race.
+## School leader 2 only had prefer not to say for gender.
+## Total leader count needs to updated.
+## Hamilton High School: ID # 650
+
+# school_lead_div_gen %>% 
+#   filter(!is.na(leader2_gender) & is.na(leader2_race))
+
+
+
+
+# count how many times race is filled out but gender is NA
+race_no_gender_count <- school_lead_div_gen %>% 
+  filter(!is.na(leader1_race) & is.na(leader1_gender) |
+           !is.na(leader2_race) & is.na(leader2_gender) |
+           !is.na(leader3_race) & is.na(leader3_gender) |
+           !is.na(leader4_race) & is.na(leader4_gender) |
+           !is.na(leader5_race) & is.na(leader5_gender) |
+           !is.na(leader6_race) & is.na(leader6_gender) |
+           !is.na(leader7_race) & is.na(leader7_gender) |
+           !is.na(leader8_race) & is.na(leader8_gender) |
+           !is.na(leader9_race) & is.na(leader9_gender) |
+           !is.na(leader10_race) & is.na(leader10_gender) |
+           !is.na(leader11_race) & is.na(leader11_gender)) %>% 
+  nrow()
+
+# count how many times gender is filled out but race is NA
+gender_no_race_count <- school_lead_div_gen %>% 
+  filter(is.na(leader1_race) & !is.na(leader1_gender) |
+           is.na(leader2_race) & !is.na(leader2_gender) |
+           is.na(leader3_race) & !is.na(leader3_gender) |
+           is.na(leader4_race) & !is.na(leader4_gender) |
+           is.na(leader5_race) & !is.na(leader5_gender) |
+           is.na(leader6_race) & !is.na(leader6_gender) |
+           is.na(leader7_race) & !is.na(leader7_gender) |
+           is.na(leader8_race) & !is.na(leader8_gender) |
+           is.na(leader9_race) & !is.na(leader9_gender) |
+           is.na(leader10_race) & !is.na(leader10_gender) |
+           is.na(leader11_race) & !is.na(leader11_gender)) %>% 
+  nrow()
+
+# print the results
+cat(paste("Race, no gender:", race_no_gender_count, "\n"))
+cat(paste("Gender, no race:", gender_no_race_count, "\n"))
+
+```
+
+This tells me there are 12 school leaders that had race but not gender and 7 that had gender but not race. That means my counts for school leaders is off by 7, but I am not sure where exactly. I will have to dig deeper.
+
+```{r leader fix}
+
+# Individually fixing the school leader total count for the schools where gender but not race was reported.
+
+
+school_fix <- c("37","247", "318", "448", "535", "650", "777")
+
+# Loop to recode total leader counts manualls
+for (col_name in leader_race_cols) {
+
+school_lead_div_gen %>% 
+  filter(school_lead_div_gen$school_id == 650) %>%
+  mutate(total_leader_count = total_leader_count +1)
+  
+}
+
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 650] <- 2
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 37] <- 11
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 247] <- 1
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 318] <- 2
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 448] <- 3
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 535] <- 3
+school_lead_div_gen$total_leader_count[school_lead_div_gen$school_id == 777] <- 6
+
+school_lead_div_gen$total_leader_count <- as.numeric(school_lead_div_gen$total_leader_count)
+
 # Determining bipoc leader percent
 school_lead_div_gen <- school_lead_div_gen %>%
   mutate(bipoc_leader_pct = bipoc_leader_count / total_leader_count * 100)
 
 ```
+
 
 ## Data table BIPOC leaders by Locale
 
@@ -311,14 +409,15 @@ school_lead_div_gen <- school_lead_div_gen %>%
 library(DT)
 
 # Count the number of BIPOC school leaders for each school type
+
 school_lead_div_sum <- school_lead_div_gen %>%
   group_by(location) %>%
   summarize(
-    bipoc_leader_count = sum(
-      across(leader1_bipoc:leader11_bipoc)),
-    total_leader_count = sum(across(leader1_race:leader11_race, ~ complete.cases(.)))) %>%
-  mutate(
-    bipoc_leader_pct = round(bipoc_leader_count / total_leader_count * 100, digits =2))
+    total_leader_count = sum(total_leader_count),
+    bipoc_leader_count = sum(across(leader1_bipoc:leader11_bipoc)),
+    bipoc_leader_pct = round(bipoc_leader_count / total_leader_count * 100,digits=2))
+
+
 
 DT::datatable(school_lead_div_sum)
 
@@ -360,6 +459,28 @@ tab_model(locale_model)
 ```
 
 
+
+## ANOVA model
+**It was recommended to use an ANOVA model instead**
+In the regression the multiple location was the comparison group, but that was not all that useful so an ANOVA will allow us to look at the differences between the groups
+
+```{r anova}
+
+locale_aov <- aov(bipoc_leader_pct ~ location, data = school_lead_div_gen)
+summary.aov(locale_aov)
+
+locale_pairs <- TukeyHSD(locale_aov)
+locale_pairs
+
+#As expected, it is pretty clear that Urban is significantly different than the others (Multiple, rural, and suburban) in terms of percent of bipoc school leaders. None of the other locales were significantly different from each other.
+
+
+```
+
+As expected, based on the bipoc leader percentage summaries and the graph, it is pretty clear that Urban is significantly different than the others (Multiple, rural, and suburban) in terms of percent of bipoc school leaders. None of the other locales were significantly different from each other.
+
+
+
 ## Barplot of BIPOC Leaders by Locale
 
 ```{r reg graph}
@@ -376,6 +497,63 @@ school_lead_div_gen %>%
 
 ```
 
+
+This helps us see that there are a few outliers in the suburban schools for a higher number of bipoc school leaders.
+
+```{r sub school bipoc}
+
+
+suburban_outliers <- school_lead_div_gen %>% filter(school_lead_div_gen$bipoc_leader_pct >= 66 & school_lead_div_gen$location == "Suburban")
+suburban_outliers
+
+```
+
+Of the three schools there is a little bit of confusion as one school, Gem Prep Nampa, reported three school leaders, 2 of which where bipoc, resulting in a calculated percent bipoc school leaders of 66% but their reported percentage of diverse school leaders was 0-24%.
+
+The other school, Ke Kula 'o Samuel M. Kamakau, had three school leaders as well but one did not report their race resulting in a calculated percent bipoc of 66% for their school leaders, but their self-reported percent leaders of color was 75-100%.
+
+Finally, The leadership school in Missouri had three school leaders who identified as Black or African American, which does seem like an outlier for suburban schools.
+
+# School Leader distributions
+## Total count distribution
+
+```{r leader school count}
+# Want to look at how many schools reported different number of leaders
+
+#Distribution of reported total school leaders across all schools
+school_lead_div_gen %>%
+  ggplot(aes(x = total_leader_count)) +
+  geom_bar(fill="#1A4C81") +
+  xlab("Total Leaders") +
+  ylab("Count")+
+  theme(legend.position = "none")
+
+```
+
+## Total count distribution by location
+
+```{r}
+# Looking at the number of leaders by location
+# Can't get the color right on this one
+# Can probably use a manual fill for color
+school_lead_div_gen %>%
+  ggplot(aes(x = total_leader_count)) +
+  geom_bar(aes(fill = location)) +
+  facet_wrap(~ location) +
+  xlab("Total Leaders") +
+  ylab("Count")+
+  theme(legend.position = "none")
+
+
+# School distribution by location
+
+school_lead_div_gen %>%
+  ggplot(aes(x=location))+
+  geom_bar(fill=transcend_cols)
+
+
+
+```
 
 
 
