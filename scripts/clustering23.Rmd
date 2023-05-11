@@ -490,3 +490,154 @@ efa_6_j %>%
   datatable(caption = "All loadings") %>%
   formatRound(digits = 2, columns = 2:9) 
 ```
+
+# Clustering by School Type (Pre-K, Elementary & Middle v. Secondary)
+
+Filter schools by type.
+```{r}
+hs_dat <- full %>% 
+  select(school_id, grades_high) %>% 
+  filter(grades_high == 1)
+
+not_hs_dat <- full %>% 
+  select(school_id, grades_high) %>% 
+  filter(grades_high == 0)
+```
+
+Filter schools by type in tags.
+```{r message=FALSE}
+hs_tags <- left_join(hs_dat, tags) %>% 
+  select(-grades_high)
+
+not_hs_tags <- left_join(not_hs_dat, tags) %>% 
+  select(-grades_high)
+```
+
+Create correlation matrices.
+```{r}
+hs_practices_cor <- hs_tags %>%
+  select(starts_with("practices")) %>%
+  cor
+```
+
+```{r}
+not_hs_practices_cor <- not_hs_tags %>%
+  select(starts_with("practices")) %>%
+  cor
+```
+
+## Retaining 3 clusters 
+
+### High School
+```{r}
+
+hs_efa_3 <- fa(hs_practices_cor, nfactors = 3, rotate = "oblimin", fm = "minres")
+
+hs_efa_3 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+hs_efa_3 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+hs_efa_3 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+
+* 1 - Social justice and equity
+* 2 - Leadership
+* 3 - Deep learning
+
+### Not High School
+
+```{r}
+
+not_hs_efa_3 <- fa(not_hs_practices_cor, nfactors = 3, rotate = "oblimin", fm = "minres")
+
+not_hs_efa_3 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+not_hs_efa_3 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+not_hs_efa_3 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+
+* 1 - Competency & mastery
+* 2 - Equity & social justice
+* 3 - Mental health & holistic, trauma-informed supports
+
+## Retaining 5 clusters
+
+### High School
+
+```{r}
+
+hs_efa_5 <- fa(hs_practices_cor, nfactors = 5, rotate = "oblimin", fm = "minres")
+
+hs_efa_5 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+hs_efa_5 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+hs_efa_5 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+
+* 1 - Equity & justice
+* 2 - Leadership
+* 3 - Interdisciplinary education
+* 4 - Flexible learning environments
+* 5 - Community and career development
+
+I don't think these clusters are as compelling/clear as just keeping 3. 6 clusters were too many, so did 5 here just to have another option.
+
+### Not High School
+
+```{r}
+
+not_hs_efa_5 <- fa(not_hs_practices_cor, nfactors = 5, rotate = "oblimin", fm = "minres")
+
+not_hs_efa_5 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+not_hs_efa_5 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+
+not_hs_efa_5 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:6) 
+```
+
+* 1 - Accommodating, competency-based education
+* 2 - Leadership
+* 3 - Equity & justice
+* 4 - Flexible learning environments
+* 5 - Mental health & holistic, trauma-informed supports
