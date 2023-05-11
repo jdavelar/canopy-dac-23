@@ -473,7 +473,7 @@ Graduate Portrait
 
 Note: wording here differed between survey draft, dictionary, and raw response. Not sure why?
 
-```{r grad portraite}
+```{r grad portrait}
 dat <- dat %>% 
   mutate(graduate_portrait_usage = case_when(
     graduate_portrait_usage == "Not sure" ~ 3,
@@ -741,7 +741,22 @@ dat <- dat %>%
     . == "6" ~ 0,
     . == "7" ~ 0
   ), .names = "{.col}_multiple")) %>% 
-  ungroup()
+  ungroup() %>% 
+  # create mutually exclusive locale variable w/ manual entries 5.19.23
+  mutate(exclusive_locale = case_when(
+    (self_reported_locale_rural == 1 & self_reported_locale_suburban == 0 & self_reported_locale_urban == 0 & self_reported_locale_multiple == 0 ~ "Rural"),
+    (self_reported_locale_urban == 1 & self_reported_locale_suburban == 0 & self_reported_locale_rural == 0 & self_reported_locale_multiple == 0 ~ "Urban"),
+    (self_reported_locale_suburban == 1 & self_reported_locale_rural == 0 & self_reported_locale_urban == 0 & self_reported_locale_multiple == 0 ~ "Suburban"),
+    self_reported_locale_multiple == 1 ~ "Multiple",
+    #outlier others based on Slack convo
+    school_name == "Gem Prep Nampa" ~ "Suburban",
+    school_name == "SEEQS: the School for Examining Essential Questions of Sustainability" ~ "Urban",
+    school_name == "Prospect Academy" ~ "Multiple",
+    school_name == "Digital Pioneers Academy" ~ "Urban",
+    school_name == "AIM Academy" ~ "Multiple",
+    school_name == "Oceti Sakowin Educational Learning Center" ~ "Rural",
+    school_name == "Oxford Virtual Academy" ~ "Multiple"
+  ))
 ```
 
 # Public-facing subset
@@ -1281,6 +1296,7 @@ self_reported_locale_other_text,
 self_reported_locale_rural,
 self_reported_locale_suburban,
 self_reported_locale_urban,
+exclusive_locale,
 self_reported_math,
 self_reported_race_aian,
 self_reported_race_asian,
@@ -1808,6 +1824,7 @@ self_reported_locale_other_text,
 self_reported_locale_rural,
 self_reported_locale_suburban,
 self_reported_locale_urban,
+exclusive_locale,
 self_reported_math,
 self_reported_race_aian,
 self_reported_race_asian,

@@ -82,32 +82,40 @@ No U.S. territories are represented this round.
 
 ```{r locale}
 #(N schools per geographic locale (urban, suburban, rural, multiple))
+# locale <- dat %>% 
+#   select(self_reported_locale_rural, self_reported_locale_suburban, self_reported_locale_urban, self_reported_locale_other) %>% 
+#   rename("rural" = self_reported_locale_rural,
+#          "suburban" = self_reported_locale_suburban,
+#          "urban" = self_reported_locale_urban,
+#          "other" = self_reported_locale_other) %>% 
+#   mutate(Rural = if_else(rural == 1 & suburban == 0 & urban == 0 & other == 0, 1, 0),
+#          Suburban = if_else(suburban == 1 & rural == 0 & urban == 0 & other == 0, 1, 0),
+#          Urban = if_else(urban == 1 & rural == 0 & suburban == 0 & other == 0, 1, 0),
+#          Other = if_else(other == 1, 1, 0),
+#          Mixed = case_when(rural == 1 & suburban == 1 ~ 1,
+#                            rural == 1 & urban == 1 ~ 1,
+#                            urban == 1 & suburban == 1 ~ 1,
+#                            urban == 1 & suburban == 1 & rural == 1 ~ 1,
+#                          TRUE ~ 0)) %>% 
+#   select(!c(rural, suburban, urban, other)) %>% 
+#   summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+#     pivot_longer(everything(),
+#                names_to = "Geographic Locale",
+#                values_to = "N")
+# #table
+# datatable(locale, rownames = FALSE)
+
+# code above was prior to 5.19.23 changes to mutually exclusive locale categories
 locale <- dat %>% 
-  select(self_reported_locale_rural, self_reported_locale_suburban, self_reported_locale_urban, self_reported_locale_other) %>% 
-  rename("rural" = self_reported_locale_rural,
-         "suburban" = self_reported_locale_suburban,
-         "urban" = self_reported_locale_urban,
-         "other" = self_reported_locale_other) %>% 
-  mutate(Rural = if_else(rural == 1 & suburban == 0 & urban == 0 & other == 0, 1, 0),
-         Suburban = if_else(suburban == 1 & rural == 0 & urban == 0 & other == 0, 1, 0),
-         Urban = if_else(urban == 1 & rural == 0 & suburban == 0 & other == 0, 1, 0),
-         Other = if_else(other == 1, 1, 0),
-         Mixed = case_when(rural == 1 & suburban == 1 ~ 1,
-                           rural == 1 & urban == 1 ~ 1,
-                           urban == 1 & suburban == 1 ~ 1,
-                           urban == 1 & suburban == 1 & rural == 1 ~ 1,
-                         TRUE ~ 0)) %>% 
-  select(!c(rural, suburban, urban, other)) %>% 
-  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
-    pivot_longer(everything(),
-               names_to = "Geographic Locale",
-               values_to = "N")
+  select(school_name, exclusive_locale) %>% 
+  mutate(rate = rep(1, 251)) %>% 
+  group_by(exclusive_locale) %>% 
+  summarize(N = sum(rate)) %>% 
+  rename(`Geographic Locale` = exclusive_locale)
 #table
-datatable(locale, rownames = FALSE)
+datatable(locale)
 #viz
-plot_locale <- locale %>% 
-  filter(!(`Geographic Locale` == "Other"))
-ggplot(plot_locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale`)) +
+ggplot(locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale`)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
   scale_y_continuous(limits=c(0, 150), expand = c(0,0)) +
@@ -125,6 +133,8 @@ ggplot(plot_locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic L
 
 ## How do schools that identified as Other describe their locale?
 
+The following schools identified their locale as `Other` (N = 7). The plot above includes these 7 schools, categorized based on their description below and per agreement made via Slack on 5.19.23.
+
 ```{r locale - other}
 #others
 locale_other <- dat %>% 
@@ -137,6 +147,7 @@ datatable(locale_other)
 ```
 
 Note that the numbers are slightly wonky if you read the descriptions that schools chose to include--though Gem Prep Nampa and SEEQS identified themselves as `Other`, what they disclosed does not actually categorize them differently. Thus, suburban should be 1 higher (N = 32 because of Gem Prep) and urban should be 1 higher (N = 142 because of SEEQS).
+
 
 # Q3: What's the breakdown of schools in the data by level?
 
