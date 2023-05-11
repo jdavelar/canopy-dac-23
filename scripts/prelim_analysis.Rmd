@@ -19,7 +19,7 @@ library(here)
 library(rio)
 library(tidyverse)
 library(DT)
-test <- import(here("data", "raw-ip.csv"))
+# test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
 theme_update(plot.title = element_text(hjust = 0.5))
@@ -30,7 +30,7 @@ dat <- full
 
 Note that we have 3 unknowns in the data. These may have been introduced in the raw data, because I do not remember there being missing state values when cleaning the data. Either these schools chose to delete the pre-filled state, or we did not have data to begin with. Something to look into.
 
-```{r states}
+```{r states, fig.height=9, fig.width=9}
 # ("N states in sample
 # List of those not represented
 # List (if any) U.S. territories represented")
@@ -291,8 +291,9 @@ datatable(core_prac)
 
 # Q8: How long have schools been implementing each core practice?
 
+Note: This plot looks messy because it's too large right now. Once we have clusters finalized I can create condensed plots by cluster, or alternately organize them in whichever ways makes most sense.
 
-```{r core time}
+```{r core time, fig.height=7, fig.width=10}
 #(N and % implementation time)
 time_prac <- dat %>% 
   select(starts_with("time_")) %>% 
@@ -302,7 +303,8 @@ time_prac <- dat %>%
   mutate(`Less than a year` = case_when(N == 1 ~ 1, TRUE ~ 0),
          `1-2 years` = case_when(N == 2 ~ 1, TRUE ~ 0),
          `3-4 years` = case_when(N == 3 ~ 1, TRUE ~ 0),
-         `5+ years` = case_when(N == 4 ~ 1, TRUE ~ 0)) %>% 
+         `5+ years` = case_when(N == 4 ~ 1, TRUE ~ 0),
+         Practice = sub("time_", "practices_", Practice)) %>%
   select(!N) %>% 
   group_by(Practice) %>% 
   summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE)))
@@ -313,7 +315,13 @@ datatable(time_prac)
 plot_time_prac <- time_prac %>% 
   pivot_longer(cols = c(`Less than a year`, `1-2 years`, `3-4 years`, `5+ years`),
                names_to = "Time",
-               values_to = "N")
+               values_to = "N") %>% 
+  mutate(Time = factor(Time, levels = c(
+    "Less than a year",
+    "1-2 years",
+    "3-4 years",
+    "5+ years"
+  )))
 ggplot(plot_time_prac, aes(reorder(Practice, -N), N, fill = Time)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
@@ -321,9 +329,11 @@ ggplot(plot_time_prac, aes(reorder(Practice, -N), N, fill = Time)) +
   labs(title = "Practices by Time Implemented",
        x = "",
        y = "") +
-  coord_flip() +
   scale_x_discrete(labels = label_tags()) +
-  theme(legend.position = "bottom", legend.direction = "horizontal")
+  theme(legend.position = "bottom", 
+        legend.direction = "horizontal",
+        text = element_text(size = 7),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 ###plan to facet by cluster once cluster analysis presented
 ```
 
