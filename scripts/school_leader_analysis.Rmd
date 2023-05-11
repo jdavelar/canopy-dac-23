@@ -34,7 +34,6 @@ confidential_names <- tibble(variable.names(confidential))
 
 # Q1: What are the racial/ethnic and gender identities of the primary school leader? (How many schools are led by school leaders of different racial/ethnic identities?)
 
-
 ## Gender
 
 ```{r}
@@ -51,9 +50,21 @@ leader_char <- confidential %>%
   ))
 
 #looks like self-identify text might have been reported in the wrong column, so recoding that one manually
-leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
+# leader_char$leader1_gender[leader_char$leader1_gender_self_identify_text == 1] <- "Man"
+
+# actually, incorrect reporting, so we will remove that 
+confidential$leader1_gender[confidential$leader1_gender_self_identify_text == "1"] <- NA
+
+# and create aggregate variable
+leader_char_gender <- confidential %>% 
+  filter(!is.na(leader1_gender)) %>% 
+  mutate(leader1_gender_agg = case_when(
+    leader1_gender == "1" ~ "Man",
+    leader1_gender == "2" ~ "Woman",
+    leader1_gender == "0" ~ "Prefer Not to Say", 
+    TRUE ~ "Multiple genders selected"
+    ))
 ```
-Multiple genders
 
 ```{r}
 leader_char %>% 
@@ -105,17 +116,18 @@ leader_char <- leader_char %>%
             "4,6" = "Hispanic or Latinx, White"
               ))
 
-leader_char <- leader_char %>% 
-  mutate(leader1_race_agg = recode(leader1_race,
-            "0" = "Prefer not to say",
-            "1" = "American Indian or Alaska Native",
-            "2" = "Asian",
-            "3" = "Black or African American",
-            "4" = "Hispanic or Latinx",
-            "5" = "Native Hawaiian or Pacific Islander",
-            "6" = "White",
-            "7" = as.character(leader1_gender_self_identify_text)
-              ))
+leader_char_race <- confidential %>% 
+  filter(!is.na(leader1_race)) %>% 
+  mutate(leader1_race_agg = case_when(
+    leader1_race == "0" ~ "Prefer not to say",
+    leader1_race == "1" ~ "American Indian or Alaska Native",
+    leader1_race == "2" ~ "Asian",
+    leader1_race == "3" ~ "Black or African American",
+    leader1_race == "4" ~ "Hispanic or Latinx",
+    leader1_race == "5" ~ "Native Hawaiian or Pacific Islander",
+    leader1_race == "6" ~ "White",
+    TRUE ~ "Self Identify/Multiple races selected"
+  ))
 ```
 
 ```{r}
@@ -125,16 +137,50 @@ leader_char %>%
   datatable()
 ```
 
+
 ```{r}
 # table(leader_char$leader1_race_agg)
 ```
 
 
+## In sum
 
-# Q2: What are the racial/ethnic and gender identities of all Canopy school leaders? (How many schools are led by school leaders of different racial/ethnic identities?)
+### Gender
+```{r}
+leader_char_gender %>% 
+  group_by(leader1_gender_agg) %>% 
+  summarise(n = n()) %>% 
+  arrange(-n) %>% 
+  datatable(colnames = c("Leader Gender", "Count (N = 250)"))
+```
 
+### Race
+```{r}
+leader_char_race %>% 
+  group_by(leader1_race_agg) %>% 
+  summarise(n = n()) %>% 
+  arrange(-n) %>% 
+  datatable(colnames = c("Primary Leader Race", "Count (N = 245)"))
+```
 
 # Q3: Are BIPOC school leaders more likely to be found in certain types of schools (e.g. urban, charter, ...)?
 
+```{r}
+school_type_dat <- full %>% 
+  select(school_id, self_reported_locale_multiple, self_reported_locale_rural, self_reported_locale_urban, self_reported_locale_suburban)
+
+school_type_dat <- left_join(leader_char_race, school_type_dat)
+```
+
+```{r}
+school_type_dat %>% 
+  group_by(leader1_race_agg) %>% 
+  summarise(across(c("self_reported_locale_rural", "self_reported_locale_urban", "self_reported_locale_suburban", "self_reported_locale_multiple"), ~sum(.x, na.rm = TRUE))) %>% 
+  datatable(colnames = c("Primary Leader Race", "Rural", "Urban", "Suburban", "Multiple"))
+```
+
 
 # Q4: How representative are Canopy school leaders of the student populations they serve?
+
+
+
