@@ -581,7 +581,19 @@ for (i in 1:length(summed_columns)) {
   cat("Rank", i, ":", col_name, "- Sum:", col_sum, "\n")
 }
 
+
+ggplot(Leaps_data, aes(x = reorder(Column,Sum), y = Sum, fill = Column)) +
+  geom_col() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8),
+        legend.position = "none") +
+  labs(title = "LEAPs Implementation", x = NULL, y = "Sum") +
+  scale_fill_manual(values = bar_colors) +
+  scale_y_discrete(breaks = c(1, 10))
+
 ```
+
+The Anytime Anywhere practice and Social Consciousness practice were the least commonly picked practices. They were the only ones that were implemented less than 50% of the time. High expectations and Connection were the practices that were most likely to be in implementation. 
 
 
 ## Implementation by locale
