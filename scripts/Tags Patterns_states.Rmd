@@ -1,0 +1,135 @@
+---
+title: "Tagging Patterns_states"
+author: "Karen Zyskind"
+date: "2023-05-11"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(reshape2)
+library(cowplot)
+library(dplyr)
+library("pacman")
+library("DT")
+pacman::p_load("summarytools")
+source(here("scripts", "branding.R"))
+load(here("data", "complete_canopy_2023.RData"))
+```
+
+#How do tagging patterns differ across states?
+## What would this look like? 
+
+
+```{r patterns, echo=FALSE}
+# Load required libraries
+
+# Extracted the columns representing the tags
+tag_columns <- colnames(tags)[-1]  # Exclude the first column (school_id)
+
+# Reshaped the data to long format
+tags_long <- tags %>%
+  tidyr::pivot_longer(cols = tag_columns, names_to = "Tag", values_to = "Count") %>%
+  filter(Count > 0)  # Remove rows with zero count (if applicable)
+
+# Merge with the schools dataframe
+merged_data <- merge(tags_long, schools, by = "school_id")
+
+# Calculate summary statistics by school_state and tag
+state_tag_summary <- merged_data %>%
+  group_by(school_state, Tag) %>%
+  summarize(
+    Total_Count = sum(Count),
+    Unique_Schools = n_distinct(school_id)
+  ) %>%
+  arrange(desc(Total_Count))
+
+# View the summary statistics
+print(state_tag_summary)
+
+print(state_tag_summary)
+print(merged_data)
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+# Create a bar chart
+bar_chart <- ggplot(state_tag_summary, aes(x = reorder(school_state, -Total_Count), y = Total_Count)) +
+  geom_bar(stat = "identity", fill = transcend_cols[1]) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  labs(x = "State", y = "Total Count of Tags", title = "Tag Counts by State") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, family = "Arial"),
+    axis.text.y = element_text(family = "Arial"),
+    plot.title = element_text(family = "Arial")
+  )
+
+# Display the bar chart
+print(bar_chart)
+
+
+
+```
+
+
+```{r}
+library(ggplot2)
+library(treemapify)
+
+# Create a treemap
+treemap <- ggplot(state_tag_summary, aes(area = Total_Count, fill = school_state, label = school_state)) +
+  geom_treemap() +
+  geom_treemap_text(size = 5, color = "white") +
+  labs(title = "Tagging Patterns Across States (Treemap)") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+# Display the treemap
+print(treemap)
+
+
+```
+
+```{r}
+library(ggplot2)
+
+# Create the box plot
+box_plot <- ggplot(state_tag_summary, aes(x = school_state, y = Total_Count)) +
+  geom_boxplot(fill = "blue") +
+  labs(x = "State", y = "Total Count of Tags", title = "Tagging Patterns Across States") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Display the box plot
+print(box_plot)
+#Each box represents the distribution of the Total_Count variable for a state. The x-axis represents the states, and the y-axis represents the total count of tags.
+
+
+
+```
+# How do tagging patterns differ among charter, district, and independent schools?
+
+The difference in standard deviation between "Independent (private) school" and "Public charter school" is approximately 8.91.
+The difference in standard deviation between "Independent (private) school" and "Public district school" is approximately 23.1.
+The difference in standard deviation between "Public charter school" and "Public district school" is approximately 23.5
+
+The differences in standard deviations between the different types of schools refer to the use of practices. The pivot table summarizes the total counts of practices for each school type. The standard deviations are then calculated for each school type, indicating the variability or spread of practice counts within each school type.
+
+`
+
+
+
+```
+
