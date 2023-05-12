@@ -1,0 +1,630 @@
+---
+title: "Student Experience Shifts"
+author: "Tony Daza"
+date: "2023-05-10"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Importing Data**
+
+```{r import, warning=FALSE, include=FALSE}
+library(rio)
+library(tidyverse)
+
+load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+source("~/Desktop/canopy-dac-23/scripts/branding.R")
+
+
+```
+
+
+```{r inspect, include=FALSE, warning=FALSE, eval=FALSE}
+
+confidential_names <- tibble(variable.names(confidential))
+
+full_names <- tibble(variable.names(full))
+
+
+```
+
+
+
+# LEAP variables
+```{r LEAPs select}
+
+school_leap <- full %>% select(c(2,3,5,6,7, 9:16, 109:129, 131:132, 151:155, 164:166, 280:285))
+
+```
+
+```{r LEAPs recode}
+
+leaps_rank_cols <- c("leaps_rank_affirmation", "leaps_rank_anytime_anywhere", "leaps_rank_connection", "leaps_rank_customization", "leaps_rank_high_expectations", "leaps_rank_relevance", "leaps_rank_rigorous_learning", "leaps_rank_self_direction", "leaps_rank_social_consciousness", "leaps_rank_whole_child")
+
+# Realized this was not necessary
+for (col_name in leaps_rank_cols) {
+  school_leap[, col_name][school_leap[, col_name] == 0] <- NA
+}
+
+
+```
+
+
+## Distribution of LEAP Implementation
+### Counts
+
+```{r, fig.height= 14, fig.width= 12}
+library(gridExtra)
+
+p.1 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_affirmation, labels = 0:1)))+
+  geom_bar(fill = "#1A4C81")+
+    labs(x="Leaps Affirmation", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.2 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_anytime_anywhere, labels = 0:1)))+
+  geom_bar(fill = "#59C3B4")+
+    labs(x="Leaps Anytime Anywhere", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.3 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_connection, labels = 0:1)))+
+  geom_bar(fill = "#EF464B")+
+    labs(x="Leaps Connection", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.4 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_customization, labels = 0:1)))+
+  geom_bar(fill = "#ADE0EE")+
+    labs(x="Leaps Customization", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.5 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_high_expectations, labels = 0:1)))+
+  geom_bar(fill = "#BC2582") +
+    labs(x="Leaps High Expectations", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.6 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_relevance, labels = 0:1)))+
+  geom_bar(fill = "#FFA630") +
+    labs(x="Leaps Relevance", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.7 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_rigorous_learning, labels = 0:1)))+
+  geom_bar(fill = "#99C24D") +
+    labs(x="Leaps Rigorous Learning", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.8 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_self_direction, labels = 0:1)))+
+  geom_bar(fill = "#FFDE42") +
+    labs(x="Leaps Self Direction", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.9 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_social_consciousness, labels = 0:1)))+
+  geom_bar(fill = "#218380") +
+    labs(x="Leaps Social Consciousness", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+
+p.10 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_whole_child, labels = 0:1))) +
+  geom_bar(fill = "#D3B7D7") +
+  labs(x="Leaps Whole Child", y = "Count")+
+  geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+
+
+
+gridExtra::grid.arrange(grobs= list(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10), nrow = 3, ncol = 4,  newpage = TRUE)
+
+```
+
+
+
+### Percentages
+In progress
+```{r, include=FALSE, eval=FALSE}
+library(gridExtra)
+
+p.1 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_affirmation, labels = 0:1))) +
+  geom_bar(position = "identity", fill = "#1A4C81", aes(y = stat_count(leaps_affirmation))) +
+    labs(x="Leaps Anytime Anywhere", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+
+
+
+p.2 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_anytime_anywhere, labels = 0:1)))+
+  geom_bar(fill = "#59C3B4")+
+    labs(x="Leaps Anytime Anywhere", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.3 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_connection, labels = 0:1)))+
+  geom_bar(fill = "#EF464B")+
+    labs(x="Leaps Connection", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.4 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_customization, labels = 0:1)))+
+  geom_bar(fill = "#ADE0EE")+
+    labs(x="Leaps Customization", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.5 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_high_expectations, labels = 0:1)))+
+  geom_bar(fill = "#BC2582") +
+    labs(x="Leaps High Expectations", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.6 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_relevance, labels = 0:1)))+
+  geom_bar(fill = "#FFA630") +
+    labs(x="Leaps Relevance", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.7 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_rigorous_learning, labels = 0:1)))+
+  geom_bar(fill = "#99C24D") +
+    labs(x="Leaps Rigorous Learning", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.8 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_self_direction, labels = 0:1)))+
+  geom_bar(fill = "#FFDE42") +
+    labs(x="Leaps Self Direction", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+p.9 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_social_consciousness, labels = 0:1)))+
+  geom_bar(fill = "#218380") +
+    labs(x="Leaps Social Consciousness", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+
+p.10 <- school_leap %>%
+  ggplot(aes(x = factor(leaps_whole_child, labels = 0:1))) +
+  geom_bar(fill = "#D3B7D7") +
+  labs(x="Leaps Whole Child", y = "Count")+
+  geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 8
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+
+
+
+
+gridExtra::grid.arrange(grobs= list(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10), nrow = 3, ncol = 4,  newpage = TRUE)
+
+```
+
+## Distribution of LEAP Rankings
+
+```{r, fig.height= 14, fig.width= 12}
+library(gridExtra)
+
+p1 <- school_leap %>%
+  filter(!is.na(leaps_rank_affirmation)) %>%
+  ggplot(aes(x = factor(leaps_rank_affirmation, labels = 1:10)))+
+  geom_bar(fill = "#1A4C81")+
+  labs(x="Leaps Rank Affirmation", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+
+p2 <- school_leap %>%
+  filter(!is.na(leaps_rank_anytime_anywhere)) %>%
+  ggplot(aes(x = factor(leaps_rank_anytime_anywhere, labels = 1:10)))+
+  geom_bar(fill = "#59C3B4")+
+    labs(x="Leaps Rank Anytime Anywhere", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+
+p3 <- school_leap %>%
+  filter(!is.na(leaps_rank_connection)) %>%
+  ggplot(aes(x = factor(leaps_rank_connection,labels = 1:10)))+
+  geom_bar(fill = "#EF464B")+
+      labs(x="Leaps Rank Connection", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p4 <- school_leap %>%
+  filter(!is.na(leaps_rank_customization)) %>%
+  ggplot(aes(x = factor(leaps_rank_customization, label =1:10)))+
+  geom_bar(fill = "#ADE0EE")+
+      labs(x="Leaps Rank Customization", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p5 <- school_leap %>%
+  filter(!is.na(leaps_rank_high_expectations)) %>%
+  ggplot(aes(x = factor(leaps_rank_high_expectations, labels = 1:10)))+
+  geom_bar(fill = "#BC2582")+
+      labs(x="Leaps Rank High Expectations", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p6 <- school_leap %>%
+  filter(!is.na(leaps_rank_relevance)) %>%
+  ggplot(aes(x = factor(leaps_rank_relevance, labels=1:10)))+
+  geom_bar(fill = "#FFA630")+
+      labs(x="Leaps Rank Relevance", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p7 <- school_leap %>%
+  filter(!is.na(leaps_rank_rigorous_learning))%>%
+  ggplot(aes(x = factor(leaps_rank_rigorous_learning, labels = 1:10)))+
+  geom_bar(fill = "#99C24D")+
+      labs(x="Leaps Rank Rigorous Learning", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p8 <- school_leap %>%
+  filter(!is.na(leaps_rank_self_direction)) %>%
+  ggplot(aes(x = factor(leaps_rank_self_direction, labels = 1:10)))+
+  geom_bar(fill = "#FFDE42")+
+      labs(x="Leaps Rank Self Direction", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p9 <- school_leap %>%
+  filter(!is.na(leaps_rank_social_consciousness))%>%
+  ggplot(aes(x = factor(leaps_rank_social_consciousness, labels = 1:10)))+
+  geom_bar(fill = "#218380")+
+      labs(x="Leaps Rank Social consciousness", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+p10 <- school_leap %>%
+  filter(!is.na(leaps_rank_whole_child))%>%
+  ggplot(aes(x = factor(leaps_rank_whole_child, labels = 1:10)))+
+  geom_bar(fill = "#D3B7D7")+
+      labs(x="Leaps Rank Whole Child", y = "Count")+
+    geom_text(
+    stat = "count",
+    aes(label = after_stat(count)),
+    vjust = 0.75,
+    color = "black",
+    size = 5
+  ) +
+  scale_x_discrete(labels = 1:10)
+
+gridExtra::grid.arrange(grobs= list(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10), nrow = 3, ncol = 4,  newpage = TRUE)
+
+```
+
+
+# Ranked Leap Tags
+
+I am not sure how to get the branding to work with ggplot. I have tried but I can't figure out how to get the branding to work right. I have downloaded the fonts too but it doesn't seem to show the correct font.
+
+Anyway, Whole child was ranked 1 by the most schools. Whereas Rigorous learning was ranked 10 or the least important shift in student experience.
+
+```{r}
+column_sums <- colSums(school_leap[, leaps_rank_cols], na.rm = TRUE)
+
+# Rank the columns based on the lowest sum (ascending order)
+ranked_columns <- order(column_sums)
+
+# Create a data frame to store the ranked column information
+ranked_data <- data.frame(
+  Rank = 1:length(ranked_columns),
+  Column = leaps_rank_cols[ranked_columns],
+  Sum = column_sums[ranked_columns]
+)
+
+
+
+# Print the ranked column names and their corresponding sums
+for (i in 1:length(ranked_columns)) {
+  col_index <- ranked_columns[i]
+  col_name <- leaps_rank_cols[col_index]
+  col_sum <- column_sums[col_index]
+  cat("Rank", i, ":", col_name, "- Sum:", col_sum, "\n")
+}
+
+
+bar_colors <- c("#1A4C81", "#59C3B4", "#EF464B", "#ADE0EE", "#BC2582", "#FFA630", "#99C24D", "#FFDE42", "#218380", "#D3B7D7")  # Color palette for the bars
+
+ggplot(ranked_data, aes(x = reorder(Column,Rank), y = Rank, fill = Column)) +
+  geom_col() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8),
+        legend.position = "none") +
+  labs(title = "Ranked LEAPs Columns", x = NULL, y = "Rank") +
+  scale_fill_manual(values = bar_colors) +
+  scale_y_discrete(breaks = c(1, 10))
+
+
+
+```
+
+
+# Leap Tags Implemenetation
+For this I just did a count because it was 1 or 0 where 1 was implementation of a practice so practices with higher scores meant that they were reported to be implemented more often.
+
+```{r}
+
+
+leaps_cols <- c("leaps_affirmation", "leaps_anytime_anywhere", "leaps_connection", "leaps_customization", "leaps_high_expectations", "leaps_relevance", "leaps_rigorous_learning", "leaps_self_direction", "leaps_social_consciousness", "leaps_whole_child")
+
+
+Leaps_sums <- colSums(school_leap[, leaps_cols], na.rm = TRUE)
+
+# Rank the columns based on the lowest sum (ascending order)
+summed_columns <- order(Leaps_sums, decreasing = TRUE)
+
+# Create a data frame to store the ranked column information
+Leaps_data <- data.frame(
+  Column = leaps_cols[summed_columns],
+  Sum = Leaps_sums[summed_columns]
+)
+
+
+
+# Print the ranked column names and their corresponding sums
+for (i in 1:length(summed_columns)) {
+  col_index <- summed_columns[i]
+  col_name <- leaps_cols[col_index]
+  col_sum <- Leaps_sums[col_index]
+  cat("Rank", i, ":", col_name, "- Sum:", col_sum, "\n")
+}
+
+```
+
+
+## Implementation by locale
+First I need to bring in the locale code to recode those variables
+
+In Progress still
+
+```{r}
+
+
+# Recoding the location variables for rural schools
+school_leap <- school_leap %>%
+  mutate(rural = recode(self_reported_locale_rural,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+# Recoding the location variables for suburban schools
+school_leap <- school_leap %>%
+  mutate(suburban = recode(self_reported_locale_suburban,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+# Recoding the location variables for urban schools
+school_leap <- school_leap %>%
+  mutate(urban = recode(self_reported_locale_urban,
+                                             "0" = "No",
+                                             "1" = "Yes"))
+
+# Recoding the location variables into one location column
+school_leap <- school_leap %>%
+  mutate(location = case_when(
+    rural == "Yes" & urban == "No" & suburban == "No" ~ "Rural",
+    rural == "No" & urban == "Yes" & suburban == "No" ~ "Urban",
+    rural == "No" & urban == "No" & suburban == "Yes" ~ "Suburban",
+    TRUE ~ "Multiple"  # add an "Other" category for rows that don't fit any of the above conditions
+  ))
+
+```
+
+
+```{r}
+
+
+
+
+
+
+```
