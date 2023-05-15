@@ -22,6 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r import, warning=FALSE, include=FALSE}
 library(rio)
 library(tidyverse)
+library(ggpubr)
 
 load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
 source("~/Desktop/canopy-dac-23/scripts/branding.R")
