@@ -52,6 +52,8 @@ school_leap <- full %>% select(c(2,3,5,6,7, 9:16, 109:129, 131:132, 151:155, 164
 
 leaps_rank_cols <- c("leaps_rank_affirmation", "leaps_rank_anytime_anywhere", "leaps_rank_connection", "leaps_rank_customization", "leaps_rank_high_expectations", "leaps_rank_relevance", "leaps_rank_rigorous_learning", "leaps_rank_self_direction", "leaps_rank_social_consciousness", "leaps_rank_whole_child")
 
+leaps_cols <- c("leaps_affirmation", "leaps_anytime_anywhere", "leaps_connection", "leaps_customization", "leaps_high_expectations", "leaps_relevance", "leaps_rigorous_learning", "leaps_self_direction", "leaps_social_consciousness", "leaps_whole_child")
+
 # Realized this was not necessary
 for (col_name in leaps_rank_cols) {
   school_leap[, col_name][school_leap[, col_name] == 0] <- NA
@@ -201,155 +203,48 @@ p.10 <- school_leap %>%
 
 
 
-gridExtra::grid.arrange(grobs= list(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10), nrow = 3, ncol = 4,  newpage = TRUE)
+ggarrange(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10, nrow = 3, ncol = 4)
 
 ```
 
 
 
 ### Percentages
-In progress
-```{r, include=FALSE, eval=FALSE}
+High expectations and whole child were the most likely to be reported as being implemented. 
+
+```{r, fig.height=12, fig.width=10}
 library(gridExtra)
 
-p.1 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_affirmation, labels = 0:1))) +
-  geom_bar(position = "identity", fill = "#1A4C81", aes(y = stat_count(leaps_affirmation))) +
-    labs(x="Leaps Anytime Anywhere", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
+
+leaps_percentage <- data.frame(
+  name = character(),
+  percent_yes = numeric(),
+  percent_no = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in leaps_cols){
+percent_yes <- round(sum(school_leap[[i]])/length(school_leap[[i]]) *100,2)
+
+percent_no <- round((length(school_leap[[i]]) - sum(school_leap[[i]]))/length(school_leap[[i]])*100, 2)
+
+leaps_percentage <- rbind(leaps_percentage, data.frame(name = i, percent_yes = percent_yes, percent_no = percent_no))
+
+}
 
 
+leaps_percentage_long <- leaps_percentage %>%
+  pivot_longer(cols = c("percent_yes", "percent_no"), names_to = "Status", values_to = "Percentage")
 
+# Create a grouped bar plot
+ggplot(leaps_percentage_long, aes(x = name, y = Percentage, fill = Status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Percentage), color = "black", size = 3, position = "jitter") +
+  theme_minimal() +
+  labs(title = "Leaps Implementation", x = "Practice", y = "Percentage") +
+  scale_fill_manual(values = c("percent_yes" = "#1A4C81", "percent_no" = "#EF464B"), labels = c("No", "Yes")) +
+  coord_flip()
 
-p.2 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_anytime_anywhere, labels = 0:1)))+
-  geom_bar(fill = "#59C3B4")+
-    labs(x="Leaps Anytime Anywhere", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.3 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_connection, labels = 0:1)))+
-  geom_bar(fill = "#EF464B")+
-    labs(x="Leaps Connection", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.4 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_customization, labels = 0:1)))+
-  geom_bar(fill = "#ADE0EE")+
-    labs(x="Leaps Customization", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.5 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_high_expectations, labels = 0:1)))+
-  geom_bar(fill = "#BC2582") +
-    labs(x="Leaps High Expectations", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.6 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_relevance, labels = 0:1)))+
-  geom_bar(fill = "#FFA630") +
-    labs(x="Leaps Relevance", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.7 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_rigorous_learning, labels = 0:1)))+
-  geom_bar(fill = "#99C24D") +
-    labs(x="Leaps Rigorous Learning", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.8 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_self_direction, labels = 0:1)))+
-  geom_bar(fill = "#FFDE42") +
-    labs(x="Leaps Self Direction", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-p.9 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_social_consciousness, labels = 0:1)))+
-  geom_bar(fill = "#218380") +
-    labs(x="Leaps Social Consciousness", y = "Count")+
-    geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-
-p.10 <- school_leap %>%
-  ggplot(aes(x = factor(leaps_whole_child, labels = 0:1))) +
-  geom_bar(fill = "#D3B7D7") +
-  labs(x="Leaps Whole Child", y = "Count")+
-  geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
-    vjust = 0.75,
-    color = "black",
-    size = 8
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-
-
-
-
-gridExtra::grid.arrange(grobs= list(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10), nrow = 3, ncol = 4,  newpage = TRUE)
 
 ```
 
@@ -500,7 +395,7 @@ p10 <- school_leap %>%
   ) +
   scale_x_discrete(labels = 1:10)
 
-gridExtra::grid.arrange(grobs= list(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10), nrow = 3, ncol = 4,  newpage = TRUE)
+ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol = 3, nrow = 4)
 
 ```
 
@@ -555,9 +450,6 @@ ggplot(ranked_data, aes(x = reorder(Column,Rank), y = Rank, fill = Column)) +
 For this I just did a count because it was 1 or 0 where 1 was implementation of a practice so practices with higher scores meant that they were reported to be implemented more often.
 
 ```{r}
-
-
-leaps_cols <- c("leaps_affirmation", "leaps_anytime_anywhere", "leaps_connection", "leaps_customization", "leaps_high_expectations", "leaps_relevance", "leaps_rigorous_learning", "leaps_self_direction", "leaps_social_consciousness", "leaps_whole_child")
 
 
 Leaps_sums <- colSums(school_leap[, leaps_cols], na.rm = TRUE)
@@ -632,11 +524,120 @@ school_leap <- school_leap %>%
 ```
 
 
+### Counts of implementation by locale
+We can see that there are more urban schools then others and they seem to set the trend for the counts and whether there is a big discrepancy in if the practice is implemented or not.
+
+```{r, fig.height=16, fig.width=10}
+library(ggpubr)
+
+p1 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_affirmation)%>%
+  ggplot(aes(x = leaps_affirmation, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p2 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_anytime_anywhere)%>%
+  ggplot(aes(x = leaps_anytime_anywhere, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+  
+
+p3 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_connection)%>%
+  ggplot(aes(x = leaps_connection, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p4 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_customization)%>%
+  ggplot(aes(x = leaps_customization, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p5 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_high_expectations)%>%
+  ggplot(aes(x = leaps_high_expectations, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p6 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_relevance)%>%
+  ggplot(aes(x = leaps_relevance, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p7 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_rigorous_learning)%>%
+  ggplot(aes(x = leaps_rigorous_learning, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p8 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_self_direction)%>%
+  ggplot(aes(x = leaps_self_direction, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p9 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_social_consciousness)%>%
+  ggplot(aes(x = leaps_social_consciousness, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+p10 <- school_leap %>%
+  group_by(location)%>%
+  count(leaps_whole_child)%>%
+  ggplot(aes(x = leaps_whole_child, y = n, fill = location))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = transcend_cols)+
+  scale_x_continuous(breaks = c(0, 1))
+
+
+ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol = 3, nrow = 4, common.legend = TRUE, legend = "right")
+
+```
+
+Here is a table showing the counts by locale and by variable
 ```{r}
+library(DT)
+
+locale_leap_counts <- school_leap %>%
+  select(c(1,2,24:28,30:34,54))
 
 
+# Reshape data from wide to long format
+locale_leap_long <- pivot_longer(locale_leap_counts, cols = starts_with("leaps_"), names_to = "practice", values_to = "value")
 
+# Group by location and practice, and calculate counts
+table_counts <- locale_leap_long %>% 
+  group_by(location, practice) %>% 
+  summarise(count = sum(value))
 
+# View the resulting table
+datatable(table_counts)
 
 
 ```
+
+
+
+
