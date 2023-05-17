@@ -45,7 +45,7 @@ full_names <- tibble(variable.names(full))
 # LEAP variables
 ```{r LEAPs select}
 
-school_leap <- full %>% select(c(2,3,5,6,7, 9:16, 109:129, 131:132, 151:155, 164:166, 280:285))
+school_leap <- full %>% select(c(2,3,5,6,7, 9:16, 109:129, 131:132, 151:156, 165:167, 281:286))
 
 ```
 
@@ -67,7 +67,7 @@ for (col_name in leaps_rank_cols) {
 ## Distribution of LEAP Implementation
 ### Counts
 
-```{r, fig.height= 14, fig.width= 12}
+```{r, fig.height= 14, fig.width= 12, warning=FALSE}
 library(gridExtra)
 
 p.1 <- school_leap %>%
@@ -213,37 +213,37 @@ ggarrange(p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10, nrow = 3, ncol = 4)
 ### Percentages
 High expectations and whole child were the most likely to be reported as being implemented. 
 
-```{r, fig.height=12, fig.width=10}
+```{r, fig.height=10, fig.width=10, warning=FALSE}
 library(gridExtra)
 
 
 leaps_percentage <- data.frame(
   name = character(),
   percent_yes = numeric(),
-  percent_no = numeric(),
+#  percent_no = numeric(),
   stringsAsFactors = FALSE
 )
 
 for (i in leaps_cols){
 percent_yes <- round(sum(school_leap[[i]])/length(school_leap[[i]]) *100,2)
 
-percent_no <- round((length(school_leap[[i]]) - sum(school_leap[[i]]))/length(school_leap[[i]])*100, 2)
+# percent_no <- round((length(school_leap[[i]]) - sum(school_leap[[i]]))/length(school_leap[[i]])*100, 2)
 
-leaps_percentage <- rbind(leaps_percentage, data.frame(name = i, percent_yes = percent_yes, percent_no = percent_no))
+leaps_percentage <- rbind(leaps_percentage, data.frame(name = i, percent_yes = percent_yes))
 
 }
 
 
 leaps_percentage_long <- leaps_percentage %>%
-  pivot_longer(cols = c("percent_yes", "percent_no"), names_to = "Status", values_to = "Percentage")
+  pivot_longer(cols = c("percent_yes"), names_to = "Status", values_to = "Percentage")
 
 # Create a grouped bar plot
-ggplot(leaps_percentage_long, aes(x = name, y = Percentage, fill = Status)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_text(aes(label = Percentage), color = "black", size = 3, position = "jitter") +
+ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage, fill = Status)) +
+  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE) +
+  geom_text(aes(label = Percentage), color = "black", size = 4, hjust = -.25) +
   theme_minimal() +
   labs(title = "Leaps Implementation", x = "Practice", y = "Percentage") +
-  scale_fill_manual(values = c("percent_yes" = "#1A4C81", "percent_no" = "#EF464B"), labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("percent_yes" = "#1A4C81")) +
   coord_flip()
 
 
@@ -251,7 +251,7 @@ ggplot(leaps_percentage_long, aes(x = name, y = Percentage, fill = Status)) +
 
 ## Distribution of LEAP Rankings
 
-```{r, fig.height= 14, fig.width= 12}
+```{r, fig.height= 14, fig.width= 12, warning=FALSE}
 library(gridExtra)
 
 p1 <- school_leap %>%
@@ -407,7 +407,7 @@ I am not sure how to get the branding to work with ggplot. I have tried but I ca
 
 Anyway, Whole child was ranked 1 by the most schools. Whereas Rigorous learning was ranked 10 or the least important shift in student experience.
 
-```{r}
+```{r, fig.width= 10, fig.height=8, warning=FALSE}
 column_sums <- colSums(school_leap[, leaps_rank_cols], na.rm = TRUE)
 
 # Rank the columns based on the lowest sum (ascending order)
@@ -447,10 +447,11 @@ ggplot(ranked_data, aes(x = reorder(Column,Rank), y = Rank, fill = Column)) +
 ```
 
 
+
 # Leap Tags Implemenetation
 For this I just did a count because it was 1 or 0 where 1 was implementation of a practice so practices with higher scores meant that they were reported to be implemented more often.
 
-```{r}
+```{r, fig.width=10, fig.height=8, warning=FALSE}
 
 
 Leaps_sums <- colSums(school_leap[, leaps_cols], na.rm = TRUE)
@@ -525,89 +526,127 @@ school_leap <- school_leap %>%
 ```
 
 
+### Implementation by locale bump
+Locale and implementation
+```{r, warning=FALSE, fig.height=10, fig.width=10}
+#install.packages("ggbump")
+library(ggbump)
+
+## NEED TO GROUP BY EXCLUSIVE LOCALE
+school_leap_bump <- school_leap %>%
+  select(c(2,24:28,30:34,42, 45, 50))
+
+# Reshape data from wide to long format
+locale_leap_bump_long <- pivot_longer(school_leap_bump, cols = starts_with("leaps_"), names_to = "practice", values_to = "value")
+
+avg_imp_data <- school_leap_bump %>%
+  group_by(exclusive_locale) %>%
+  summarize(across(starts_with("leaps_"), mean, na.rm = TRUE), .groups = "drop")
+
+locale_avg_imp <- pivot_longer(avg_imp_data, cols = starts_with("leaps_"), names_to = "practice", values_to = "avg_imp")
+
+##########################
+
+locale_avg_imp %>% 
+  group_by(exclusive_locale, practice) %>%
+  ggplot(aes(x = exclusive_locale, y = avg_imp, color = practice, group = practice)) +
+  geom_bump(size = 1.5, na.rm = TRUE, smooth = 8) + 
+  geom_point(size = 6)
+
+
+locale_avg_imp %>% 
+  group_by(exclusive_locale, practice) %>%
+  ggplot(aes(x = practice, y = avg_imp, color = exclusive_locale, group = exclusive_locale)) +
+  geom_bump(size = 1.5, na.rm = TRUE, smooth = 8) + 
+  geom_point(size = 6)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.15, hjust = 0.15, size = 8))
+
+
+```
+
 ### Counts of implementation by locale
 We can see that there are more urban schools then others and they seem to set the trend for the counts and whether there is a big discrepancy in if the practice is implemented or not.
 
-```{r, fig.height=16, fig.width=10}
+```{r, fig.height=16, fig.width=10, warning=FALSE}
 library(ggpubr)
 
 p1 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_affirmation)%>%
-  ggplot(aes(x = leaps_affirmation, y = n, fill = location))+
+  ggplot(aes(x = leaps_affirmation, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p2 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_anytime_anywhere)%>%
-  ggplot(aes(x = leaps_anytime_anywhere, y = n, fill = location))+
+  ggplot(aes(x = leaps_anytime_anywhere, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
   
 
 p3 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_connection)%>%
-  ggplot(aes(x = leaps_connection, y = n, fill = location))+
+  ggplot(aes(x = leaps_connection, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p4 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_customization)%>%
-  ggplot(aes(x = leaps_customization, y = n, fill = location))+
+  ggplot(aes(x = leaps_customization, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p5 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_high_expectations)%>%
-  ggplot(aes(x = leaps_high_expectations, y = n, fill = location))+
+  ggplot(aes(x = leaps_high_expectations, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p6 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_relevance)%>%
-  ggplot(aes(x = leaps_relevance, y = n, fill = location))+
+  ggplot(aes(x = leaps_relevance, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p7 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_rigorous_learning)%>%
-  ggplot(aes(x = leaps_rigorous_learning, y = n, fill = location))+
+  ggplot(aes(x = leaps_rigorous_learning, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p8 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_self_direction)%>%
-  ggplot(aes(x = leaps_self_direction, y = n, fill = location))+
+  ggplot(aes(x = leaps_self_direction, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p9 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_social_consciousness)%>%
-  ggplot(aes(x = leaps_social_consciousness, y = n, fill = location))+
+  ggplot(aes(x = leaps_social_consciousness, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
 
 p10 <- school_leap %>%
-  group_by(location)%>%
+  group_by(exclusive_locale)%>%
   count(leaps_whole_child)%>%
-  ggplot(aes(x = leaps_whole_child, y = n, fill = location))+
+  ggplot(aes(x = leaps_whole_child, y = n, fill = exclusive_locale))+
   geom_col(position = "dodge")+
   scale_fill_manual(values = transcend_cols)+
   scale_x_continuous(breaks = c(0, 1))
@@ -618,11 +657,11 @@ ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol = 3, nrow = 4, common.le
 ```
 
 Here is a table showing the counts by locale and by variable
-```{r}
+```{r, warning=FALSE}
 library(DT)
 
 locale_leap_counts <- school_leap %>%
-  select(c(1,2,24:28,30:34,54))
+  select(c(1,2,24:28,30:34,42))
 
 
 # Reshape data from wide to long format
@@ -630,7 +669,7 @@ locale_leap_long <- pivot_longer(locale_leap_counts, cols = starts_with("leaps_"
 
 # Group by location and practice, and calculate counts
 table_counts <- locale_leap_long %>% 
-  group_by(location, practice) %>% 
+  group_by(exclusive_locale, practice) %>% 
   summarise(count = sum(value))
 
 # View the resulting table
@@ -641,4 +680,111 @@ datatable(table_counts)
 
 
 
+## Ranking by locale
+Locale and Ranking
+```{r, fig.width=10, fig.height=8, warning=FALSE}
+#install.packages("ggbump")
+library(ggbump)
+library(dplyr)
+
+## NEED TO GROUP BY EXCLUSIVE LOCALE
+school_leap_bump <- school_leap %>%
+  select(c(2,14:24, 42, 45, 50))
+
+# Reshape data from wide to long format
+locale_leap_bump_long <- pivot_longer(school_leap_bump, cols = starts_with("leaps_rank"), names_to = "practice", values_to = "value")
+
+### I REALIZED I NEED TO CACULATE THE RANKS AGAIN
+# THIS NEEDS TO BE EDITED
+
+
+avg_rank_data <- school_leap_bump %>%
+  group_by(exclusive_locale) %>%
+  summarize(across(starts_with("leaps_rank"), mean, na.rm = TRUE), .groups = "drop")
+
+locale_avg_rank <- pivot_longer(avg_rank_data, cols = starts_with("leaps_rank"), names_to = "practice", values_to = "avg_rank")
+
+# Plot the grouped bar chart
+ggplot(locale_avg_rank, aes(x = reorder(practice, avg_rank), y = avg_rank, fill = exclusive_locale)) +
+  geom_col(position = "dodge") +
+  labs(x = "Practice", y = "Average Rank", fill = "School Location") +
+  theme_minimal()+
+  scale_fill_manual(values = bar_colors) +
+  scale_y_discrete(breaks = c(1, 10))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.15, hjust = 0.15, size = 8))
+
+
+
+ggplot(locale_avg_rank, aes(x = exclusive_locale, y = avg_rank, fill = reorder(practice, avg_rank))) +
+  geom_col(position = "dodge") +
+  labs(x = "Practice", y = "Average Rank", fill = "School Location") +
+  theme_minimal() +
+  scale_fill_manual(values = bar_colors) +
+  scale_y_discrete(breaks = c(1, 10))
+
+
+
+###### Bump graphs that don't really work
+locale_avg_rank %>% 
+  group_by(exclusive_locale, practice) %>%
+  ggplot(aes(x = exclusive_locale, y = avg_rank, color = practice, group = practice)) +
+  geom_bump(size = 1.5, na.rm = TRUE, smooth = 8) + 
+  geom_point(size = 6)
+
+
+locale_avg_rank %>% 
+  group_by(exclusive_locale, practice) %>%
+  ggplot(aes(x = practice, y = avg_rank, color = exclusive_locale, group = exclusive_locale)) +
+  geom_bump(size = 1.5, na.rm = TRUE, smooth = 8) + 
+  geom_point(size = 6)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.15, hjust = 0.15, size = 8))
+
+
+
+
+
+
+```
+
+
+# Ranking and Percent Implementation Graph
+
+```{r, warning=FALSE, fig.height=8, fig.width=10}
+
+# Load the required packages
+library(ggplot2)
+
+# Create a data frame with the ranking and implementation data
+rank_data <- data.frame(
+  Practice = leaps_cols,
+  Ranking = c(7, 2, 5, 9, 3, 6, 10, 4, 8, 1),
+  Implementation = c(57.77, 43.03, 71.71, 62.55, 74.50, 62.55, 66.14, 60.56, 48.21, 67.33)
+)
+
+
+
+
+leaps_cols
+
+custom_labels <- c("Whole Child", "Anytime Anywhere", "High Expectations", "Self Direction", " Connection",
+                   "Relevance", "Affirmation", "Social Consciousness", "Customization", "Rigorous Learning")
+# Create the bar chart ordered by rank
+ggplot(rank_data, aes(x = reorder(Practice, Ranking))) +
+  geom_bar(aes(y = Implementation), stat = "identity", fill = "#1A4C81") +
+  scale_y_continuous(
+    name = "Percentage of Implementation",
+    sec.axis = sec_axis(~./(max(rank_data$Ranking) / max(rank_data$Implementation)), 
+                        name = "")
+  ) +
+  geom_text(aes(y = Ranking, label = Ranking), color = "#EF464B", size = 6, vjust = -0.25) +
+  geom_text(aes(y = Implementation, label = Implementation), color = "black", size = 4, vjust = 2.25) +
+  scale_x_discrete(labels = custom_labels) +
+  labs(title = "Ranking and Percentage of Implementation", x = "") +
+  theme_minimal()+
+  ylim(0, 100)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
 
