@@ -1,0 +1,273 @@
+---
+title: "Updated Tagging Patterns"
+author: "Karen Zyskind"
+date: "2023-05-16"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(reshape2)
+library(cowplot)
+library(dplyr)
+library("pacman")
+library("DT")
+pacman::p_load("summarytools")
+source(here("scripts", "branding.R"))
+load(here("data", "complete_canopy_2023.RData"))
+```
+
+
+# How do tagging patterns differ across states?
+First re-arranging the data 
+
+```{r State tag df, echo=FALSE}
+# Load required libraries
+
+# Extracted the columns representing the tags
+tag_columns <- colnames(tags)[-1]  # Exclude the first column (school_id)
+
+# Reshaped the data to long format
+tags_long <- tags %>%
+  tidyr::pivot_longer(cols = tag_columns, names_to = "Tag", values_to = "Count") %>%
+  filter(Count > 0)  # Remove rows with zero count (if applicable)
+
+# Merge with the schools dataframe
+merged_data <- merge(tags_long, schools, by = "school_id")
+
+# Calculated summary statistics by school_state and tag
+state_tag_summary <- merged_data %>%
+  group_by(school_state, Tag) %>%
+  summarize(
+    Total_Count = sum(Count),
+    Unique_Schools = n_distinct(school_id)
+  ) %>%
+  arrange(desc(Total_Count))
+
+# View the summary statistics
+print(state_tag_summary)
+
+print(state_tag_summary)
+print(merged_data)
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+str(state_tag_summary)
+```
+
+## Now finding the distributions 
+Top states include 
+1. California with 1252 different tags 
+2 Colorado with 1014
+3 Massachusetts with 903
+4 New York with 791
+5 Arizona with 641
+```{r state,echo=FALSE}
+
+library(dplyr)
+library(knitr)
+
+# Overall distribution of tags
+tag_summary <- state_tag_summary %>%
+  group_by(Tag) %>%
+  summarize(Total_Count = sum(Total_Count), .groups = "drop") %>%
+  arrange(desc(Total_Count))
+
+kable(tag_summary, caption = "Overall Distribution of Tags")
+
+# Exploring distribution of tags within each state
+state_summary <- state_tag_summary %>%
+  group_by(school_state) %>%
+  summarize(Total_Count = sum(Total_Count), .groups = "drop") %>%
+  arrange(desc(Total_Count))
+
+kable(state_summary, caption = "Distribution of Tags Within Each State")
+
+# Comparing the top tags across states
+top_states <- head(state_summary, 5)  # Select top 5 states with highest tag counts
+
+filtered_data <- state_tag_summary %>%
+  filter(school_state %in% top_states$school_state)
+
+state_tag_comparison <- filtered_data %>%
+  group_by(school_state, Tag) %>%
+  summarize(Total_Count = sum(Total_Count), .groups = "drop") %>%
+  arrange(school_state, desc(Total_Count))
+
+kable(state_tag_comparison, caption = "Comparison of Tags Across States")
+
+
+
+```
+
+## Including Plots for tags across states 
+**Been having issues with font**
+
+
+```{r chart, echo=FALSE}
+# Set the font size and label width for the x-axis labels
+label_size <- 10
+label_width <- 15
+
+# Create the bar chart
+bar_chart <- ggplot(state_tag_summary, aes(x = reorder(school_state, -Total_Count), y = Total_Count)) +
+  geom_bar(stat = "identity", fill = transcend_cols[1]) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = label_width)) +
+  labs(x = "State", y = "Total Count of Tags", title = "Tag Counts by State") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1, size = label_size, family = "Arial"),
+    axis.text.y = element_text(size = label_size, family = "Arial"),
+    plot.title = element_text(family = "Arial")
+  )
+
+# Display the bar chart
+print(bar_chart)
+
+
+```
+
+## Type and Pattern of Tags 
+First looking at type count 
+Charter n= 113
+District n= 102
+Independent = 36
+```{r Type, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Load the branding file
+source(here("scripts", "branding.R"))
+
+# Count the number of schools for each school descriptor
+school_counts <- schools %>%
+  count(school_descriptor)
+
+# Create the table
+school_counts_table <- school_counts %>%
+  mutate(school_descriptor = c("Charter", "District", "Independent")) %>%
+  kable(caption = "Number of Schools by Descriptor", align = "c") %>%
+  kable_styling("striped")
+
+# Display the table
+print(school_counts_table)
+
+
+```
+
+# Differences of tags across Type 
+```{r Differences, echo=FALSE}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Merge the tags_long and schools data frames
+merged_data <- inner_join(tags_long, schools, by = "school_id")
+
+# Define the custom labels for school_descriptor
+school_descriptor_labels <- c("Public district school", "Public charter school", "Independent (private) school")
+
+# Filter necessary columns for the analysis and apply custom labels
+filtered_data <- merged_data %>%
+  select(Tag, school_descriptor) %>%
+  mutate(school_descriptor = case_when(
+    school_descriptor == 1 ~ school_descriptor_labels[1],
+    school_descriptor == 2 ~ school_descriptor_labels[2],
+    school_descriptor == 3 ~ school_descriptor_labels[3],
+    TRUE ~ as.character(school_descriptor)  # Handle other values if present
+  ))
+
+# Calculate differences in tags by school_descriptor (modify this step based on your desired calculation method)
+
+# Create the table
+tag_differences_table <- filtered_data %>%
+  group_by(Tag, school_descriptor) %>%
+  summarize(Total_Count = n()) %>%
+  pivot_wider(names_from = school_descriptor, values_from = Total_Count, values_fill = 0) %>%
+  kable(caption = "Differences in Tags by School Descriptor", align = "c") %>%
+  kable_styling("striped")
+
+# Display the table
+print(tag_differences_table)
+
+
+
+
+```
+## Biggest Difference 
+Will be calculating the absolute differnces between the counts of each count for pupblic and private
+ Table of Differences 
+The table shows the values for each tag, the counts in the public district school, independent (private) school, and public charter school, as well as the absolute differences between these counts.
+```{r Tables Diff, echo=FALSE}
+
+# Calculated counts for each tag and school descriptor
+type_tbl <- filtered_data %>%
+  group_by(Tag, school_descriptor) %>%
+  summarize(Total_Count = n()) %>%
+  pivot_wider(names_from = school_descriptor, values_from = Total_Count, values_fill = 0)
+
+# Apply labels to school descriptor columns
+colnames(type_tbl)[colnames(type_tbl) == "1"] <- "Public district school"
+colnames(type_tbl)[colnames(type_tbl) == "2"] <- "Public charter school"
+colnames(type_tbl)[colnames(type_tbl) == "3"] <- "Independent (private) school"
+
+# Calculated the absolute differences between counts for each tag
+type_tbl <- type_tbl %>%
+  mutate(dis_char_diff = abs(`Public district school` - `Public charter school`),
+         char_ind_diff = abs(`Public charter school` - `Independent (private) school`),
+         ind_dis_diff = abs(`Independent (private) school` - `Public district school`))
+
+# Display the table of differences
+datatable(type_tbl)
+
+
+
+
+```
+##Differences from one another 
+
+
+```{r}
+str(type_tbl)
+# Select the desired columns for the table
+diff_table <- type_tbl %>%
+  select(Tag, `Public district school`, `Independent (private) school`, `Public charter school`,
+         dis_char_diff, char_ind_diff, ind_dis_diff)
+
+# Print the table
+print(diff_table)
+
+dis_char_viz <- diff_table %>%
+  slice_max(dis_char_diff, n = 10, with_ties = FALSE) %>%
+  ggplot(aes(reorder(Tag, dis_char_diff), dis_char_diff, fill = Tag)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  geom_text(aes(x = Tag, y = dis_char_diff + 0.1, label = dis_char_diff),
+            color = "black", size = 5, family = "Bebas Neue") +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  scale_y_continuous(limits = c(0, max(diff_table$dis_char_diff) + 1)) +
+  labs(x = "",
+       y = "Absolute Difference",
+       title = "Top 10 Tags with Largest Differences between District and Charter Schools",
+       subtitle = "Comparison within school types")
+
+dis_char_viz
+
+
+
+```
+
