@@ -641,3 +641,57 @@ not_hs_efa_5 %>%
 * 3 - Equity & justice
 * 4 - Flexible learning environments
 * 5 - Mental health & holistic, trauma-informed supports
+
+# Analysis File
+
+Create final cluster analysis
+```{r}
+efa_2023 = fa(practices_cor, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+write_efa_files = function(efa, dir, file, threshold = 0.28) {
+  efa %>%
+    model_parameters(sort = TRUE, threshold = "max") %>%
+    write_tsv(here(dir, paste(file, "Max.txt")), na = "")
+  efa %>%
+    model_parameters(sort = TRUE, threshold = threshold) %>%
+    write_tsv(here(dir, paste(file, "Threshold.txt")), na = "")
+  efa %>%
+    model_parameters(sort = TRUE) %>%
+    write_tsv(here(dir, paste(file, "All.txt")), na = "")
+  invisible()
+}
+
+print_efa = function(
+  efa, 
+  type = c("max", "threshold", "all"), 
+  threshold = 0.28,
+  caption = "")
+{
+  type = match.arg(type)
+  if(type == "max") {
+    return(efa |> 
+      model_parameters(sort = TRUE, threshold = "max") |>
+      datatable(caption = paste(caption, "Max loadings")) |>
+      formatRound(digits = 2, columns = 2:(efa$factors + 3)))
+  }
+  if(type == "threshold") {
+    return(efa |> 
+      model_parameters(sort = TRUE, threshold = threshold) |>
+      datatable(caption = paste(caption, "Threshold loadings")) |>
+      formatRound(digits = 2, columns = 2:(efa$factors + 3)))
+  }
+  if(type == "all") {
+    return(efa |> 
+      model_parameters(sort = TRUE) |>
+      datatable(caption = paste(caption, "All loadings")) |>
+      formatRound(digits = 2, columns = 2:(efa$factors + 3)))
+  }
+}
+
+efa_2023 %>%
+  model_parameters(sort = TRUE) %>%
+  write_tsv(here("output", "EFA 2023 Results All.txt"), na = "") %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+```
+
