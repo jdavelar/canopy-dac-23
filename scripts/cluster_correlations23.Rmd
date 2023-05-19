@@ -1,0 +1,138 @@
+---
+title: "Clustering Analysis 2"
+author: "Anwesha Guha"
+date: '2023-05-18'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+
+c4 <- read_tsv(here("output/EFA 2023 Results All.txt"))
+```
+
+Adapted from Gregor's code:
+```{r}
+cweights <- c4 %>% 
+#  rename(all_of(clust_details_r)) %>%
+  select(-Complexity, -Uniqueness) %>%
+  pivot_longer(cols = -Variable, names_to = "cluster", values_to = "weight") %>%
+  rename(practice = Variable)
+
+practices_long <- tags %>% 
+  select(school_id, starts_with("practices")) %>%
+  pivot_longer(-school_id, names_to = "practice", values_to = "val")
+
+clusters_by_school <- practices_long %>%
+  left_join(cweights, by = "practice") %>%
+  group_by(school_id, cluster) %>% 
+  summarize(cluster_weight = sum(val * weight, na.rm = TRUE), .groups = "drop") %>%
+  arrange(school_id)
+
+clusters_by_school_wide <- clusters_by_school %>%
+  pivot_wider(id_cols = school_id, names_from = cluster, values_from = cluster_weight) %>%
+  arrange(school_id) %>% 
+  rename(learning_mastery = MR1,
+         holistic_student_justice = MR2,
+         postsec_pathways_world = MR3,
+         blended_flexible_learning = MR4)
+
+update = FALSE
+
+if(update) {
+  write_tsv(clusters_by_school, file = here("output/cluster_scores_by_school_long.tsv"))
+  write_tsv(clusters_by_school_wide, file = here("output/cluster_scores_by_school_wide.tsv"))
+}
+```
+
+```{r}
+features_df <- full %>% 
+  select(school_id, grades_prek, grades_elementary, grades_middle, grades_high, self_reported_locale_urban, self_reported_locale_suburban, self_reported_locale_rural, school_descriptor, leadership_diversity, teaching_diversity, self_reported_ell, self_reported_frpl, self_reported_total_enrollment)
+
+# read_rds(here("data/features_for_models.rds"))
+
+# editing down to the features to use right now
+# trying bipoc_percent rather than Black and Hispanic for students
+# leaving independent schools in, at least for now
+feature_names <- c("school_id", "grades_prek", "grades_elementary", "grades_middle", "grades_high", "self_reported_locale_urban", "self_reported_locale_suburban", "self_reported_locale_rural", "school_descriptor", "leadership_diversity", "teaching_diversity", "self_reported_ell", "self_reported_frpl", "self_reported_total_enrollment")
+
+response_names <- c(
+  "Deeper learning for mastery",
+  "Educational justice and holistic student support",
+  "Postsecondary pathways and the world outside school",
+  "Flexible, blended and individualized learning pathways"
+)
+
+clust_labs <- c("learning_mastery", "holistic_student_justice", "postsec_pathways_world", "blended_flexible_learning")
+
+model_data <-
+  inner_join(clusters_by_school_wide, features_df, by = "school_id") %>%
+  mutate(across(all_of(clust_labs), scale)) #%>%
+#  rename(set_names(clust_labs, response_names))
+
+formulas = sprintf("%s ~ %s", clust_labs, paste(feature_names, collapse = " + "))
+```
+
+```{r fit_models, message = FALSE, cache = TRUE, include = FALSE}
+library(rstanarm)
+
+mods = list()
+
+for(i in seq_along(formulas)) {
+  message("\n\n\nSTARTING MODEL ", i, " OF ", length(formulas), "\n\n\n")
+  mods[[clust_labs[i]]] = stan_lm(
+    formulas[i],
+    data = model_data,
+    prior = R2(location = 0.3)
+  )
+}
+```
+
+```{r report_models, fig.width = 15, fig.height = 10}
+mods %>% map_df(tidy, .id = "response") %>% 
+    filter(!term %in% c("(Intercept)")) ->
+  coef_df
+    
+coef_labeler = function(x) {
+  x %>% 
+    str_replace(pattern = "diversity_staff", "Staff: ") %>%
+    str_replace(pattern = "diversity_leads", "Leadership: ") %>%
+    str_replace("_scaled", "") %>%
+    str_replace("grades_", "Level: ") %>%
+    str_replace("schooL_descriptor_", "Type: ") %>%
+    str_replace("locale", "Locale: ") %>%
+    str_replace("n_students", "Number of students") %>%
+    label_dems
+}
+
+
+ggplot(
+  coef_df, 
+  aes(x = estimate, y = fct_reorder(term, estimate, .fun = mean))
+) + 
+  geom_col(fill = transcend_cols[2]) + 
+  geom_errorbarh(aes(xmin = estimate - std.error, xmax = estimate + std.error), height = 0.2) +
+  labs(y = "",
+       x = "Average change in cluster score (in standard deviations)", 
+       title = "Association between school characteristics and practice clusters",
+       subtitle = "Compared to urban schools with white staff/leadership sorted by average effect across all clusters.\nError bars show +/- 1 std deviation, about a 65% confidence interval--there's a lot of variability here!") +
+  guides(fill = FALSE) +
+  facet_grid(~ response) + 
+#  scale_y_discrete(labels = coef_labeler) + 
+  theme(#axis.text = element_text(size = 8), strip.text = element_text(size = rel(0.6)),
+        panel.grid.major.y = element_blank()#,
+        #axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0)
+      ) 
+```
