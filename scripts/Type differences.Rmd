@@ -1,0 +1,345 @@
+---
+html_document:
+  toc: yes
+  toc_float: yes
+  theme: flatly
+  highlight: tango
+  code_folding: hide
+author: "Karen Zyskind"
+date: "2023-05-19"
+title: "Differences in Types"
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+library(tidyverse)
+library(here)
+library(reshape2)
+library(cowplot)
+library(dplyr)
+library("pacman")
+library("DT")
+pacman::p_load("summarytools")
+load(here("data", "complete_canopy_2023.RData"))
+
+```
+
+#Guiding questions/tasks & format:  
+`SCHOOL TYPE`: How do tagging patterns differ among district, charter, independent, sws, virtual, microschool, homeschool, and hub schools?  
+* table of biggest differences between categories  
+* odds ratio  
+* visualization 
+
+##Type and how many tags
+First recall Type and Pattern of Tags 
+First looking at type count 
+Charter n= 113
+District n= 102
+Independent = 36
+
+```{r Type, echo=FALSE}
+library(gt)
+
+# Count the number of schools for each school descriptor
+school_counts <- schools %>%
+  count(school_descriptor)
+
+# Load the necessary packages
+library(gt)
+
+# Create the table
+school_counts_table <- school_counts %>%
+  mutate(school_descriptor = c("Charter", "District", "Independent")) %>%
+  gt() %>%
+  tab_header(
+    title = "Number of Schools by Descriptor"
+  ) %>%
+  tab_style(
+    style = list(cell_text(weight = "bold")),
+    locations = cells_body(columns = everything())
+  )
+
+# Display the table
+school_counts_table
+
+
+
+
+```
+
+## Countsand differences table 
+
+The values in the table indicate the count or frequency of each tagging practice for each school descriptor. For example, in the "Independent (private) school" row, the "practices_a_la_carte" column has a value of 5, indicating that this practice is present in 5 schools categorized as independent private schools. 
+
+```{r Differences, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Merge the tags and schools data frames
+merged_data <- inner_join(tags, schools, by = "school_id")
+
+# Define the custom labels for school_descriptor
+school_descriptor_labels <- c("Public district school", "Public charter school", "Independent (private) school")
+
+# Filter necessary columns for the analysis and apply custom labels
+filtered_data <- merged_data %>%
+  select(starts_with("practices_"), school_descriptor) %>%
+  mutate(school_descriptor = case_when(
+    school_descriptor == 1 ~ school_descriptor_labels[1],
+    school_descriptor == 2 ~ school_descriptor_labels[2],
+    school_descriptor == 3 ~ school_descriptor_labels[3],
+    TRUE ~ as.character(school_descriptor)  # Handle other values if present
+  ))
+
+# Create the tag_differences object
+tag_differences <- filtered_data %>%
+  group_by(school_descriptor) %>%
+  summarise_all(sum)
+
+# Calculate the absolute differences between counts for each tag
+type_tbl <- tag_differences %>%
+  mutate(dis_char_diff = abs(practices_a_la_carte - practices_accommodations),
+         char_ind_diff = abs(practices_accommodations - practices_adult_wellness),
+         ind_dis_diff = abs(practices_adult_wellness - practices_a_la_carte))
+
+# Create the table
+tag_differences_table <- type_tbl %>%
+  kable(caption = "Differences in Tags by School Descriptor", align = "c") %>%
+  kable_styling("striped")
+
+# Display the table of differences
+print(tag_differences_table)
+
+```
+
+## Differences in charter and independent schools 
+practices_career_prep: Charter schools place a higher emphasis on career preparation programs compared to independent schools, with a difference of 35.
+
+practices_makerspace: Charter schools prioritize the establishment of makerspaces for hands-on learning experiences more than independent schools, showing a difference of 32.
+```{r charter and indep, echo=FALSE}
+
+str(type_tbl)
+# Calculate the differences in charter and independent schools
+diff_career_prep <- type_tbl$practices_career_prep[2] - type_tbl$practices_career_prep[3]
+diff_makerspace <- type_tbl$practices_makerspace[2] - type_tbl$practices_makerspace[3]
+
+# Print the differences
+cat("practices_career_prep: Charter schools place a higher emphasis on career preparation programs compared to independent schools, with a difference of", diff_career_prep, "\n")
+cat("practices_makerspace: Charter schools prioritize the establishment of makerspaces for hands-on learning experiences more than independent schools, showing a difference of", diff_makerspace, "\n")
+
+# Reshape the data to create a single "tag" column
+char_ind_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with largest differences
+char_ind_diff <- char_ind_diff %>%
+  group_by(tag) %>%
+  summarize(`Charter vs. Independent Difference` = abs(sum(value[2]) - sum(value[3]))) %>%
+  top_n(n = 10, wt = `Charter vs. Independent Difference`) %>%
+  arrange(desc(`Charter vs. Independent Difference`))
+
+# Create the bar chart visualization
+char_ind_viz <- char_ind_diff %>%
+  ggplot(aes(reorder(tag, `Charter vs. Independent Difference`), `Charter vs. Independent Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference", 
+       title = "Top 10 Tags with Largest Differences between Charter and Independent Schools") +
+  coord_flip()
+
+# Display the visualization
+char_ind_viz
+
+# Print the table
+print(char_ind_diff)
+
+
+
+```
+
+## Large Differences in Independent Vs District 
+practices_mtss_academics: Independent schools exhibit a higher presence on Multi-Tiered System of Supports (MTSS) for academics compared to district schools, with a difference of 69.
+practices_career_prep: Independent schools prioritize career preparation programs more than district schools, showing a difference of 66.
+
+```{r Indep Dist, echo=FALSE}
+# Reshape the data to create a single "tag" column
+ind_dis_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with largest differences
+ind_dis_diff <- ind_dis_diff %>%
+  group_by(tag) %>%
+  summarize(`Independent vs. District Difference` = abs(sum(value[1]) - sum(value[3]))) %>%
+  top_n(n = 10, wt = `Independent vs. District Difference`) %>%
+  arrange(desc(`Independent vs. District Difference`))
+
+# Create the bar chart visualization
+ind_dis_viz <- ind_dis_diff %>%
+  ggplot(aes(reorder(tag, `Independent vs. District Difference`), `Independent vs. District Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference", 
+       title = "Top 10 Tags with Largest Differences between Independent and District Schools") +
+  coord_flip()
+
+# Display the visualization
+ind_dis_viz
+
+# Print the table
+print(ind_dis_diff)
+
+
+```
+## Largest difference charter vs District 
+# Table Differences largest Differences 
+This looked at the 10 tags with the largest differences between District and Charter schools. Findings showed variations in practices across various areas. For example, practices related to MTSS academics showed a difference of 63 points between District and Charter schools. Similarly, culturally responsive practices had a difference of 59 points, assessments had a difference of 57 points, and so on. 
+```{r, chartervdistric, echo=FALSE}
+
+# Reshape the data to create a single "tag" column
+char_dis_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with largest differences
+char_dis_diff <- char_dis_diff %>%
+  group_by(tag) %>%
+  summarize(`Charter vs. District Difference` = abs(sum(value[2]) - sum(value[3]))) %>%
+  top_n(n = 10, wt = `Charter vs. District Difference`) %>%
+  arrange(desc(`Charter vs. District Difference`))
+
+# Create the bar chart visualization
+char_dis_viz <- char_dis_diff %>%
+  ggplot(aes(reorder(tag, `Charter vs. District Difference`), `Charter vs. District Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference", 
+       title = "Top 10 Tags with Largest Differences between Charter and District Schools") +
+  coord_flip()
+
+# Display the visualization
+char_dis_viz
+
+# Print the table
+print(char_dis_diff)
+
+
+
+```
+
+
+## Smallest differences independent and district 
+```{r small indept, echo=FALSE}
+
+
+# Reshape the data to create a single "tag" column
+ind_dis_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with smallest differences
+ind_dis_diff <- ind_dis_diff %>%
+  group_by(tag) %>%
+  summarize(`Independent vs. District Difference` = abs(sum(value[1]) - sum(value[3]))) %>%
+  top_n(n = 10, wt = `Independent vs. District Difference`) %>%
+  arrange(`Independent vs. District Difference`)
+
+# Create the bar chart visualization
+ind_dis_viz <- ind_dis_diff %>%
+  ggplot(aes(reorder(tag, `Independent vs. District Difference`), `Independent vs. District Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference",
+       title = "Top 10 Tags with Smallest Differences between Independent and District Schools") +
+  coord_flip()
+
+# Display the visualization
+ind_dis_viz
+
+# Print the table
+print(ind_dis_diff)
+
+
+```
+
+## Smallest difference district and charter
+```{r small district, echo=FALSE}
+# Reshape the data to create a single "tag" column
+dis_char_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with smallest differences
+dis_char_diff <- dis_char_diff %>%
+  group_by(tag) %>%
+  summarize(`District vs. Charter Difference` = abs(sum(value[1]) - sum(value[2]))) %>%
+  top_n(n = 10, wt = `District vs. Charter Difference`) %>%
+  arrange(`District vs. Charter Difference`)
+
+# Create the bar chart visualization
+dis_char_viz <- dis_char_diff %>%
+  ggplot(aes(reorder(tag, `District vs. Charter Difference`), `District vs. Charter Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference",
+       title = "Top 10 Tags with Smallest Differences between District and Charter Schools") +
+  coord_flip()
+
+# Display the visualization
+dis_char_viz
+
+# Print the table
+print(dis_char_diff)
+
+```
+
+## Smallest difference charter vs independent 
+```{r small chart and ind, echo=FALSE}
+# Reshape the data to create a single "tag" column
+char_ind_diff <- type_tbl %>%
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "value") %>%
+  filter(!is.na(value))
+
+# Select top 10 tags with smallest differences
+char_ind_diff <- char_ind_diff %>%
+  group_by(tag) %>%
+  summarize(`Charter vs. Independent Difference` = abs(sum(value[2]) - sum(value[1]))) %>%
+  top_n(n = 10, wt = `Charter vs. Independent Difference`) %>%
+  arrange(`Charter vs. Independent Difference`)
+
+# Create the bar chart visualization
+char_ind_viz <- char_ind_diff %>%
+  ggplot(aes(reorder(tag, `Charter vs. Independent Difference`), `Charter vs. Independent Difference`)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Tag", y = "Difference",
+       title = "Top 10 Tags with Smallest Differences between Charter and Independent Schools") +
+  coord_flip()
+
+# Display the visualization
+char_ind_viz
+
+# Print the table
+print(char_ind_diff)
+
+
+
+```
