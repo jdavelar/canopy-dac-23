@@ -1,0 +1,515 @@
+---
+title: "School level innovation"
+author: "Tony Daza"
+date: "2023-05-18"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+**Importing Data**
+
+```{r import, warning=FALSE, include=FALSE}
+library(rio)
+library(tidyverse)
+library(ggpubr)
+library(Hmisc)
+library(dplyr)
+library(corrplot)
+library(corrr)
+library(gt)
+
+load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+source("~/Desktop/canopy-dac-23/scripts/branding.R")
+
+
+```
+
+
+```{r inspect, include=FALSE, warning=FALSE, eval=FALSE}
+
+
+full_names <- tibble(variable.names(full))
+
+
+```
+
+
+```{r central_network select}
+
+central_network <- full %>% select(c(2,3,5,6,7, 9:16, 131:132, 156, 165:167, 213:215, 224:244, 281:285))
+
+
+```
+
+
+# Correlation of Central Practices  
+Correlations of Central Practices for schools with Innovation Network.  
+```{r}
+# THIS SHOULD NOT BE HERE BUT THE FILE WOULD NOT KNIT OTHERWISE
+central_cor <- central_network %>%
+  filter(central_network$innovation_initiative == 1) %>%  # & central_network$innovation_initiative_importance != "NA") %>%
+  select(c(23:25, 27, 30:33))
+
+# Column 21 is the importance question
+
+central_cor_mat <- correlate(central_cor)
+central_cor_mat <- central_cor_mat %>%
+  shave(upper = TRUE)
+
+rplot(central_cor_mat)
+
+central_cor_mat <- central_cor_mat %>%
+  fashion(na_print = "", leading_zeros = TRUE, decimals = 2)
+gt(central_cor_mat)
+
+central_cor_mat <- as.matrix(central_cor)
+
+cor_matrix <- rcorr(central_cor_mat)
+
+
+corrplot(cor_matrix$r, type = "lower", order = "hclust", tl.col = "black", tl.srt = 45)
+
+```
+
+
+
+```{r recode, warning=FALSE}
+central_network <- central_network %>%
+  mutate(central_other =recode(central_other,
+                              "1" = as.character(central_other_text)))
+
+central_network <- central_network %>%
+  mutate(network_other =recode(network_other,
+                              "1" = as.character(network_other_text)))
+
+central_network <- central_network %>%
+  mutate(school_descriptor_other =recode(school_descriptor_other,
+                              "1" = as.character(school_descriptor_other_text)))
+
+central_network <- central_network %>% select(-c("school_descriptor_other_text", "central_other_text", "network_other_text"))
+
+```
+
+
+```{r interest_cols}
+
+central_cols <- c("central_direction", "central_exemptions", "central_funding", "central_n_a", "central_navigation", "central_peer", "central_people_capacity", "central_public_support", "central_tools_supports")
+
+network_cols <- c("network_direction", "network_exemptions", "network_exemptions", "network_funding", "network_navigation", "network_peer", "network_people_capacity", "network_public_support", "network_tools_supports")
+
+```
+
+# School level variables  
+## Most common central supports  
+
+First is a look at the most commonly selected central office supports for public and charter schools.  
+
+### All schools  
+
+```{r central most pct}
+
+central_percentage <- data.frame(
+  name = character(),
+  percent_yes = numeric(),
+#  percent_no = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in central_cols){
+percent_yes <- round(sum(central_network[[i]])/length(central_network[[i]]) *100,2)
+
+# percent_no <- round((length(school_leap[[i]]) - sum(school_leap[[i]]))/length(school_leap[[i]])*100, 2)
+
+central_percentage <- rbind(central_percentage, data.frame(name = i, percent_yes = percent_yes))
+
+}
+
+gt(central_percentage)
+```
+
+Most (83%) of public or charter schools nominated indicated that they did receive supports from a central office. 
+
+Of those schools, public support and encouragement for the school's innovative work (43%) and funding (40%) were the most common supports.
+
+The least common supports were exemptions with only 18% of schools reporting central office exemptions from district policies or regulations.
+
+The majority of the supports reported were around 30%.
+
+
+**Do I need to filter only schools that indicated supports before calculating this?**
+**I think so.**
+
+
+### Schools with central office  
+
+```{r central office, fig.width=10, fig.height=8, warning=FALSE}
+library(ggplot2)
+
+central_network_yes <- central_network %>%
+  filter(central_n_a == 1)
+
+central_cols <- c("central_direction", "central_exemptions", "central_funding", "central_navigation", "central_peer", "central_people_capacity", "central_public_support", "central_tools_supports")
+
+central_percentage <- data.frame(
+  name = character(),
+  percent_yes = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in central_cols){
+percent_yes <- round(sum(central_network_yes[[i]])/length(central_network_yes[[i]]) *100,2)
+
+central_percentage <- rbind(central_percentage, data.frame(name = i, percent_yes = percent_yes))
+
+}
+
+gt(central_percentage)
+
+bar_colors <- c("#1A4C81", "#59C3B4", "#EF464B", "#ADE0EE", "#BC2582","#FFA630", "#99C24D", "#FFDE42")  # Color palette for the bars
+
+central_percentage %>%
+  ggplot(aes(x=name, y = percent_yes, fill = name))+
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = bar_colors) +
+  ylab("Percent") +
+  xlab("")+
+  theme_minimal()+
+  scale_y_continuous(limits = c(0,100), n.breaks = 5)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+  
+
+
+```
+
+**This is better**
+
+Of schools that reported central office supports (about 80% of schools) the most common supports were:
+
+Public support of their work 52%
+Central funding 48%
+People and time support for innovative project 47%
+
+Least common supports were:
+District policy or regulatory exemptions 22%
+Direction and vision for innovative project 36%
+Peer connections or learning communities 38%
+
+The rest of the supports were about 40%
+
+
+# Innovation importance  
+## Charter/District Schools  
+
+How do schools' responses to the "how important is this initiative" question relate to their responses to the "does your central office provide" question?
+
+```{r}
+
+# Number of schools that reported being part of a larger innovation network: 
+## 0 = No, 1 = Yes, 2 = Not sure
+table(central_network$innovation_initiative)
+# Proportion of schools responding to the previous question
+prop.table(table(central_network$innovation_initiative))
+
+
+# School responses to the importance of the innovation district/network is to the project
+table(central_network$innovation_initiative_importance)
+# Percentage of responses to the importance question
+## Quick note: only schools that responded yes to having a network answered this question
+
+### 1 = not important, 2 = slightly important, 3 = fairly important, 
+### 4 = important, 5 = very important
+prop.table(table(central_network$innovation_initiative_importance))
+
+
+```
+
+A quick look tells us that 68 of the schools, 29%, reported that they were part of a larger innovation initiative within their district or charter network. The remaining schools were either unsure, 13%, or responded that no, 58%.
+
+Looking at the innovative importance question, only 62 schools responded. Of those 62 schools, 76% rated the importance as 5 or "very important". Seven schools, 11%, rated the importance as "important". The remaining schools, 4 each, were split between "fairly important" and "slightly important" with 6.5% each.
+
+
+We can examine of the schools that responded to the importance question, what supports did they receive compared to schools that did not respond. 
+
+```{r}
+
+central_network_importance <- central_network %>%
+  filter(central_network$innovation_initiative == 1)
+
+# These are the same counts as above, but this is from the data that is filtered to # only include schools that indicated that they were part of a district network
+
+# The take away here is that only schools that were part of the innovation network responded to the question about importance.
+table(central_network_importance$innovation_initiative_importance)
+
+# Cool so this is all the schools that answered yes to the question:
+# Is your learning environment part of a larger innovation initiative within your district or charter network?
+
+# of these schools, we can look at the distribution of supports they received.
+
+table(central_network_importance$central_n_a)
+
+# Surprisingly, of these schools, 5 reported not having a central office
+
+
+central_importance_pct <- data.frame(
+  name = character(),
+  percent_yes = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in central_cols){
+percent_yes <- round(sum(central_network_importance[[i]])/length(central_network_importance[[i]]) *100,2)
+
+central_importance_pct <- rbind(central_importance_pct, data.frame(name = i, percent_yes = percent_yes))
+
+}
+  
+gt(central_importance_pct)
+
+
+
+```
+
+**Schools that answered yes to being part of a larger district initiative**   
+These schools were more likely than other schools to report receiving supports. The trends in terms of which supports were provided stayed the same, but the percentages changed. In this group of schools, 73% reported receiving support in terms of people or time for the innovation project. 70% reported tools/supports from a central office focus on the innovative project. The third most frequently reported support was public support for their project with 65%. 
+
+The least reported support was still central office exemptions which was reported for 29% of schools.
+
+
+We can look at the percentages of supports for each rating.  
+
+```{r}
+
+cent_pcts <- central_network %>%
+  filter(central_network$innovation_initiative == 1) %>%
+  select(c(20, 22:24, 26, 28:31))
+
+central_cols <- colnames(cent_pcts)[-1]  # Exclude the first column
+
+
+central_supports_pct <- data.frame(
+  name = character(),
+  importance = character(),
+  percentage = numeric(),
+  stringsAsFactors = FALSE
+)
+
+
+cent_pcts2 <- cent_pcts %>%
+  filter(cent_pcts$innovation_initiative_importance == 2) %>%
+  select(-"innovation_initiative_importance")
+
+for (i in central_cols) {
+percent_2 <- round(sum(cent_pcts2[[i]])/length(cent_pcts2[[i]]) *100,2)
+  row_data <- data.frame(
+    name = i,
+    importance = "slightly_important",
+    percentage = percent_2
+  )
+  central_supports_pct <- rbind(central_supports_pct, row_data)
+}
+
+cent_pcts3 <- cent_pcts %>%
+  filter(cent_pcts$innovation_initiative_importance == 3) %>%
+  select(-"innovation_initiative_importance")
+
+for (i in central_cols) {
+percent_3 <- round(sum(cent_pcts3[[i]])/length(cent_pcts3[[i]]) *100,2)
+row_data <- data.frame(
+    name = i,
+    importance = "fairly_important",
+    percentage = percent_3
+  )
+  central_supports_pct <- rbind(central_supports_pct, row_data)
+}
+
+
+
+cent_pcts4 <- cent_pcts %>%
+  filter(cent_pcts$innovation_initiative_importance == 4) %>%
+  select(-"innovation_initiative_importance")
+
+for (i in central_cols) {
+percent_4 <- round(sum(cent_pcts4[[i]])/length(cent_pcts4[[i]]) *100,2)
+row_data <- data.frame(
+    name = i,
+    importance = "important",
+    percentage = percent_4
+  )
+  central_supports_pct <- rbind(central_supports_pct, row_data)
+}
+
+cent_pcts5 <- cent_pcts %>%
+  filter(cent_pcts$innovation_initiative_importance == 5) %>%
+  select(-"innovation_initiative_importance")
+
+for (i in central_cols) {
+percent_5 <- round(sum(cent_pcts5[[i]])/length(cent_pcts5[[i]]) *100,2)
+row_data <- data.frame(
+    name = i,
+    importance = "very_important",
+    percentage = percent_5
+  )
+  central_supports_pct <- rbind(central_supports_pct, row_data)
+}
+
+central_supports_pct <- central_supports_pct %>%
+  spread(importance, percentage)
+
+central_supports_pct <- central_supports_pct %>%
+  select(name, slightly_important, fairly_important, important, very_important)
+  
+gt(central_supports_pct)
+
+```
+
+
+There are not any super clear patterns and the data is a bit odd because the numbers are skewed. With only 4 schools each reporting slightly and fairly important and only 7 reporting important versus 47 reporting very important. It might be more beneficial to compare very important versus everything else.  
+
+
+Despite that, it does seem like schools that marked slightly important were more likely to report a lower percentage of supports compared to other schools.  
+
+As a reminder, this is only from schools that reported being part of an innovation network, a group of 63 schools.  
+
+We can look at schools that are not in a network, but I won't have the importance score because only schools that were in the network answered the importance question.  
+
+
+But for comparison, here are the percentages of supports for schools that reported that they were not in a innovation network but the schools did have a central office support.   
+
+```{r}
+
+central_non_network <- central_network %>%
+  filter(central_network$innovation_initiative != 1)
+
+
+table(central_non_network$central_n_a)
+# 37 reported no central office support
+# 115 reported central office support
+
+central_non_network <- central_network %>%
+  filter(central_network$innovation_initiative != 1 & central_network$central_n_a == 1)
+
+central_cols <- c("central_direction", "central_exemptions", "central_funding", "central_navigation", "central_peer", "central_people_capacity", "central_public_support", "central_tools_supports")
+
+central_non_net_pct <- data.frame(
+  name = character(),
+  percent_yes = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in central_cols){
+percent_yes <- round(sum(central_non_network[[i]])/length(central_non_network[[i]]) *100,2)
+
+central_non_net_pct <- rbind(central_non_net_pct, data.frame(name = i, percent_yes = percent_yes))
+
+}
+  
+gt(central_non_net_pct)
+
+```
+
+There is some difference between the groups, but I haven't run any significance tests.  
+
+
+## Chi Squared Test   
+
+Here is a quick test to see if schools in an innovation network were more likely than schools not in an innovative network to report central office supports  
+
+```{r chi sq}
+
+central_network_chi <- central_network %>%
+  select(c(19, 22:24, 26, 28:31))
+
+# Recode the innovation_initiative variable
+central_network_chi <- central_network_chi %>%
+  mutate(innovation_initiative = case_when(
+    innovation_initiative == "0" ~ "No Support",
+    innovation_initiative == "1" ~ "Support",
+    innovation_initiative == "2" ~ "No Support",
+    is.na(innovation_initiative) ~ "No Support",
+    TRUE ~ as.character(innovation_initiative)
+  ))
+
+central_network_chi$innovation_initiative <- as.factor(central_network_chi$innovation_initiative)
+
+CHIS <- lapply(central_network_chi[,-1], function(x) chisq.test(central_network_chi[,1], x)); CHIS
+
+do.call(rbind, CHIS)[,c(1,3)]
+
+
+
+```
+
+**NOTE**   
+
+I combined No and Not Sure into No support and compared it to those that indicated they received support.  
+
+There were several supports that were statistically significant between the groups:  
+
+Central direction p < 0.001 ***   
+Central exemptions p = 0.025 *   
+Central funding p < 0.001  **   
+Central navigation p < 0.001 ***     
+Central peer support p < 0.001 ***    
+Central people capacity p <0.001 ***    
+Central public support p < 0.001 ***   
+Central tools supports p < 0.001 ***    
+
+In this grouping, all of the supports were significant. Those that indicated they 
+
+**IMPORTANT NOTE**  
+
+When running the same code, but excluding NA values there were different findings.
+
+```{r chi sqed}
+
+central_network_chi <- central_network %>%
+  select(c(19, 22:24, 26, 28:31))
+
+# Recode the innovation_initiative variable
+central_network_chi <- central_network_chi %>%
+  mutate(innovation_initiative = case_when(
+    innovation_initiative == "0" ~ "No Support",
+    innovation_initiative == "1" ~ "Support",
+    innovation_initiative == "2" ~ "No Support",
+    TRUE ~ as.character(innovation_initiative)
+  ))
+
+central_network_chi$innovation_initiative <- as.factor(central_network_chi$innovation_initiative)
+
+CHIS <- lapply(central_network_chi[,-1], function(x) chisq.test(central_network_chi[,1], x)); CHIS
+
+do.call(rbind, CHIS)[,c(1,3)]
+
+
+
+```
+
+Here are the results when removing the schools that responded NA to the innovation initiative network, i.e. NA.
+
+Central direction p < 0.001 ***   
+Central exemptions p = 0.14 (Not significant)   
+Central funding p = 0.018 *  
+Central navigation p = 0.016 *   
+Central peer support p < 0.001***   
+Central people capacity p <0.001 ***  
+Central public support p = 0.01 **  
+Central tools supports p < 0.001 ***   
+
+
+## Indepdent schools  
+How do schools' responses to the "how important is this network" question relate to their responses to the "does your network provide" question?
+
+
+
