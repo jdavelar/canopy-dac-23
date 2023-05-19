@@ -95,6 +95,27 @@ label_dems = function(dems) coalesce(dem_labs_rv[dems], dems)
 scale_x_demo = scale_x_discrete(labels = function(x) lapply(strwrap(dem_labs_rv, width = 10, simplify = FALSE), paste, collapse="\n"))
 # scale_x_discrete(labels = label_wrap(10))
 
+# Leaps labels ###
+leap_labs = c(
+  "High Expectations with Unlimited Opportunities" = "leaps_high_expectations",
+  "Whole-Child Focus" = "leaps_whole_child",
+  "Rigorous Learning" = "leaps_rigorous_learning",
+  "Relevance" = "leaps_relevance",
+  "Affirmation of Self & Others" = "leaps_affirmation",
+  "Social Consciousness & Action" = "leaps_social_consciousness",
+  "Connection & Community" = "leaps_connection",
+  "Customization" = "leaps_customization",
+  "Active Self-Direction" = "leaps_self_direction",
+  "Anytime, Anywhere Learning" = "leaps_anytime_anywhere"
+)
+
+leap_labs_rv = names(leap_labs)
+names(leap_labs_rv) = leap_labs
+
+label_leaps = function(leaps) coalesce(leap_labs_rv[leaps], leaps)
+#scale_x_demo = scale_x_discrete(labels = leap_labs_rv)
+scale_x_demo = scale_x_discrete(labels = function(x) lapply(strwrap(leap_labs_rv, width = 10, simplify = FALSE), paste, collapse="\n"))
+
 ## Percent bin labels ####
 label_percent_bins = function(breaks) {
   n = length(breaks)

@@ -1,0 +1,38 @@
+---
+title: "Longitudinal Analysis"
+author: "Janette Avelar"
+date: '2023-03-22'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(rio)
+library(tidyverse)
+library(DT)
+#data
+load(here("data", "complete_canopy_2023.Rdata"))
+#branding
+# source(here("scripts", "branding.R"))
+# theme_update(plot.title = element_text(hjust = 0.5))
+dat <- full
+```
+
+#How many schools participated in both SY2021-22 and SY2022-23?
+
+#How many schools participated in SY2020-21, SY2021-22, and SY2022-23?
+
+#What practices are being adopted or retired over time? 
+
+#How many tags have been retained across years?
+
+#How many schools have participated across years?

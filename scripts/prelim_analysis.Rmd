@@ -388,3 +388,40 @@ ggplot(tag_bar, aes(x = tag, y = n, fill = tag)) +
   scale_x_discrete(labels = label_tags(wrap = 10)) +
   scale_fill_manual(values = transcend_cols)
 ```
+
+#Misc. - Ignore
+
+##Descriptors
+
+```{r descriptors by type}
+# desc <- full %>% 
+#   select(school_name, school_descriptor, school_descriptor_homeschool, school_descriptor_hybrid, school_descriptor_microschool, school_descriptor_sws, school_descriptor_virtual) %>% 
+#   mutate(school_type = case_when(
+#     school_descriptor == 1 ~ "Public district school",
+#            school_descriptor == 2 ~ "Public charter school",
+#            school_descriptor == 3 ~ "Independent (private) school"),
+#     school_description = case_when(
+#       school_descriptor_homeschool == 1 ~ "Homeschool",
+#       school_descriptor_hybrid == 1 ~ "Hybrid",
+#       school_descriptor_microschool == 1 ~ "Microschool",
+#       school_descriptor_sws == 1 ~ "School within school",
+#       school_descriptor_virtual == 1 ~ "Virtual"
+#     )) %>% 
+#   select(-c(starts_with("school_descriptor"), school_name)) %>% 
+#   mutate(rate = rep(1, 251)) %>% 
+#   group_by(school_type, school_description) %>% 
+#   summarize(n = sum(rate)) %>% 
+#   ungroup() %>% 
+#   mutate(pct = n/)
+```
+
+```{r}
+# lang_schools <- dat %>% 
+#   select(school_name, school_id, practices_dual_language, practices_translanguaging, practices_heritage_language, practices_assessments_bilingual, student_experience) %>% 
+#   filter(practices_dual_language == 1 |
+#          practices_translanguaging == 1 |
+#            practices_heritage_language == 1 |
+#            practices_assessments_bilingual == 1)
+# export(lang_schools, "language.csv")
+```
+

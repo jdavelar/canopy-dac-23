@@ -1,0 +1,408 @@
+---
+title: "Authentic and Full Inclusion"
+author: "Janette Avelar"
+date: '2023-05-19'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(rio)
+library(tidyverse)
+library(DT)
+#data
+load(here("data", "complete_canopy_2023.Rdata"))
+#branding
+source(here("scripts", "branding.R"))
+# theme_update(plot.title = element_text(hjust = 0.5))
+```
+
+# What are the biggest tagging differences among schools with inclusive classrooms?
+
+*Not sure how to tackle this one yet - in progress*
+
+```{r tagging diffs inclusive vs not}
+inclusive_vs_not <- tags %>% 
+  filter(practices_all_courses_designed_for_inclusion==1)
+```
+
+
+
+# Which tags were schools designing to meet the needs of students who have been marginalized most likely to select?
+
+### Most selected tags
+
+```{r design marginalized trends}
+marginalized <- full %>% 
+  select(starts_with("practices_")) %>% 
+  filter(practices_design_marginalized == 1) %>% 
+  select(-practices_design_marginalized) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "Tag",
+               values_to = "N") %>% 
+  group_by(Tag) %>% 
+  summarize(N = sum(N)) %>% 
+  arrange(desc(N)) %>% 
+  head(n = 10)
+#table
+datatable(marginalized)
+```
+
+### Most and least likely
+
+```{r design marginalized likelihood, fig.dim = c(11, 9)}
+marginalized_odd <- tags %>% 
+  select(starts_with("practices_")) %>% 
+  filter(practices_design_marginalized == 1) %>% 
+  select(-practices_design_marginalized) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n)) %>% 
+  mutate(prob = n/191,
+         odds = prob/(1-prob),
+         lor = log(odds)) %>% 
+  arrange(desc(n)) %>% 
+  ungroup() %>% 
+  filter(n > 153 |
+           n < 24) %>% 
+  mutate(likely = case_when(
+    n > 153 ~ "more",
+    n < 24 ~ "less"
+  ))
+#plot
+ggplot(marginalized_odd, aes(reorder(tag, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_x_discrete(labels = label_tags()) +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Tags Most & Least Likely Selected by\nSchools Designing for Marginalized Students",
+       subtitle = "Interpret with caution: These odds do not account for relevant\ncharacteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-4, 4),
+                     labels = c("-4" = "4x less", 
+                            "-2" = "2x less",
+                            "0" = "Even",
+                            "2" = "2x more",
+                            "4" = "4x more")) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+
+# Which tags were schools with inclusive classrooms most likely to select?
+
+### Most selected tags
+
+```{r inclusive classrooms trends}
+inclusive <- full %>% 
+  select(starts_with("practices_")) %>% 
+  filter(practices_all_courses_designed_for_inclusion == 1) %>% 
+  select(-practices_all_courses_designed_for_inclusion) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "Tag",
+               values_to = "N") %>% 
+  group_by(Tag) %>% 
+  summarize(N = sum(N)) %>% 
+  arrange(desc(N)) %>% 
+  head(n = 10)
+#table
+datatable(inclusive)
+```
+
+### Most and least likely
+
+```{r inclusive classrooms likelihood, fig.dim = c(11, 9)}
+inclusive_odd <- tags %>% 
+  select(starts_with("practices_")) %>% 
+  filter(practices_all_courses_designed_for_inclusion == 1) %>% 
+  select(-practices_all_courses_designed_for_inclusion) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n)) %>% 
+  mutate(prob = n/191,
+         odds = prob/(1-prob),
+         lor = log(odds)) %>% 
+  arrange(desc(n)) %>% 
+  ungroup() %>% 
+  filter(n > 144 |
+           n < 21) %>% 
+  mutate(likely = case_when(
+    n > 144 ~ "more",
+    n < 21 ~ "less"
+  ))
+#plot
+ggplot(inclusive_odd, aes(reorder(tag, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_x_discrete(labels = label_tags()) +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Tags Most & Least Likely Selected by\nSchools Implementing Inclusive Classrooms",
+       subtitle = "Interpret with caution: These odds do not account for relevant\ncharacteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-4, 4),
+                     labels = c("-4" = "4x less", 
+                            "-2" = "2x less",
+                            "0" = "Even",
+                            "2" = "2x more",
+                            "4" = "4x more")) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+
+# Which leaps were schools designing to meet the needs of students who have been marginalized more likely to select?
+
+### Most selected leaps
+
+The percentage column below indicates the proportion of schools selecting `design to meet the needs of students who have been marginalized` that also selected each given Leap.
+
+A possible next step here is to disaggregate by the specific student group(s) schools were designing for, but this is not a priority task.
+
+```{r leaps - design marginalized trends}
+leaps <- full %>% 
+  select(starts_with("leaps"), practices_design_marginalized) %>% 
+  select(-starts_with("leaps_rank"), -leaps_interest) %>% 
+  filter(practices_design_marginalized == 1) %>% 
+  select(-practices_design_marginalized) %>% 
+  pivot_longer(cols = starts_with("leaps"),
+               names_to = "Leap",
+               values_to = "N") %>% 
+  group_by(Leap) %>% 
+  summarize(N = sum(N, na.rm = TRUE),
+            Pct = paste0(round(N/191, 2)*100, "%")) %>% 
+  arrange(desc(N))
+#table
+datatable(leaps)
+```
+
+### Most and least likely
+
+```{r leaps - design marginalized likelihood, fig.dim = c(11, 9)}
+leaps_odd <- full %>% 
+  select(starts_with("leaps"), practices_design_marginalized) %>% 
+  select(-starts_with("leaps_rank"), -leaps_interest) %>% 
+  filter(practices_design_marginalized == 1) %>% 
+  select(-practices_design_marginalized) %>% 
+  pivot_longer(cols = starts_with("leaps"),
+               names_to = "leap",
+               values_to = "n") %>% 
+  group_by(leap) %>% 
+  summarize(n = sum(n, na.rm = TRUE)) %>% 
+  mutate(prob = n/191,
+         odds = prob/(1-prob),
+         lor = log(odds)) %>% 
+  arrange(desc(n)) %>% 
+  mutate(likely = case_when(
+    lor > 0 ~ "more",
+    lor < 0 ~ "less"
+  ))
+#create labels for plot
+
+#plot
+ggplot(leaps_odd, aes(reorder(leap, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_x_discrete(labels = label_leaps) +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Leaps Most & Least Likely Selected by\nSchools Designing for Marginalized Students",
+       subtitle = "Interpret with caution: These odds do not account for relevant\ncharacteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-2, 2),
+                     labels = c("-2" = "2x less",
+                                "-1" = "",
+                            "0" = "Even",
+                            "1" = "",
+                            "2" = "2x more")) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+
+# Which leaps were schools with inclusive classrooms more likely to select?
+
+### Most selected leaps
+
+The percentage column below indicates the proportion of schools selecting `all classrooms designed for inclusion` that also selected each given Leap.
+
+Like above, a possible next step here is to disaggregate by the specific student group(s) schools were designing for, but this is not a priority task.
+
+```{r leaps - inclusive classrooms trends}
+leaps_inclusive <- full %>% 
+  select(starts_with("leaps"), practices_all_courses_designed_for_inclusion) %>% 
+  select(-starts_with("leaps_rank"), -leaps_interest) %>% 
+  filter(practices_all_courses_designed_for_inclusion == 1) %>% 
+  select(-practices_all_courses_designed_for_inclusion) %>% 
+  pivot_longer(cols = starts_with("leaps"),
+               names_to = "Leap",
+               values_to = "N") %>% 
+  group_by(Leap) %>% 
+  summarize(N = sum(N, na.rm = TRUE),
+            Pct = paste0(round(N/183, 2)*100, "%")) %>% 
+  arrange(desc(N))
+#table
+datatable(leaps_inclusive)
+```
+
+### Most and least likely
+
+```{r leaps - inclusive classrooms likelihood, fig.dim = c(11, 9)}
+leaps_inclusive_odd <- full %>% 
+  select(starts_with("leaps"), practices_all_courses_designed_for_inclusion) %>% 
+  select(-starts_with("leaps_rank"), -leaps_interest) %>% 
+  filter(practices_all_courses_designed_for_inclusion == 1) %>% 
+  select(-practices_all_courses_designed_for_inclusion) %>% 
+  pivot_longer(cols = starts_with("leaps"),
+               names_to = "leap",
+               values_to = "n") %>% 
+  group_by(leap) %>% 
+  summarize(n = sum(n, na.rm = TRUE)) %>% 
+  mutate(prob = n/183,
+         odds = prob/(1-prob),
+         lor = log(odds)) %>% 
+  arrange(desc(n)) %>% 
+  mutate(likely = case_when(
+    lor > 0 ~ "more",
+    lor < 0 ~ "less"
+  ))
+#create labels for plot
+
+#plot
+ggplot(leaps_inclusive_odd, aes(reorder(leap, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_x_discrete(labels = label_leaps) +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Leaps Most & Least Likely Selected by\nSchools with Inclusive Classrooms",
+       subtitle = "Interpret with caution: These odds do not account for relevant\ncharacteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-2, 2),
+                     labels = c("-2" = "2x less",
+                                "-1" = "",
+                            "0" = "Even",
+                            "1" = "",
+                            "2" = "2x more")) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+# Of schools that selected either designing to meet the needs of students who have been marginalized, or inclusive classrooms, how many selected coleadership and who was involved in coleadership?
+
+I didn't include percentages in the table below to avoid it being messy, but I can add them in if it seems useful. For context:  
+* 191 schools selected `Design to meet needs of students who have been marginalized`  
+* 183 schools selected `All classrooms designed for inclusion`  
+* 157 schools selected both
+
+```{r marginalized & inclusive coleadership}
+colead <- tags %>% 
+  select(practices_design_marginalized, practices_all_courses_designed_for_inclusion, practices_co_leaders, practices_families_leaders, practices_students_leaders, practices_teachers_leaders, practices_community_leaders, practices_industry_leaders, practices_other_leaders) %>% 
+  filter(practices_design_marginalized == 1 |
+           practices_all_courses_designed_for_inclusion == 1) %>% #217
+  pivot_longer(cols = c(3:9),
+               names_to = "Coleadership Tags",
+               values_to = "N") %>% 
+  mutate("N (Marginalized)" = case_when(
+    practices_design_marginalized == 1 & N == 1 ~ 1,
+    practices_design_marginalized == 0 & N == 1 ~ 0,
+    practices_design_marginalized == 0 & N == 0 ~ 0),
+    "N (Inclusive)" = case_when(
+      practices_all_courses_designed_for_inclusion == 1 & N == 1 ~ 1,
+      practices_all_courses_designed_for_inclusion == 0 & N == 0 ~ 0,
+      practices_all_courses_designed_for_inclusion == 0 & N == 1 ~ 0),
+    "N (Both Selected)" = case_when(
+      practices_all_courses_designed_for_inclusion == 1 & practices_design_marginalized == 1 & N == 1 ~ 1,
+      practices_design_marginalized == 1 & practices_design_marginalized == 1 & N == 0 ~ 0
+    )) %>% 
+  select(-starts_with("practices_")) %>% 
+  group_by(`Coleadership Tags`) %>% 
+  summarize("N (Marginalized)" = sum(`N (Marginalized)`, na.rm = TRUE),
+            "N (Inclusive)" = sum(`N (Inclusive)`, na.rm = TRUE),
+            "N (Both Selected)" = sum(`N (Both Selected)`, na.rm = TRUE))
+```
+
+
+# Which populations of students were schools most likely to design for?
+
+The table below shows the number and proportion of schools that indicated each given student group was the group they're designing for when selecting `Design to meet needs of students who have been marginalized`. 
+
+A next step may be to fit a model.
+
+```{r design marginalized focus}
+marginalized_focus <- full %>% 
+  select(practices_design_marginalized, starts_with("focus"), -focus_other_student_group_text) %>% 
+  filter(practices_design_marginalized==1) %>% 
+  select(-practices_design_marginalized) %>% 
+  pivot_longer(cols = everything(),
+               names_to = "Student Focus",
+               values_to = "N") %>% 
+  group_by(`Student Focus`) %>% 
+  summarize(N = sum(N),
+            Pct = paste0(round(N/191, 2)*100, "%")) %>% 
+  arrange(desc(N))
+#table
+datatable(marginalized_focus)
+```
+
+
+# How many groups of students did schools report designing for, on average?
+
+Schools that selected `design to meet the needs of students who have been marginalized` selected an average of 6 (out of 10) possible student groups they were designing for.
+
+Something to think about for the future is that the sheer number of schools selecting both this and the inclusive tag, coupled with the mean above, may indicate we need to better specify this tag next year. It may be over-selected beyond what we are hoping to capture.
+
+```{r avg design marginalized focus}
+avg_marg_focus <- full %>% 
+    select(school_id, practices_design_marginalized, starts_with("focus"), -focus_other_student_group_text) %>% 
+  filter(practices_design_marginalized==1) %>% 
+  select(-practices_design_marginalized) %>% 
+  rowwise() %>% 
+  mutate(Total = sum(c_across(2:12))) %>% 
+  select(-starts_with("focus")) %>% 
+  ungroup() %>% 
+  summarize(Average = mean(Total))
+```
+
