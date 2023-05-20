@@ -214,7 +214,7 @@ The rest of the supports were about 40%
 
 How do schools' responses to the "how important is this initiative" question relate to their responses to the "does your central office provide" question?
 
-```{r}
+```{r, fig.height=12, fig.width=14}
 
 # Number of schools that reported being part of a larger innovation network: 
 ## 0 = No, 1 = Yes, 2 = Not sure
@@ -230,7 +230,7 @@ percentages <- round(100 * imp_plot / sum(imp_plot), 1)
 labels <- paste0(custom_labels, " (", percentages, "%)")
 
 # Pie chart of schools in an innovation network 
-pie(imp_plot, radius = 2, col = transcend_cols, labels = labels, main = "Is your school part of an innovation network?")
+pie(imp_plot, radius = 1, col = transcend_cols, labels = labels, main = "Is your school part of an innovation network?")
 
 # Proportion of schools responding to the previous question
 prop.table(table(central_network$innovation_initiative))
@@ -249,7 +249,7 @@ percentages <- round(100 * inno_plot / sum(inno_plot), 1)
 labels <- paste0(custom_labels, " (", percentages, "%)")
 
 # Pie Chart for importance of innovation network to schools i nthe network
-pie(inno_plot, radius = 2, col = transcend_cols, labels = labels, main = "Importance of Innovation Network to Schools in the Network")
+pie(inno_plot, radius = 1, col = transcend_cols, labels = labels, main = "Importance of Innovation Network to Schools in the Network")
 
 # Percentage of responses to the importance question
 ## Quick note: only schools that responded yes to having a network answered this question
