@@ -1,0 +1,33 @@
+---
+title: 'Clustering Analysis Part 2: Breakdown'
+author: "Anwesha Guha"
+date: "5/22/2023"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+```
+
+# Parent/Child Breakdown
+
+
+# School Type Breakdown (Public, District, Charter)
+
+
+# School Locale Breakdown (Public, District, Charter)
+
+
+# School Demographic Profile Breakdown (%BIPOC students and/or staff)

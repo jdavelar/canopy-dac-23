@@ -58,10 +58,7 @@ if(update) {
 ```
 
 ```{r}
-features_df <- full %>% 
-  select(school_id, grades_prek, grades_elementary, grades_middle, grades_high, self_reported_locale_urban, self_reported_locale_suburban, self_reported_locale_rural, school_descriptor, leadership_diversity, teaching_diversity) #, self_reported_ell, self_reported_frpl, self_reported_total_enrollment)
-
-# read_rds(here("data/features_for_models.rds"))
+read_rds(here("data/features_for_models.rds"))
 
 feature_names <- c("school_id", "grades_prek", "grades_elementary", "grades_middle", "grades_high", "self_reported_locale_urban", "self_reported_locale_suburban", "self_reported_locale_rural", "school_descriptor", "leadership_diversity", "teaching_diversity") #, "self_reported_ell", "self_reported_frpl", "self_reported_total_enrollment")
 
