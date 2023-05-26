@@ -111,15 +111,16 @@ ggplot(clusters_by_school, aes(x = cluster, y = cluster_weight)) +
 
 ## Ranks
 
-```{r eval=FALSE, fig.width=10, message=FALSE, include=FALSE}
-leaps_ranks = learning_model_data %>%
+```{r echo=TRUE, fig.width=10, message=FALSE}
+leaps_ranks <- full %>%
   select(school_id, starts_with("leaps_rank")) %>%
-  arrange(school_id)
+  arrange(school_id) %>% 
+  select(-school_id)
 
 
-leaps_clusters = cor(
-  leaps_ranks, #%>% select(-school_id) %>% mutate(across(everything(), \(x) -x)),
-  clusters_by_school_wide %>% select(-school_id),
+leaps_clusters <- cor(leaps_ranks, 
+  clusters_by_school_wide %>% 
+  select(-school_id),
   method = "spearman"
 )
 
@@ -132,7 +133,7 @@ ggcorrplot(leaps_clusters, hc.order = FALSE, lab = TRUE, lab_size = 2) +
     labs(x = "", y = "") + 
     #scale_fill_cc_gradient + 
     theme_transcend_sparse + 
-    scale_y_discrete(labels = label_clust) +
+#    scale_y_discrete(labels = label_clust) +
     theme(
       axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, size = rel(0.8)),
       axis.text.y = element_text(size = rel(0.8)),
@@ -142,7 +143,7 @@ ggcorrplot(leaps_clusters, hc.order = FALSE, lab = TRUE, lab_size = 2) +
 ```
 
 
-```{r eval=FALSE, include=FALSE}
+```{r echo=TRUE}
 leaps_clusters %>% 
   datatable(
     caption = "Leap Ranks and Clusters Correlations"#,
@@ -152,14 +153,14 @@ leaps_clusters %>%
 ```
 ## Leaps Variables
 
-```{r eval=FALSE, fig.height=8, fig.width=10, message=FALSE, include=FALSE}
-leaps_vars = learning_model_data %>%
+```{r echo=TRUE, fig.height=8, fig.width=10, message=FALSE}
+leaps_vars <- full %>%
   select(school_id, starts_with("leaps_")) %>% 
   select(-starts_with("leaps_rank")) %>%
   arrange(school_id) 
 
 
-leapsv_clusters = cor(
+leapsv_clusters <- cor(
   leaps_vars %>% select(-school_id) %>% mutate(across(everything(), \(x) x != "0")),
   clusters_by_school_wide %>% select(-school_id)
 )
@@ -173,7 +174,7 @@ ggcorrplot(leapsv_clusters, lab = TRUE, lab_size = 2) +
     labs(x = "", y = "") + 
     #scale_fill_cc_gradient + 
     theme_transcend_sparse + 
-    scale_y_discrete(labels = label_clust) +
+#    scale_y_discrete(labels = label_clust) +
     theme(
       axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, size = rel(0.8)),
       axis.text.y = element_text(size = rel(0.8)),
