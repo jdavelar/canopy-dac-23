@@ -29,10 +29,84 @@ dat <- full
 
 #How many schools participated in both SY2021-22 and SY2022-23?
 
+73 schools from last year (2021-22) participated this year (2022-23). This accounts for about 30% of all schools that responded this year. The full list of schools is displayed in the table below.
+
+```{r schools since last year}
+#pull in all datasets with school IDs and names first
+merge_2019 <- import(here("data", "previous_datasets", "schools_2018-19.csv")) %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2018-19", 173))
+merge_2021a <- import(here("data", "previous_datasets", "schools_2020-21a.csv")) %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2020-21", 144))
+merge_2021b <- import(here("data", "previous_datasets", "schools_2020-21b.csv")) %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2020-21", 88))
+merge_2021c <- import(here("data", "previous_datasets", "schools_2020-21c.csv")) %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2020-21", 99))
+merge_2022 <- import(here("data", "previous_datasets", "schools_2021-22.csv")) %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2021-22", 161))
+merge_2023 <- dat %>% 
+  select(school_id, school_name) %>% 
+  mutate(year = rep("2022-23", 251))
+#merge last year and this year
+repeat_schls_2023 <- merge_2023 %>% 
+  left_join(merge_2022, by = c("school_id", "school_name")) %>% 
+  filter(!is.na(year.y)) %>% 
+  select(!c(year.x, year.y)) %>% 
+  rename(`School ID` = school_id,
+         `School Name` = school_name)
+#table
+datatable(repeat_schls_2023)
+```
+
 #How many schools participated in SY2020-21, SY2021-22, and SY2022-23?
+
+There are 41 schools that have participated every year since AY2021-21. That's 7.5% of all schools we've had participate over time (N = 542). The list of schools is displayed in the table below.
+
+```{r schools since COVID}
+recent_schls <- merge_2021a %>% 
+  #start by merging other 2021 datasets with a full merge to create full set
+  full_join(merge_2021b, by = c("school_id", "school_name", "year")) %>% 
+  full_join(merge_2021c, by = c("school_id", "school_name", "year")) %>% 
+  #get rid of repeat schools
+  unique() %>% 
+  #left join following year to find crossover
+  left_join(merge_2022, by = c("school_id", "school_name")) %>% 
+  filter(!is.na(year.y)) %>% 
+  left_join(merge_2023, by = c("school_id", "school_name")) %>% 
+  filter(!is.na(year)) %>% 
+  select(!starts_with("year")) %>% 
+  rename(`School ID` = school_id,
+         `School Name` = school_name)
+#table
+datatable(recent_schls)
+```
+
+#How many schools have participated across years?
+
+We have a total of 542 Canopy schools, and their participation over time is displayed in the table below by year.
+
+**Hint** If you want to sort by multiple rows, select 1 column followed by the next column you'd like to sort. If you select all 4 columns, it will display the 21 schools that have participated since the start of Canopy at the top of the table.
+
+```{r}
+long_schls <- merge_2019 %>% 
+  full_join(merge_2021a, by = c("school_id", "school_name", "year")) %>% 
+  full_join(merge_2021b, by = c("school_id", "school_name", "year")) %>% 
+  full_join(merge_2021c, by = c("school_id", "school_name", "year")) %>% 
+  full_join(merge_2022, by = c("school_id", "school_name", "year")) %>% 
+  full_join(merge_2023, by = c("school_id", "school_name", "year")) %>% 
+  mutate(wave = rep("Participated", length(817))) %>% 
+  pivot_wider(names_from = year,
+              values_from = wave) %>% 
+  select(!school_id) %>% 
+  rename(`School Name` = school_name)
+datatable(long_schls)
+```
+
 
 #What practices are being adopted or retired over time? 
 
 #How many tags have been retained across years?
-
-#How many schools have participated across years?
