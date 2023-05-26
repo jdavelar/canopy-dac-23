@@ -23,6 +23,64 @@ load(here("data/complete_canopy_2023.RData"))
 
 # Parent/Child Breakdown
 
+```{r}
+parent <- c("practices_co_leaders", "practices_blended_learning", "practices_all_courses_designed_for_inclusion", "practices_design_marginalized")
+
+child_leadership <- c("practices_teachers_leaders", "practices_students_leaders", "practices_families_leaders", "practices_community_leaders", "practices_industry_leaders", "practices_other_leaders")
+
+child_blended <- c("practices_a_la_carte", "practices_flipped_classroom", "practices_flex", "practices_enriched_virtual", "practices_station_rotation")
+```
+
+```{r}
+practices_cor <- tags %>%
+  select(starts_with("practices")) %>%
+  cor
+
+efa_4 <- fa(practices_cor, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+# print(efa_4, sort = T)
+
+efa_max <- efa_4 %>%
+  model_parameters(sort = TRUE, threshold = "max") %>% 
+  mutate(status = case_when(Variable == "practices_co_leaders" ~ "parent_co_leader",
+                            Variable == "practices_blended_learning" ~ "parent_blended",
+                            Variable == "practices_all_courses_designed_for_inclusion" ~ "parent_inclusion",
+                            Variable == "practices_design_marginalized" ~ "parent_design_margin",
+                         Variable %in% child_leadership ~ "child_leadership",
+                         Variable %in% child_blended ~ "child_blended"))
+
+efa_max %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4 %>%
+  model_parameters(sort = TRUE, threshold = 0.28) %>%
+  datatable(caption = "Threshold loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+
+efa_4 %>%
+  model_parameters(sort = TRUE) %>%
+  datatable(caption = "All loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+```
+
+## EFA with child tags removed
+```{r}
+practices_cor_nonest <- tags %>%
+  select(starts_with("practices")) %>%
+  select(-c(all_of(child_leadership), all_of(child_blended))) %>% 
+  cor
+```
+
+```{r}
+efa_4_nonest <- fa(practices_cor, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+efa_4_nonest %>%
+  model_parameters(sort = TRUE, threshold = "max") %>%
+  datatable(caption = "Max loadings") %>%
+  formatRound(digits = 2, columns = 2:7) 
+```
+
 
 # School Type Breakdown (Public, District, Charter)
 
