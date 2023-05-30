@@ -549,6 +549,17 @@ contingency_table <- table(central_network_chi$innovation_initiative, central_ne
 # Perform Fisher's exact test to calculate odds ratio
 odds_ratio_dir <- fisher.test(contingency_table)
 
+#     No Direction   Direction
+#  No Network  112  40
+#  Network     27   36
+
+## So prob direction support network: 36/(36+27) = 0.57
+# Prob direction support no network: 40/(112+40) = 0.26
+# Odd ratio: 0.57/0.26 = 2.17
+
+### HMMMMMM
+# Same as I calculated before BUT the fisher test gives 3.70
+
 odds_ratio_list[[1]] <- odds_ratio_dir
 
 # 3.71 odds ratio direction
@@ -560,6 +571,8 @@ contingency_table <- table(central_network_chi$innovation_initiative, central_ne
 
 
 odds_ratio_ex <- fisher.test(contingency_table)
+
+
 
 
 odds_ratio_list[[2]] <- odds_ratio_ex
@@ -673,8 +686,110 @@ central_odd <- full %>%
                values_to = "n") %>% 
   mutate(central = as.factor(central)) %>% 
   group_by(central) %>%
-  dplyr::summarize(n = sum(n, na.rm = TRUE)) %>% 
-  dplyr::mutate(prob = n/63,
+  dplyr::summarize(n = sum(n, na.rm = TRUE))
+
+
+
+
+central_odd_not <- full %>% 
+  select(starts_with("central_"), innovation_initiative) %>% 
+  select(-c("central_n_a", "central_other", "central_other_text")) %>% 
+  filter(innovation_initiative == 0 | innovation_initiative == 2) %>% 
+  select(-innovation_initiative) %>% 
+  pivot_longer(cols = starts_with("central_"),
+               names_to = "central",
+               values_to = "n") %>% 
+  mutate(central = as.factor(central)) %>% 
+  group_by(central) %>%
+  dplyr::summarize(n = sum(n, na.rm = TRUE))
+
+
+# EXAMPLE:
+##                 Direction   |  No Direction
+##
+## Inno Network      36             27
+##
+## No Network        40             112
+
+# Prob of Direction support in Inno Network: 36/63 = 0.57
+# Prob of Direction support No Network: 40/ 152 = 0.26
+# Odds Ratio: 0.57/0.26 = 2.17
+# Log Odds ratio: log(2.17) = 0.775
+
+# THIS IS NOT THE SAME AS THE CODE ABOVE
+## I think the code above is assuming that we can calculate the odds ratio by doing the probability -1, but due to NAs in the data that doesn't quite work.
+
+
+#####################################################################
+# Manually calculating odds ratio based on how I understand them
+
+central_odd <- central_odd %>%
+  mutate(net_yes = 63,
+         prob_yes = n/63)
+
+central_odd_not <- central_odd_not %>%
+  mutate(net_no = 152,
+         prob_y = n/152)
+
+central_odd <- left_join(central_odd, central_odd_not, by = "central")
+
+central_odd <- central_odd %>%
+  mutate(odd = prob_yes/prob_y,
+         lor = log(odd)) %>%
+    arrange(desc(odd)) %>% 
+  mutate(likely = case_when(
+    lor > 0 ~ "more",
+    lor < 0 ~ "less"
+  ))
+
+# Now a corresponding graph
+########################################################################
+
+ggplot(central_odd, aes(reorder(central, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Most & Least Likely Supports Selected by\nCharter Schools in Innovative Netwokrs",
+       subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-2, 2),
+                     labels = c("-2" = "2x less",
+                                "-1" = "",
+                            "0" = "Even",
+                            "1" = "",
+                            "2" = "2x more")) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .5, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+
+
+########################################################################
+
+table(central_odd$innovation_initiative)
+# 0 = 124 (No)
+# 1 = 63 (Yes)
+# 2 = 28 (Not Sure)
+# NA = 36 
+
+central_odd_x <- full %>% 
+  select(starts_with("central_"), innovation_initiative) %>% 
+  select(-c("central_n_a", "central_other", "central_other_text")) %>% 
+  filter(innovation_initiative == 1) %>% 
+  select(-innovation_initiative) %>% 
+  pivot_longer(cols = starts_with("central_"),
+               names_to = "central",
+               values_to = "n") %>% 
+  mutate(central = as.factor(central)) %>% 
+  group_by(central) %>%
+  dplyr::summarize(n = sum(n, na.rm = TRUE)) %>%
+  mutate(prob = n/63,
          odds = prob/(1-prob),
          lor = log(odds)) %>% 
   arrange(desc(n)) %>% 
@@ -684,17 +799,10 @@ central_odd <- full %>%
   ))
 
 
-table(central_odd$innovation_initiative)
-# 0 = 124 (No)
-# 1 = 63 (Yes)
-# 2 = 28 (Not Sure)
-# NA = 36 
-
-
-ggplot(central_odd, aes(reorder(central, lor), lor, fill = likely)) +
+ggplot(central_odd_x, aes(reorder(central, lor), lor, fill = likely)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols[1:2]) +
-  labs(title = "Most & Least Likely Supports Selected by\nCharter Schools in Innovative Netowkrs",
+  labs(title = "Most & Least Likely Supports Selected by\nCharter Schools in Innovative Networks",
        subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",
        x = "",
        y = "") +
@@ -720,7 +828,7 @@ ggplot(central_odd, aes(reorder(central, lor), lor, fill = likely)) +
 **I think I made a mistake**  
 The odds Ratios are different in this version.  
 
-```{r retry}
+```{r retry, include=FALSE, eval=FALSE}
 central_odd <- full %>% 
   select(starts_with("central_"), innovation_initiative) %>% 
   select(-c("central_n_a", "central_other", "central_other_text"))
@@ -739,11 +847,11 @@ central_network_chi <- central_odd %>%
 
 central_network_chi <- central_network_chi %>% filter(innovation_initiative == "Support" | innovation_initiative == "No Support")
 
-central_network_chi$innovation_initiative <- as.factor(central_network_chi$innovation_initiative)
-
-CHIS <- lapply(central_network_chi[,-1], function(x) chisq.test(central_network_chi[,1], x)); CHIS
-
-do.call(rbind, CHIS)[,c(1,3)]
+# central_network_chi$innovation_initiative <- as.factor(central_network_chi$innovation_initiative)
+# 
+# CHIS <- lapply(central_network_chi[,-1], function(x) chisq.test(central_network_chi[,1], x)); CHIS
+# 
+# do.call(rbind, CHIS)[,c(1,3)]
 
 
 
@@ -786,13 +894,17 @@ Schools in the Innovation Network were 5.46 times more likely to report central 
 
 ```{r odds graph}
 
+odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.46)
+lor <- log(odds)
+
 central_odds <- data.frame(odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.46),
                            p_value = c(0.001, 0.10, 0.016, 0.015, 0.001, 0.001, 0.007, 0.001),
+                           lor = lor,
                            supports = c("Direction", "Exemptions", "Funding", "Navigation", "Peer Connections", "People Capacity", "Public Support", "Curriculum"))
 
 #plot
 central_odds %>%
-  ggplot(aes(reorder(supports, odds), odds)) +
+  ggplot(aes(reorder(supports, lor), lor)) +
   geom_col(fill = "#59C3B4") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -812,7 +924,7 @@ central_odds %>%
                             "6" = "6x more"),
                      n.breaks = 7) +
   geom_hline(yintercept = 0, color = transcend_cols[3]) +
-  geom_text(aes(label = odds), 
+  geom_text(aes(label = round(lor, 2)), 
              nudge_y = .5, 
              color = transcend_cols[3],
              fontface = "bold",
@@ -822,6 +934,59 @@ central_odds %>%
 
 ```
 
+
+### Write Up  
+So here is the deal. I am a little lost. I can't figure out how this is suppose to look.  When I use the fisher test to get my odds ratios it is different than if I calculate it myself. 
+
+I am not sure I fully understand the fisher test so it might make sense to use calculated odds ratios even though they would not have significance values. The chi squared test can tell us that the difference between the two groups are statistically significant.  
+
+I checked the contingency tables to ensure they were really calculating without NA values for innovative network and indeed they are the same as the tables I had calculated by hand. In this I grouped unsure and no support as both no support for being in an innovative network.  
+
+I am inclined to use the odds ratios calculated by hand.  
+
+Here is the graph based on the hand calculated odds ratios and the datatable for it:  
+
+```{r, fig.width= 10, fig.height=8}
+
+ggplot(central_odd, aes(reorder(central, lor), lor, fill = likely)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(title = "Most & Least Likely Supports Selected by\nCharter Schools in Innovative Netwokrs",
+       subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",
+       x = "",
+       y = "") +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(limits=c(-1, 1),
+                     labels = c("-1" = "1x less",
+                            "0" = "Even",
+                            "1" = "1x more"),
+                     n.breaks = 3) +
+  geom_hline(yintercept = 0, color = transcend_cols[3]) +
+  geom_text(aes(label = signif(round(lor, 2))), 
+            nudge_y = .1, 
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+
+central_odd <- central_odd %>%
+  mutate(supp_yes = n.x,
+         net_yes = net_yes,
+         prob_supp_net =round(prob_yes,2),
+         supp_no = n.y,
+         net_no = net_no,
+         prob_supp_no = round(prob_y,2),
+         odd_ratio = round(odd,2),
+         log_or = round(lor,2),
+         likely = likely) %>%
+  select(c(central, supp_yes, net_yes, prob_supp_net, supp_no, net_no, prob_supp_no, odd_ratio, log_or, likely))
+
+gt(central_odd)
+
+
+```
 
 
 ## Indepdent schools  
