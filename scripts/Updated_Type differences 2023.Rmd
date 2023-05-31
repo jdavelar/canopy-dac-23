@@ -1,0 +1,412 @@
+---
+title: "Differences Type"
+author: "Karen Zyskind"
+date: "2023-05-31"
+html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+library(tidyverse)
+library(here)
+library(reshape2)
+library(cowplot)
+library(dplyr)
+library("pacman")
+library("DT")
+pacman::p_load("summarytools")
+source(here("scripts", "branding.R"))
+load(here("data", "complete_canopy_2023.RData"))
+
+```
+
+#Guiding questions/tasks & format:  
+`SCHOOL TYPE`: How do tagging patterns differ among district, charter, independent, sws, virtual, microschool, homeschool, and hub schools?  
+* table of biggest differences between categories  
+
+##Type and how many tags
+First recall Type and Pattern of Tags 
+First looking at type count 
+Charter n= 113
+District n= 102
+Independent = 36
+
+```{r Type, echo=FALSE}
+library(gt)
+
+
+# Count the number of schools for each school descriptor
+school_counts <- schools %>%
+  count(school_descriptor)
+
+# Load the necessary packages
+library(gt)
+
+# Create the table
+school_counts_table <- school_counts %>%
+  mutate(school_descriptor = c("Charter", "District", "Independent")) %>%
+  gt() %>%
+  tab_header(
+    title = "Number of Schools by Descriptor"
+  ) %>%
+  tab_style(
+    style = list(cell_text(weight = "bold")),
+    locations = cells_body(columns = everything())
+  )
+
+# Display the table
+school_counts_table
+
+
+```
+
+## Counts of practices  by type first 
+```{r countandtype, echo=FALSE}
+
+library(dplyr)
+library(tidyverse)
+library(htmlTable)
+
+# Subset relevant columns from the 'tags' data frame
+practice_columns <- grep("^practices", names(tags), value = TRUE)
+
+# Merge 'tags' and 'schools' data frames
+merged_data <- merge(tags, schools, by = "school_id")
+
+# Group the data by school descriptor and calculate practice counts
+practice_counts <- merged_data %>%
+  group_by(school_descriptor) %>%
+  summarise(across(all_of(practice_columns), sum))
+
+# Rename school descriptor values with labels
+practice_counts$school_descriptor <- recode(practice_counts$school_descriptor,
+                                            `1` = "Public district school",
+                                            `2` = "Public charter school",
+                                            `3` = "Independent")
+
+# Arrange the table by school descriptor
+practice_counts <- practice_counts %>%
+  arrange(school_descriptor)
+
+# Print the table
+knitr::kable(practice_counts)
+
+# Create a pivot table
+pivot_table <- practice_counts %>%
+  pivot_longer(cols = starts_with("practices_"), names_to = "practice", values_to = "count")
+
+# Display the pivot table as an HTML table
+htmlTable(pivot_table, rnames = FALSE)
+
+
+```
+
+
+
+## Differences table by percents for each practice by each type 
+District vs Charter Difference: The percentage difference in tag occurrence between public district schools and public charter schools. Positive values indicate higher occurrence in district schools, while negative values indicate higher occurrence in charter schools.
+
+```{r Differences, echo=FALSE}
+library(DT)
+
+# Create a vector to map numeric values to categories
+descriptor_categories <- c("Public district school", "Public charter school", "Independent")
+
+# Convert school_descriptor column to factor with corresponding categories
+school_categories <- factor(schools$school_descriptor, levels = 1:3, labels = descriptor_categories)
+
+# Filter the columns in the tags dataframe that start with "practice"
+practice_cols <- grep("^practice", names(tags), value = TRUE)
+
+# Create an empty dataframe to store the results
+table_of_differences <- data.frame(
+  Tag = character(),
+  `District vs Charter Difference` = numeric(),
+  `Charter vs Independent Difference` = numeric(),
+  `Independent vs District Difference` = numeric(),
+  `Pct Tags Within(District)` = numeric(),
+  `Pct Tags Within(Charter)` = numeric(),
+  `Pct Tags Within(Independent)` = numeric(),
+  `Pct Tags Across(District)` = numeric(),
+  `Pct Tags Across(Charter)` = numeric(),
+  `Pct Tags Across(Independent)` = numeric(),
+  `N Tags(District)` = numeric(),
+  `N Tags(Charter)` = numeric(),
+  `N Tags(Independent)` = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Iterate over each tag column and calculate the differences and percentages
+for (col in practice_cols) {
+  tag <- col  # Assign the column name to the 'tag' variable as is
+  
+  district_pct <- round(sum(tags[, col] & school_categories == "Public district school") / sum(school_categories == "Public district school") * 100, 2)
+  charter_pct <- round(sum(tags[, col] & school_categories == "Public charter school") / sum(school_categories == "Public charter school") * 100, 2)
+  independent_pct <- round(sum(tags[, col] & school_categories == "Independent") / sum(school_categories == "Independent") * 100, 2)
+  
+  district_vs_charter_diff <- round(district_pct - charter_pct, 2)
+  charter_vs_independent_diff <- round(charter_pct - independent_pct, 2)
+  independent_vs_district_diff <- round(independent_pct - district_pct, 2)
+  
+  district_pct_within <- round(sum(tags[, col] & school_categories == "Public district school") / sum(tags[, col]) * 100, 2)
+  charter_pct_within <- round(sum(tags[, col] & school_categories == "Public charter school") / sum(tags[, col]) * 100, 2)
+  independent_pct_within <- round(sum(tags[, col] & school_categories == "Independent") / sum(tags[, col]) * 100, 2)
+  
+  district_pct_across <- round(sum(tags[, col] & school_categories != "Public district school") / sum(tags[, col]) * 100, 2)
+  charter_pct_across <- round(sum(tags[, col] & school_categories != "Public charter school") / sum(tags[, col]) * 100, 2)
+  independent_pct_across <- round(sum(tags[, col] & school_categories != "Independent") / sum(tags[, col]) * 100, 2)
+  
+  n_tags_district <- sum(tags[, col] & school_categories == "Public district school")
+  n_tags_charter <- sum(tags[, col] & school_categories == "Public charter school")
+  n_tags_independent <- sum(tags[, col] & school_categories == "Independent")
+  
+  # Create a new row with the results and append it to table_of_differences
+  new_row <- data.frame(
+    Tag = tag,
+    `District vs.Charter Difference` = district_vs_charter_diff,
+    `Charter vs.Independent Difference` = charter_vs_independent_diff,
+    `Independent vs.District Difference` = independent_vs_district_diff,
+    `Pct.Tags Within(District)` = district_pct_within,
+    `Pct.Tags Within(Charter)` = charter_pct_within,
+    `Pct.Tags Within(Independent)` = independent_pct_within,
+    `Pct.Tags Across(District)` = district_pct_across,
+    `Pct.Tags Across(Charter)` = charter_pct_across,
+    `Pct.Tags Across(Independent)` = independent_pct_across,
+    `N Tags(District)` = n_tags_district,
+    `N Tags(Charter)` = n_tags_charter,
+    `N Tags(Independent)` = n_tags_independent
+  )
+  
+  table_of_differences <- rbind(table_of_differences, new_row)
+}
+
+# Show the resulting table of differences
+datatable(table_of_differences, options = list(scrollY = "400px", paging = FALSE))
+
+```
+
+
+## Top 10 Differences in charter and independent schools 
+```{r charter and indep, echo=FALSE}
+
+library(plotly)
+
+# Filter the data for relevant columns and select the top 10 tags with the largest differences
+char_ind_diff <- table_of_differences %>%
+  select(Tag, "Charter.vs.Independent.Difference", "Pct.Tags.Within.Charter.", "Pct.Tags.Within.Independent.") %>%
+  arrange(desc(Charter.vs.Independent.Difference)) %>%
+  slice_head(n = 10)
+
+# Create the side-by-side bar chart using plotly
+char_ind_viz <- char_ind_diff %>%
+  plot_ly(x = ~Tag, type = "bar", name = "Charter", y = ~`Pct.Tags.Within.Charter.`, marker = list(color = "steelblue")) %>%
+  add_trace(y = ~`Pct.Tags.Within.Independent.`, name = "Independent", marker = list(color = "orange")) %>%
+  layout(
+    barmode = "group",
+    xaxis = list(title = ""),
+    yaxis = list(title = "Percent of Schools Selecting Tag"),
+    title = "Top 10 Tags with Largest Differences between Charter and Independent Schools"
+  )
+
+# Display the side-by-side bar chart
+char_ind_viz
+
+
+
+
+```
+
+## Top 10 Differences in Independent Vs District 
+```{r sidebyside, echo=FALSE}
+library(plotly)
+
+# Filter the data for relevant columns and select the top 10 tags with the largest differences
+ind_dist_diff <- table_of_differences %>%
+  select(Tag, "Independent.vs.District.Difference", "Pct.Tags.Within.Independent.", "Pct.Tags.Within.District.") %>%
+  arrange(desc(Independent.vs.District.Difference)) %>%
+  slice_head(n = 10)
+
+# Create the side-by-side bar chart using plotly
+ind_dist_viz <- ind_dist_diff %>%
+  plot_ly(x = ~Tag, type = "bar", name = "Independent", y = ~`Pct.Tags.Within.Independent.`, marker = list(color = "orange")) %>%
+  add_trace(y = ~`Pct.Tags.Within.District.`, name = "District", marker = list(color = "steelblue")) %>%
+  layout(
+    barmode = "group",
+    xaxis = list(title = ""),
+    yaxis = list(title = "Percentage of Schools Selecting Tag"),
+    title = "Top 10 Tags with Largest Differences between Independent and District Schools"
+  )
+
+# Display the side-by-side bar chart
+ind_dist_viz
+
+
+```
+
+##Top 10 difference District and Charter
+```{r moresidebyside, echo=FALSE}
+library(plotly)
+
+# Filter the data for relevant columns and select the top 10 tags with the largest differences
+dist_char_diff <- table_of_differences %>%
+  select(Tag, "District.vs.Charter.Difference", "Pct.Tags.Within.District.", "Pct.Tags.Within.Charter.") %>%
+  arrange(desc(District.vs.Charter.Difference)) %>%
+  slice_head(n = 10)
+
+# Create the side-by-side bar chart using plotly
+dist_char_viz <- dist_char_diff %>%
+  plot_ly(x = ~Tag, type = "bar", name = "District", y = ~`Pct.Tags.Within.District.`, marker = list(color = "steelblue")) %>%
+  add_trace(y = ~`Pct.Tags.Within.Charter.`, name = "Charter", marker = list(color = "orange")) %>%
+  layout(
+    barmode = "group",
+    xaxis = list(title = ""),
+    yaxis = list(title = "Percent of Schools Selecting Tag"),
+    title = "Top 10 Tags with Largest Differences between District and Charter Schools"
+  )
+
+# Display the side-by-side bar chart
+dist_char_viz
+
+
+```
+
+
+#Variance and variability
+```{r variance cal, echo=FALSE}
+# Data prep
+var_all <- table_of_differences %>% 
+  select(Tag, starts_with("Pct.Tags.Within.")) %>% 
+  pivot_longer(cols = c("Pct.Tags.Within.Charter.", "Pct.Tags.Within.Independent.", "Pct.Tags.Within.District."),
+               names_to = "type",
+               names_prefix = "Pct.Tags.Within.",
+               values_to = "proportion") %>% 
+  ungroup() %>% 
+  group_by(Tag) %>% 
+  mutate(variance = sd(proportion))
+
+# Max variability plot - top 10
+var_max_10 <- var_all %>% 
+  group_by(type) %>% 
+  slice_max(variance, n = 10, with_ties = FALSE) %>% 
+  ggplot(aes(Tag, proportion, fill = type)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "",
+       y = "Tags with Most Variability",
+       title = "Top 10 Tags with Largest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of increasing variability")
+
+var_max_10
+
+```
+
+##Low 10 with largest variability 
+```{r low var, echo=FALSE}
+
+
+# Max Variability Plot - Lowest 10
+var_min_10 <- var_all %>% 
+  group_by(type) %>% 
+  slice_min(variance, n = 10, with_ties = FALSE) %>% 
+  ggplot(aes(Tag, proportion, fill = type)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "",
+       y = "Tags with Least Variability",
+       title = "Top 10 Tags with Lowest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of decreasing variability")
+
+var_min_10
+
+
+```
+
+##Top 15 with largest variability 
+```{r top15, echo=FALSE}
+
+# Max variability plot - top 15
+var_max_15 <- var_all %>%
+  group_by(type) %>%
+  slice_max(variance, n = 15, with_ties = FALSE) %>%
+  arrange(variance) %>%
+  ggplot(aes(Tag, proportion, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040"))+
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "", y = "Tags with Most Variability",
+       title = "Top 15 Tags with Largest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of increasing variability")
+
+var_max_15
+
+
+```
+
+
+##Lowest 15 with largest variability for charter, district, and independent
+```{r low15, echo=FALSE}
+# Min variability plot - lowest 15
+var_min_15 <- var_all %>%
+  group_by(type) %>%
+  slice_min(variance, n = 15, with_ties = FALSE) %>%
+  arrange(variance) %>%
+  ggplot(aes(Tag, proportion, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "", y = "Tags with Least Variability",
+       title = "Top 15 Tags with Lowest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of increasing variability")
+
+var_min_15
+
+```
+
+##Top 20 tags with Largest variability 
+```{r top20variability, echo=FALSE}
+# Max variability plot - top 20
+var_max_20 <- var_all %>%
+  group_by(type) %>%
+  slice_max(variance, n = 20, with_ties = FALSE) %>%
+  arrange(variance) %>%
+  ggplot(aes(Tag, proportion, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "", y = "Tags with Most Variability",
+       title = "Top 20 Tags with Largest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of increasing variability")
+
+var_max_20
+
+```
+
+##Lowest 20 tags with largest variability 
+
+```{r}
+# Min variability plot - lowest 20
+var_min_20 <- var_all %>%
+  group_by(type) %>%
+  slice_min(variance, n = 20, with_ties = FALSE) %>%
+  arrange(variance) %>%
+  ggplot(aes(Tag, proportion, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  labs(x = "", y = "Tags with Least Variability",
+       title = "Top 20 Tags with Lowest Variability for Charter, District, and Independent Schools",
+       subtitle = "In order of increasing variability")
+
+var_min_20
+
+```
+
