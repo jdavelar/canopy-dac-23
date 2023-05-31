@@ -84,8 +84,105 @@ efa_4_nonest %>%
 
 # School Type Breakdown (Public, District, Charter)
 
+```{r}
+c4 <- read_tsv(here("output/EFA 2023 Results All.txt"))
 
-# School Locale Breakdown (Public, District, Charter)
+cweights <- c4 %>% 
+#  rename(all_of(clust_details_r)) %>%
+  select(-Complexity, -Uniqueness) %>%
+  pivot_longer(cols = -Variable, names_to = "cluster", values_to = "weight") %>%
+  rename(practice = Variable)
 
+practices_long <- tags %>% 
+  select(school_id, starts_with("practices")) %>%
+  pivot_longer(-school_id, names_to = "practice", values_to = "val")
+
+clusters_by_school <- practices_long %>%
+  left_join(cweights, by = "practice") %>%
+  group_by(school_id, cluster) %>% 
+  summarize(cluster_weight = sum(val * weight, na.rm = TRUE), .groups = "drop") %>%
+  arrange(school_id)
+
+clusters_by_school_wide <- clusters_by_school %>%
+  pivot_wider(id_cols = school_id, names_from = cluster, values_from = cluster_weight) %>%
+  arrange(school_id) %>% 
+  rename(learning_mastery = MR1,
+         holistic_student_justice = MR2,
+         postsec_pathways_world = MR3,
+         blended_flexible_learning = MR4)
+```
+
+
+```{r echo=TRUE, fig.width=10, message=FALSE}
+school_type_dat <- full %>%
+  select(school_id, school_descriptor) %>%
+  arrange(school_id) %>% 
+  mutate(n = 1,
+         school_descriptor = case_when(school_descriptor == 1 ~ "Public district",
+                                       school_descriptor == 2 ~ "Public charter",
+                                       school_descriptor == 3 ~ "Independent/private")) %>% 
+  pivot_wider(names_from = school_descriptor,
+              values_from = n, 
+              values_fill = 0) %>% 
+  select(-school_id)
+
+
+school_type_clusters <- cor(school_type_dat, 
+  clusters_by_school_wide %>% 
+  select(-school_id),
+  method = "spearman"
+)
+
+ggcorrplot(school_type_clusters, hc.order = FALSE, lab = TRUE, lab_size = 2) +
+    scale_fill_distiller(type = "div", limits = c(-1, 1), expand = c(0, 0)) +
+    labs(title = "Correlation between practice clusters\nand school type",
+         fill = "Correlation") +
+    #scale_x_discrete(labels = label_tags) +
+    #scale_y_discrete(labels = label_tags) +
+    labs(x = "", y = "") + 
+    #scale_fill_cc_gradient + 
+    theme_transcend_sparse + 
+#    scale_y_discrete(labels = label_clust) +
+    theme(
+      axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, size = rel(0.8)),
+      axis.text.y = element_text(size = rel(0.8)),
+      panel.border = element_blank(),
+      axis.ticks = element_blank()
+    )
+```
+
+# School Locale Breakdown (Rural, Suburban, Urban)
+
+
+```{r echo=TRUE, fig.width=10, message=FALSE}
+school_locale_dat <- full %>%
+  select(school_id, self_reported_locale_rural, self_reported_locale_urban, self_reported_locale_suburban) %>%
+  arrange(school_id) %>% 
+  select(-school_id)
+
+
+school_locale_clusters <- cor(school_locale_dat, 
+  clusters_by_school_wide %>% 
+  select(-school_id),
+  method = "spearman"
+)
+
+ggcorrplot(school_locale_clusters, hc.order = FALSE, lab = TRUE, lab_size = 2) +
+    scale_fill_distiller(type = "div", limits = c(-1, 1), expand = c(0, 0)) +
+    labs(title = "Correlation between practice clusters\nand school locale",
+         fill = "Correlation") +
+    scale_x_discrete(labels = c("Rural", "Urban", "Suburban")) +
+    #scale_y_discrete(labels = label_tags) +
+    labs(x = "", y = "") + 
+    #scale_fill_cc_gradient + 
+    theme_transcend_sparse + 
+#    scale_y_discrete(labels = label_clust) +
+    theme(
+      axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, size = rel(0.8)),
+      axis.text.y = element_text(size = rel(0.8)),
+      panel.border = element_blank(),
+      axis.ticks = element_blank()
+    )
+```
 
 # School Demographic Profile Breakdown (%BIPOC students and/or staff)
