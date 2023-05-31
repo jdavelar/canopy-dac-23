@@ -541,7 +541,7 @@ locale_leap_bump_long <- pivot_longer(school_leap_bump, cols = starts_with("leap
 
 avg_imp_data <- school_leap_bump %>%
   group_by(exclusive_locale) %>%
-  summarize(across(starts_with("leaps_"), mean, na.rm = TRUE), .groups = "drop")
+  summarise_at(vars(starts_with("leaps_")), mean, na.rm = TRUE, .groups = "drop")
 
 locale_avg_imp <- pivot_longer(avg_imp_data, cols = starts_with("leaps_"), names_to = "practice", values_to = "avg_imp")
 
@@ -700,7 +700,8 @@ locale_leap_bump_long <- pivot_longer(school_leap_bump, cols = starts_with("leap
 
 avg_rank_data <- school_leap_bump %>%
   group_by(exclusive_locale) %>%
-  summarize(across(starts_with("leaps_rank"), mean, na.rm = TRUE), .groups = "drop")
+  summarise_at(vars(starts_with("leaps_rank")), mean, na.rm = TRUE, .groups = "drop")
+
 
 locale_avg_rank <- pivot_longer(avg_rank_data, cols = starts_with("leaps_rank"), names_to = "practice", values_to = "avg_rank")
 
