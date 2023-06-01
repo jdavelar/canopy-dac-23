@@ -1,0 +1,323 @@
+---
+title: "Model & Condition Innovation (67,68,71,73)"
+author: "Merly Klaas"
+date: "2023-06-01"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+pacman::p_load(rio, here, tidyverse, ggrepel, DT)
+```
+
+```{r}
+
+#source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+model <- full %>% 
+  select(school_id, 
+         school_name, 
+         "BPL"=model_usage_bpl,
+         "ELE"=   model_usage_ele ,
+         "IB" = model_usage_ib,
+         "NTN" = model_usage_ntn,
+         "OP" =  model_usage_oc,
+         "SL" = model_usage_sl) 
+
+cond <- full %>% 
+  select(school_id,
+         school_name,
+         waiver_application)
+```
+```{r}
+#Temporary manual branding used code here as Open Sans font keep making trouble
+
+# main Transcend colors
+transcend_cols = c(
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
+)
+
+transcend_cols2 = c(
+  "#BC2582",
+  "#FFA630",
+  "#FFDE42",
+  "#99C24D",
+  "#218380",
+  "#D3B7D7"
+)
+
+transcend_grays = c(
+  "#4D4D4F",
+  "#9D9FA2",
+  "#D1D3D4"
+)
+
+```
+## Adopted Model
+```{r}
+#Check whether or not school implemented any adoptable models
+model %>% 
+  mutate(across(c(3:8),
+                ~ case_when(. > 0 ~ "Yes",TRUE ~ "No"))) %>% 
+  pivot_longer(cols = 3:8, 
+               names_to = "models",
+               values_to = "response") %>% 
+  ggplot(aes(x=models, 
+             fill=response))+
+  geom_bar(stat = "count", position = "dodge") + 
+   scale_fill_manual(name="",
+   values = transcend_cols) + 
+  geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 1), vjust = -1, size = 3) + 
+  labs(title = "How many schools reported implementing adoptable models?",
+       x= "Adopted Models") +
+  theme(
+    plot.title = element_text(family = "Bebas Neue", color = "black"),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text = element_text(colour = "black"),
+    axis.title.y = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
+  )
+```
+```{r}
+model %>% 
+mutate_all(~replace_na(.,0)) %>% 
+  pivot_longer(cols = 3:8, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0"))) %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(stat = "count", position = "fill") + 
+   geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            round= 1,
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3,
+            color = "white")+
+   scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "To what degree is your school utilizing any of the adoptable models listed below?",
+       ) +
+  theme(
+    plot.title = element_text(family = "Bebas Neue", color = "black"),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
+  ) 
+```
+
+```{r}
+model %>% 
+mutate_all(~replace_na(.,0)) %>% 
+  pivot_longer(cols = 3:8, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0"))) %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(position = "fill")+
+  geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), color="white", size =3)+
+   scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "To what degree is your school utilizing any of the adoptable models listed below?",
+       ) +
+  theme(
+    plot.title = element_text(family = "Bebas Neue", color = "black"),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
+  ) +
+  coord_flip()
+
+  
+```
+
+## Conditions of Innovation
+
+
+```{r}
+
+
+full %>% 
+  ggplot(aes(x = "", fill = as.factor(waiver_application)))+ 
+  geom_bar(position = "fill", width = 1, color = "white") + 
+  coord_polar(theta = "y", start = 180) +
+  
+  
+  
+  geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            round= 1,
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3)+
+  scale_fill_manual(name="",
+   values = transcend_cols2,
+    breaks=c("0", "1", "2", "3", "4", NA),
+    labels = c("No", 
+               "Yes, we have received a waiver", 
+               "Yes, we applied for a waiver, but did not receive it",
+               "Yes, we considered applying for a waiver, did not ultimately choose to apply", 
+               "Not sure",
+               "NA")) +
+  labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?",
+       ) +
+  theme(
+    plot.title.position = "plot",
+   plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8)
+  ) 
+
+  
+  
+
+```
+```{r eval=FALSE, include=FALSE}
+full %>%
+    select(political_impact) %>% 
+    drop_na() %>% 
+    count(political_impact) %>% 
+    mutate(perc = round(proportions(n) * 100, 1),
+           res = str_c(n ,"\n", "(", perc, ")%"),
+           political_impact = as.factor(political_impact)) %>% 
+  ggplot(aes(x = "", fill = as.factor(political_impact)))+ 
+  geom_bar(position = "fill", width = 0.2, color = "white") +
+  geom_text(aes(y = n, label=res), 
+            position= position_fill(vjust=1),
+            size=3)+
+coord_flip()+
+  scale_fill_manual(values=c("#FFA630", "#FFDE42", "#D1D3D4", "#99C24D","#218380"),
+   breaks=c("1", "2", "3", "4", "5"),
+   labels=c("Strongly Disagree",
+            "Disagree",
+            "Neither agree nor disagree",
+            "Agree",
+            "Strongly Agree"),
+   name="")+
+  labs(title = "To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
+  theme(
+     plot.title.position = "plot",
+     plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8)
+  )
+```
+
+```{r}
+
+full %>%
+    select(political_impact) %>% 
+    count(political_impact) %>% 
+  
+    mutate(perc = round(proportions(n) * 100, 1),
+           political_impact=recode(political_impact,
+                                   "1"="Strongly Disagree",
+                                   "2"="Disagree",
+                                   "3"="Neither agree nor disagree",
+                                   "4"="Agree",
+                                   "5"="Strongly Agree")) %>% 
+  datatable(caption = "To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission (with NA)", options = list(dom = 't'))
+
+```
+
+```{r}
+
+full %>% 
+  select(political_impact) %>% 
+  mutate(political_impact = factor(political_impact, levels = c("5", "4", "3", "2", "1"))) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = "", fill = as.factor(political_impact)))+ 
+  geom_bar(position = "fill", width = 0.2, color = "white") +
+    geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3)+
+  coord_flip()+
+  scale_fill_manual(values=c("#FFA630", "#FFDE42", "#D1D3D4", "#99C24D","#218380"),
+   breaks=c("1", "2", "3", "4", "5"),
+   labels=c("Strongly Disagree",
+            "Disagree",
+            "Neither agree nor disagree",
+            "Agree",
+            "Strongly Agree"),
+   name="")+
+  labs(title = "To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
+  theme(
+     plot.title.position = "plot",
+     plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8)
+  ) 
+
+  
+
+```
+
+
+ 
+
+
