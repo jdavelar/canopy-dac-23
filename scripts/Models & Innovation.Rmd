@@ -197,8 +197,7 @@ full %>%
                "Yes, we considered applying for a waiver, did not ultimately choose to apply", 
                "Not sure",
                "NA")) +
-  labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?",
-       ) +
+  labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
   theme(
     plot.title.position = "plot",
    plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
@@ -220,18 +219,19 @@ full %>%
   
 
 ```
-```{r eval=FALSE, include=FALSE}
+```{r}
 full %>%
     select(political_impact) %>% 
     drop_na() %>% 
     count(political_impact) %>% 
     mutate(perc = round(proportions(n) * 100, 1),
            res = str_c(n ,"\n", "(", perc, ")%"),
-           political_impact = as.factor(political_impact)) %>% 
-  ggplot(aes(x = "", fill = as.factor(political_impact)))+ 
-  geom_bar(position = "fill", width = 0.2, color = "white") +
-  geom_text(aes(y = n, label=res), 
-            position= position_fill(vjust=1),
+           political_impact = factor(political_impact, levels = c("5", "4", "3", "2", "1")),
+           category = "yes") %>% 
+  ggplot(aes( x= category, y=n, fill = as.factor(political_impact)))+ 
+  geom_bar(position = "stack", stat= "identity", color = "white", width = 0.2) + 
+  geom_text(aes(label=res),
+                position=position_stack(vjust=0.5),
             size=3)+
 coord_flip()+
   scale_fill_manual(values=c("#FFA630", "#FFDE42", "#D1D3D4", "#99C24D","#218380"),
@@ -249,6 +249,8 @@ coord_flip()+
     #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
     plot.background = element_blank(),
     axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text =element_blank(),
     panel.border = element_rect(colour = transcend_grays[1], fill = NA),
     strip.text = element_text(size = rel(0.8)),
     plot.margin = margin(10, 24, 10, 10, "pt"),
@@ -257,6 +259,7 @@ coord_flip()+
     legend.position = "bottom",
    legend.text=element_text(size=8)
   )
+
 ```
 
 ```{r}
@@ -277,6 +280,7 @@ full %>%
 ```
 
 ```{r}
+#with only pct label
 
 full %>% 
   select(political_impact) %>% 
