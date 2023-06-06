@@ -1,0 +1,55 @@
+---
+title: "Disaggregated Tagging Patterns"
+author: "Janette Avelar"
+date: '2023-06-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(rio)
+library(DT)
+#data
+load(here("data", "complete_canopy_2023.Rdata"))
+#branding
+source(here("scripts", "branding.R"))
+```
+
+#What are the top tags selected when disaggregated?
+
+##By locale
+
+```{r top tags by locale}
+disag_locale <- full %>% 
+  select(school_id, lo)
+```
+
+
+##By level
+
+##By school type
+
+##By leadership team
+
+##By designing for specific student groups
+
+###Multilingual students
+
+###Students classified as English Learners
+
+###Students with interrupted formal education
+
+###Newcomer students
+ (add the rest)
+
+#What are the top *core* tags selected when disaggregated?
+
+##By locale
+
+##By level
+
+##By school type
+
+##By leadership team

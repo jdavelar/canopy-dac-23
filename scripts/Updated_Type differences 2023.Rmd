@@ -41,19 +41,17 @@ District n= 102
 Independent = 36
 
 ```{r Type, echo=FALSE}
-library(gt)
-
-
 # Count the number of schools for each school descriptor
 school_counts <- schools %>%
   count(school_descriptor)
 
 # Load the necessary packages
-library(gt)
+# library(gt)
+# Karen: I used datatable() from {DT} instead because I was having issues with {gt}
 
 # Create the table
 school_counts_table <- school_counts %>%
-  mutate(school_descriptor = c("Charter", "District", "Independent")) %>%
+  mutate(school_descriptor = c("Charter", "District", "Independent")) #%>%
   gt() %>%
   tab_header(
     title = "Number of Schools by Descriptor"
