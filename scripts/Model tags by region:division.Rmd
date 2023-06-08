@@ -1,0 +1,176 @@
+---
+title: "Models_by_region"
+author: "Merly Klaas"
+date: "2023-06-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r library, include = FALSE}
+library(pacman)
+p_load(here, rio, janitor, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+#source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+region <- import(here("data", "us_census_bureau_regions_and_divisions.csv" )) %>% 
+  clean_names()
+
+
+```
+
+# Models
+
+The plot details the top 10 absolute effects for each demographic variable listed above, as drawn from Gregor's work.
+
+```{r}
+mod_prep <- full %>% 
+  select(school_id, school_state, school_descriptor, starts_with("practices_")) %>% 
+   pivot_longer(cols = c(starts_with("practices")),
+               names_to = "tag",
+               values_to = "value")
+
+mod_prep <- left_join(mod_prep, region, by = c("school_state"= "state"))
+
+```
+
+
+```{r}
+scale_x_reordered <- function(..., sep = "___") {
+  reg <- paste0(sep, ".+$")
+  ggplot2::scale_x_discrete(labels = function(x) gsub(reg, "", x), ...)
+}
+
+reorder_within <- function(x, by, within, fun = mean, sep = "___", ...) {
+  new_x <- paste(x, within, sep = sep)
+  stats::reorder(new_x, by, FUN = fun)
+}
+
+transcend_cols = c(
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
+)
+```
+
+
+```{r}
+one_vars = c("school_state", "region", "division")
+
+logistic_one_dat = 
+  mod_prep %>%
+  select(school_state,value, tag, one_of(one_vars)) %>%
+  na.omit() %>%
+  group_by(tag)
+one_form = as.formula(paste("value", "~", paste(one_vars, collapse = "+")))
+
+
+bayes_mods = list()
+
+library(scales)
+library(rstanarm)
+library(broom.mixed)
+library(gmodels)
+
+for(this_tag in unique(mod_prep$tag)) {
+  bayes_mods[[this_tag]] = stan_glm(
+    one_form,
+    data = filter(logistic_one_dat, tag == this_tag),
+    family = binomial(link = "logit"),
+    prior = student_t( #df and scale are recommended values of 7 & 2.5, respectively
+      df = 7,
+      location = 0,
+      scale = 2.5
+    )
+  )
+  
+}
+
+bayes_tidy = lapply(bayes_mods, tidy) %>%
+  bind_rows(.id = "response") %>%
+  filter(term != "(Intercept)")
+
+```
+
+```{r}
+## top 10 absolute effects per demo:
+
+bayes_facet_dat = bayes_tidy %>% 
+  group_by(term) %>%
+  arrange(desc(abs(estimate))) %>%
+  slice(1:10)
+
+bayes_facet = 
+  ggplot(bayes_facet_dat,
+    aes(y = exp(estimate),
+        x = reorder_within(response, estimate, within = term, fun = mean),
+    )) +
+  geom_col() + 
+  labs(y = "Odds multiplier",
+       x = "", 
+       #fill = "Demographic",
+       title = "Top 10 tags most/least related to each demographic") +
+  facet_wrap(~ term, scales = "free_y") +
+  scale_y_continuous(
+    trans = "log",
+    breaks = c(.0625, .125, .25, .5, 1, 2, 4, 8, 16),
+    labels = c("1/16", "1/8", "1/4", "1/2", "1", "2", "4", "8", "16"),
+    expand = expansion(0, 0)
+  ) +
+  scale_x_reordered() + 
+  coord_flip() +
+  guides(fill = "none") +
+  theme(axis.text = element_text(size = 8), strip.text = element_text(size = rel(0.6)),
+        panel.grid.major.y = element_blank(),
+        axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0))
+
+bayes_facet
+```
+
+Plot above is clunky, so I am separating into different plots:
+```{r}
+list_plot <- bayes_facet_dat %>% 
+  split(.$term) %>% 
+  map(~ggplot(., aes(y = exp(estimate), 
+             x = reorder_within(response, estimate, within = term, fun = mean)
+             )) +
+  geom_col() + 
+    scale_fill_manual(values = transcend_cols[1:2]) +
+  labs(y = "Odds multiplier",
+       x = "", 
+       #fill = "Demographic",
+       title = "Top 10 tags most/least related to each region/division") +
+  scale_y_continuous(
+    trans = "log",
+    breaks = c(.0625, .125, .25, .5, 1, 2, 4, 8, 16),
+    labels = c("1/16", "1/8", "1/4", "1/2", "1", "2", "4", "8", "16"),
+    expand = expansion(0, 0)
+  ) +
+  scale_x_reordered() + 
+  coord_flip() +
+  guides(fill = "none") +
+  theme(axis.text = element_text(size = 8), strip.text = element_text(size = rel(0.6)),
+        panel.grid.major.y = element_blank(),
+        axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0))
+  )
+
+
+
+file_names <- stringr::str_c(names(list_plot), ".png")
+
+```
+
+Run code below only to resave files
+```{r}
+pwalk(list(file_names, list_plot), ggsave, path = "output/modeling/")
+```
+
+```{r}
+list_plot
+```
+
+
+
+
