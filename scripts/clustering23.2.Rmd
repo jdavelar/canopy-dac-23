@@ -16,7 +16,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(pacman)
-p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors, ggthemes)
 source(here("scripts/branding.R"))
 load(here("data/complete_canopy_2023.RData"))
 ```
