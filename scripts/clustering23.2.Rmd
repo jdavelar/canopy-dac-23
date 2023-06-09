@@ -115,6 +115,22 @@ clusters_by_school_wide <- clusters_by_school %>%
          blended_flexible_learning = MR4)
 ```
 
+###### this chunk below is for Sarah####
+
+```{r}
+school_name_temp <- full %>% 
+  select(school_id, school_name, school_city, school_state)
+
+school_clust_temp <- left_join(clusters_by_school_wide, school_name_temp) %>% 
+  select(school_name, school_city, school_state, everything())
+
+
+
+```
+
+
+########################################
+
 ## All tags
 ```{r echo=TRUE, fig.width=10, message=FALSE}
 school_type_dat <- full %>%
