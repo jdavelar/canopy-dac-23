@@ -19,7 +19,11 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ```{r library, include = FALSE}
 library(pacman)
-p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors, broom)
+library(scales)
+library(rstanarm)
+library(broom.mixed)
+library(gmodels)
 source(here("scripts/branding.R"))
 load(here("data/complete_canopy_2023.RData"))
 ```
@@ -82,10 +86,6 @@ one_form = as.formula(paste("value", "~", paste(one_vars, collapse = "+")))
 
 bayes_mods = list()
 
-library(scales)
-library(rstanarm)
-library(broom.mixed)
-library(gmodels)
 
 for(this_tag in unique(mod_prep$tag)) {
   bayes_mods[[this_tag]] = stan_glm(
@@ -103,11 +103,11 @@ for(this_tag in unique(mod_prep$tag)) {
 
 bayes_tidy = lapply(bayes_mods, tidy) %>%
   bind_rows(.id = "response") %>%
-  filter(term != "(Intercept)") #%>%
-  # mutate(
-  #   nice_tag = label_tags(response),
-  #   nice_demog = factor(label_dems(term))
-  # )
+  filter(term != "(Intercept)") %>%
+  mutate(
+    nice_tag = label_tags()(response),
+    nice_demog = factor(label_dems(term))
+  )
 ```
 
 ```{r}
@@ -121,12 +121,12 @@ bayes_facet_dat = bayes_tidy %>%
 bayes_facet = 
   ggplot(bayes_facet_dat,
     aes(y = exp(estimate),
-        x = reorder_within(response, estimate, within = term, fun = mean),
+        x = reorder_within(response, estimate, within = term, fun = mean)
     )) +
-  geom_col() + 
+  geom_col(aes(fill = term)) + 
   labs(y = "Odds multiplier",
        x = "", 
-       #fill = "Demographic",
+       fill = "Demographic",
        title = "Top 10 tags most/least related to each demographic") +
   facet_wrap(~ term, scales = "free_y") +
   scale_y_continuous(
