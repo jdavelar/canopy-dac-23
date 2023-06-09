@@ -1,0 +1,66 @@
+---
+title: "Innovation Frequency and Duration"
+output: html_document
+date: "2023-06-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors)
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+
+ragg_png = function(..., res = 192) {
+  ragg::agg_png(..., res = res, units = "in")
+}
+knitr::opts_chunk$set(dev = "ragg_png", fig.ext = "png")
+
+```
+
+```{r}
+core_order = c("Not a core practice", "Less than a year", "1-2 years", "3-4 years", "5+ years", "Not sure")
+core_length_lookup = data.frame(
+  value = 0:5,
+  label = factor(core_order, levels = core_order)
+)
+
+core_lengths = tags |> 
+  select(school_id, starts_with("time")) |>
+  pivot_longer(
+    cols = -school_id,
+    names_to = "core_practice"
+  ) |>
+  left_join(core_length_lookup, by = "value")
+
+core_lengths_plot_data = core_lengths |>
+  filter(value %in% 1:4) |>
+  mutate(
+    time_order = mean(value),
+    n = n(), 
+    .by = school_id
+  ) |>
+  arrange(time_order, n) |> 
+  mutate(
+    school_id = fct_inorder(as.character(school_id))
+  )
+```
+
+  
+```{r, fig.height=10}
+ggplot(core_lengths_plot_data,
+       aes(y = school_id, fill = label)) +
+  geom_bar() +
+  labs(
+    x = "Number of Core Practices",
+    y = "School",
+    fill = ""
+  ) +
+  scale_x_discrete(expand = expansion(0, 0)) +
+  scale_fill_manual(values = transcend_cols[c(3, 1, 2, 4)]) +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+```
+
