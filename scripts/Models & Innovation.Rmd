@@ -50,7 +50,7 @@ cond <- full %>%
          waiver_application)
 ```
 
-```{r}
+```{r include=FALSE}
 #Temporary manual branding used code here as Open Sans font keep making trouble
 
 # main Transcend colors
@@ -132,6 +132,11 @@ transcend_grays = c(
   ) 
   }
   
+  scale_y_reordered <- function(..., sep = "___") {
+  reg <- paste0(sep, ".+$")
+  ggplot2::scale_y_discrete(labels = function(x) gsub(reg, "", x), ...)
+}
+  
 ```
 Check missing values 
 ```{r}
@@ -151,11 +156,11 @@ model %>%
 
 ```
 
-
-
 ## Adopted Model
+### "How many schools reported implementing adoptable models?"
 
 For this graph, I recoded the response of 1 (somewhat) & 2 (to a large extent) to be* **YES**, and response of 0 and missing values to be **NO**
+
 ```{r}
 #Check whether or not school implemented any adoptable models
 model %>% 
@@ -204,7 +209,7 @@ mutate_if(is.numeric , replace_na, replace = 0) %>%
 ```
 
 
-Based on Locale
+### Based on Locale: Adopted models
 
 ```{r fig.height=8, fig.width=8}
 model %>%
@@ -235,6 +240,8 @@ mutate_if(is.numeric , replace_na, replace = 0) %>%
 
 ```
 
+### Adopted Models : High school vs Non high school
+
 ```{r fig.height=6, fig.width=8}
 model %>%
 mutate_if(is.numeric , replace_na, replace = 0) %>% 
@@ -264,7 +271,6 @@ mutate_if(is.numeric , replace_na, replace = 0) %>%
 ```
 
 
-
 ## Conditions of Innovation
 
 The majority of school/system in this sample did not consider applying for a waiver. 
@@ -272,6 +278,8 @@ The majority of school/system in this sample did not consider applying for a wai
 ```{r}
 full %>% 
   select(waiver_application) %>% 
+  filter(waiver_application != "4") %>% 
+  drop_na() %>% 
   ggplot(aes(x ="", fill = as.factor(waiver_application)))+ 
   geom_bar(position = "fill", width = 1, color = "white") + 
   coord_polar(theta = "y", start = 180) +
@@ -282,13 +290,11 @@ full %>%
             size = 3)+
   scale_fill_manual(name="",
    values = transcend_cols2,
-    breaks=c("0", "1", "2", "3", "4", NA),
-    labels = c("No", 
-               "Yes, we have received a waiver", 
-               "Yes, we applied for a waiver, but did not receive it",
-               "Yes, we considered but did not apply", 
-               "Not sure",
-               "NA")) +
+    breaks=c("3","1","2","0"),
+    labels = c("Consider, but did not apply",
+                "Applied & Received",
+                "Applied, but did not receive it",
+                "No"))+
   scale_y_continuous(expand = c(0,0))+
   labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
   theme_3()
@@ -296,25 +302,28 @@ full %>%
   
 ```
 
-Figure By State
+### Conditions of Innovation: Policy Waiver Application Figure By State
+
+
 
 ```{r fig.height=8, fig.width=8}
 full %>% 
   select(school_state, waiver_application) %>% 
+  filter(waiver_application != "4") %>% 
   drop_na() %>% 
-  ggplot(aes(x = school_state, fill = as.factor(waiver_application)))+ 
+  ggplot(aes(x = fct_reorder(school_state, waiver_application), fill = as.factor(waiver_application)))+ 
   geom_bar(position = "fill", width = 1, color = "white") + 
 #  coord_polar(theta = "y", start = 180) +
  geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), color="black", size = 3)+
   scale_fill_manual(name="",
    values = transcend_cols2,
-    breaks=c("0", "1", "2", "3", "4", NA),
-    labels = c("No", 
-               "Applied & Received", 
-               "Applied but did not receive it",
-               "Consider but not apply", 
-               "Not sure",
-               "NA")) +
+    breaks=c("3","1","2","0"),
+    labels = c("Consider, but did not apply",
+                "Applied & Received",
+                "Applied, but did not receive it",
+                "No"))+
+              # "Not sure",
+              # "NA")) +
    scale_y_reordered() +
   scale_y_continuous(expand = c(0,0))+
   labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
@@ -322,7 +331,7 @@ full %>%
   theme_3()
 ```
 
-Waiver Application by Locale
+### Conditions of Innovation: Policy Waiver Application by Locale
 
 
 ```{r}
@@ -331,7 +340,8 @@ model %>%
                names_to = "category", 
                values_to = "count",
                names_prefix= "self_reported_locale_") %>% 
-  filter(count == "1") %>% 
+  filter(count == "1",
+         waiver_application != "4") %>% 
   drop_na() %>% 
   ggplot(aes(x = category, fill = as.factor(waiver_application)))+ 
   geom_bar(position = "fill", width = 0.5, color = "white") + 
@@ -343,20 +353,18 @@ model %>%
             size = 3)+
   scale_fill_manual(name="",
    values = transcend_cols2,
-    breaks=c("0", "1", "2", "3", "4", NA),
-    labels = c("No", 
-               "Applied & Received", 
-               "Applied but did not receive it",
-               "Consider but not apply", 
-               "Not sure",
-               "NA")) +
+     breaks=c("3","1","2","0"),
+    labels = c("Consider, but did not apply",
+                "Applied & Received",
+                "Applied, but did not receive it",
+                "No"))+
   scale_y_continuous(expand = c(0,0))+
   labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
   coord_flip()+
   theme_3()
 ```
 
-
+### How did schools respond to the question about political debates? 
 
 ```{r}
 full %>%
@@ -400,23 +408,19 @@ full %>%
   datatable(caption = "To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission (with NA)", options = list(dom = 't'))
 
 ```
-
+### Political Debates by State
 ```{r fig.height=8, fig.width=8}
-
-
-  
 full %>%
     select(school_state,political_impact) %>% 
   drop_na() %>% 
     mutate(
            political_impact = factor(political_impact, levels = c("5", "4", "3", "2", "1"))) %>%
-  ggplot(aes( x=(school_state), fill=as.factor(political_impact)))+ 
+  ggplot(aes( x=fct_reorder(school_state, as.numeric(political_impact)), fill=as.factor(political_impact)))+ 
   geom_bar(stat= "count", 
            position = "fill")+
    geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), size =3)+
   labs(title = "By State: To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
   scale_y_continuous(expand = c(0,0))+
-   scale_y_reordered() +
   scale_fill_manual(values=c("#FFA630", "#FFDE42", "#D1D3D4", "#99C24D","#218380"),
    breaks=c("1", "2", "3", "4", "5"),
    labels=c("Strongly Disagree",
@@ -428,7 +432,7 @@ full %>%
   coord_flip() + 
   theme_2()
 ```
-
+### Political Debates by Locale
 ```{r}
 model %>%
   pivot_longer(cols = starts_with("self_"),
@@ -462,7 +466,7 @@ model %>%
 ```
 
 
-
+### Political Debates High School - Non high school
 ```{r}
 full %>%
     select(school_state, grades_high, political_impact) %>% 
