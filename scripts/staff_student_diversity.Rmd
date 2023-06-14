@@ -1,0 +1,366 @@
+---
+title: "staff_student_diversity"
+author: "Merly Klaas"
+date: "2023-06-08"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r include=FALSE}
+library(pacman)
+p_load(here, rio, janitor, purrr, tidyverse,parameters, DT, nFactors, stringr, forcats)
+#source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+region <- import(here("data", "us_census_bureau_regions_and_divisions.csv" )) %>% 
+  clean_names()
+transcend_cols = c(
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
+)
+
+transcend_grays = c(
+  "#4D4D4F",
+  "#9D9FA2",
+  "#D1D3D4"
+)
+
+ theme_2 <- function() {
+   theme(
+     plot.title.position = "plot",
+     plot.title = element_text(family = "Bebas Neue", color = "black", face="bold"),
+    plot.subtitle = element_text(family = "Sans", size = rel(0.8), face ="italic"),
+    plot.background = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], 
+                                fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8),
+   axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x =element_blank(),
+  )
+    }
+  
+ 
+ theme_3 <- function() {
+ theme(
+     plot.title.position = "plot",
+     plot.title = element_text(family = "Bebas Neue", color = "black", face="bold"),
+    plot.subtitle = element_text(family = "Sans", size = rel(0.8), face ="italic"),
+    plot.background = element_rect(fill="transparent", color=NA),
+    panel.background = element_rect(fill='transparent'),
+    panel.border = element_rect(colour = transcend_grays[1], 
+                               fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+   plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8),
+   axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x =element_blank()
+  )}
+```
+
+```{r}
+
+dat <- full %>% 
+  select(school_id, 
+         school_state, 
+         leadership_diversity, 
+         teaching_diversity, 
+         pct_bipoc, 
+         self_reported_locale_rural,
+         self_reported_locale_suburban,
+         self_reported_locale_urban,
+         self_reported_locale_multiple) %>% 
+  drop_na(pct_bipoc) %>% 
+  filter(leadership_diversity != 0,
+         teaching_diversity != 0) %>% 
+  mutate(scale_bipoc = case_when(pct_bipoc<25 ~ 1,
+                                 pct_bipoc>25 & pct_bipoc <50 ~ 2, 
+                                 pct_bipoc >49 & pct_bipoc<75 ~ 3, 
+                                 pct_bipoc >74 ~ 4, TRUE ~ NA), 
+         lead_stu_div = scale_bipoc/leadership_diversity,
+         teach_stu_div = scale_bipoc/teaching_diversity,
+         lead_stu_prop = case_when(lead_stu_div < "1" ~ "Overly Representative",
+                                   lead_stu_div == 1 ~ "Equally Representative",
+                                   lead_stu_div > 1 & lead_stu_div < 3 ~ "Under Representative",
+                                   teach_stu_div >=3  ~ "Severely under representative",
+                                   TRUE ~ NA),
+         teach_stu_prop = case_when(teach_stu_div < "1" ~ "Overly Representative",
+                                   teach_stu_div == 1 ~ "Equally Representative",
+                                   teach_stu_div > 1 & teach_stu_div < 3 ~ "Under Representative",
+                                   teach_stu_div >=3  ~ "Severely under representative",
+                                   TRUE ~ NA)) 
+              
+```
+
+### Leadership & Teaching Team VS Student Diversity
+
+In this figure, I wanted to show the ratio of Bipoc student compared to Bipoc teaching team / leadership team. Teaching team and Leadership team racial/ethnicity data were collected with four options: 1 = 0-24%, 2= 25-49%, 3= 50-74%, and  4= 75-100 % (I dropped NA and refuse to answer response). While we have the raw % of bipoc students. To have an equal comparison to leadership/teaching staff, I converted raw % of bipoc student into the same scale with four options (1-4). I then, created new variable of the scale of bipoc student on bipoc staff ratio by dividing bipoc student scale on bipoc staff. Lastly, I created another variable with four categories and created a bar chart showing #n of school within these categories: 
+
++ Severely under representative if ratio = 3:1 - 4:1
++ Under Representative if ratio 2:1
++ Equally Representative 1:1
++ Over Representative if staff team is more diverse"
+
+```{r fig.height=7, fig.width=7}
+dat %>% 
+  drop_na(lead_stu_prop) %>% 
+  ggplot(aes(x= factor(lead_stu_prop, levels = c("Severely under representative",
+                                                 "Under Representative",
+                                                 "Equally Representative",
+                                                 "Overly Representative")), 
+             fill = lead_stu_prop))+
+  geom_bar(stat = "count", position = "dodge") + 
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -1, size = 3) + 
+  labs(title = "How representative are leadership teams of the student populations they serve? \nRatio of BIPOC Students Compared to BIPOC Teaching Team",
+       x="") +
+   scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("Severely under representative",
+                              "Under Representative",
+                              "Equally Representative",
+                              "Overly Representative"),
+  labels = c("Severely under representative \n(3:1 - 4:1)",
+             "Under Representative \n(2:1)",
+             "Equally Representative \n(1:1)",
+             "Overly Representative \n(Leadership team is more diverse)"))+
+  theme_2()
+
+dat %>% 
+  drop_na(teach_stu_prop) %>% 
+  ggplot(aes(x= factor(teach_stu_prop, levels = c("Severely under representative",
+                                                  "Under Representative",
+                                                  "Equally Representative",
+                                                  "Overly Representative")), 
+             fill = teach_stu_prop))+
+  geom_bar(stat = "count", position = "dodge") + 
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -1, size = 3) + 
+  labs(title = "How representative are teaching teams of the student populations they serve? \nRatio of BIPOC Students Compared to BIPOC Teaching Team",
+       x="") +
+   scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("Severely under representative",
+                              "Under Representative",
+                              "Equally Representative", 
+                              "Overly Representative"),
+                     labels = c("Severely under representative \n3:1 - 4:1",
+                                "Under Representative \n2:1","Equally Representative \n1:1",
+                                "Over Representative \nTeaching team is more diverse"))+
+  theme_2()
+
+```
+
+### School Leader vs Student Diversity gap
+
+I extracted leaders' race and recoded them into Bipoc/non-bipoc for each school as binary variable (coded 1 for Bipoc). Then, I calculated percentage of Bipoc leader within each school. I joined this data with percent bipoc student in each school. 
+
+In the first graph, I calculated overall percentage of bipoc leaders and bipoc students, then visualized it as bar graph. 
+
+```{r include=FALSE}
+dat2 <- confidential %>% 
+  select(school_id, ends_with("race")) %>% 
+  pivot_longer(cols = 2:12,
+               names_to = "leader",
+               names_pattern = "leader(.*)_race",
+                values_to = "race") %>% 
+  drop_na() %>% 
+  filter(race != 0) %>% 
+  mutate(leader_bipoc = case_when(race == 6 ~ 0,
+                                  TRUE ~ 1)) %>% 
+  group_by(school_id) %>% 
+  mutate( pct_leader_bipoc = round(mean(leader_bipoc)*100,0)) %>% 
+  distinct(school_id, .keep_all=TRUE )
+
+stud_bipoc <- full %>% 
+  select(school_id, school_state, pct_bipoc)
+
+dat2<- left_join(dat2, stud_bipoc) %>% 
+  drop_na(pct_bipoc)
+               
+```
+
+
+
+
+```{r}
+dat2 %>% 
+  pivot_longer(cols = c(pct_leader_bipoc, pct_bipoc),
+               names_to = "category",
+               values_to = "pct") %>% 
+  group_by(category) %>% 
+  summarise(percent_total = mean(pct)) %>% 
+  ggplot(aes(x=category, y=percent_total, fill = category)) +
+  geom_col(width = .5)+ 
+  geom_text(aes(x=category, y=percent_total, label = paste(round(percent_total,0),"%")), vjust= -.1)+ 
+  scale_fill_manual(name ="",
+                    values = transcend_cols,
+                    labels=c("% Non-white student","% Non-white Leader"))+ 
+  labs(title = "School Leader & Student Diversity Gap (Canopy School Sample)",
+            subtitle = "66% of all students identify as Non-white while only 42% of all leaders identify as Non-white") + 
+  theme_2()
+
+
+```
+
+In the second graph, I grouped by state and calculated percent total of bipoc leader and student in each state. I visualized them as dumbbell plot to highlight the racial diversity gap between school leader and student. 
+
+
+```{r fig.height=8, fig.width=8}
+dat2 %>% 
+  pivot_longer(cols = c(pct_leader_bipoc, pct_bipoc),
+               names_to = "category",
+               values_to = "pct") %>% 
+  group_by(school_state, category) %>% 
+  summarise(percent_total = mean(pct)) %>% 
+  drop_na() %>% 
+  ggplot()+ 
+  geom_line(aes(x=percent_total, 
+                y = fct_reorder(school_state,percent_total), 
+                group = school_state),
+                linetype= "dotted", 
+            color = "gray") +
+  geom_text(aes(x=percent_total, y=school_state, label = round(percent_total,0)),
+               nudge_x = 2, 
+            size = 3, 
+            family = "sans") +
+  geom_point(aes(x=percent_total, 
+                 y = fct_reorder(school_state,percent_total),
+                 color = category), 
+             size=3, 
+             show.legend = TRUE) +
+  scale_color_manual(name ="",
+                    values = transcend_cols,
+                    breaks = c("pct_leader_bipoc","pct_bipoc"),
+                    labels=c("% BIPOC Leader","% BIPOC Student"))+ 
+  labs(title = "School Leader & Student Diveristy Gap (Canopy School Sample)") +
+  theme_3()
+   
+  
+```
+
+### Mean comparison
+
+```{r include=FALSE}
+anova_dat <- dat %>% 
+  left_join(dat2) %>% 
+  mutate(self_reported_locale_rural = case_when(self_reported_locale_multiple == "1" ~ 0, TRUE ~ self_reported_locale_rural),
+         self_reported_locale_urban = case_when(self_reported_locale_multiple == "1" ~ 0, TRUE ~ self_reported_locale_urban),
+         self_reported_locale_suburban = case_when(self_reported_locale_multiple == "1" ~ 0, TRUE ~ self_reported_locale_suburban)) %>% #recode if select multiple, other locale = 0
+pivot_longer(cols = starts_with("self_"),
+               names_to = "locale", 
+               values_to = "count",
+               names_prefix= "self_reported_locale_") %>% 
+  filter(count != 0) %>% 
+ # mutate_at(vars(c("leadership_diversity", "teaching_diversity", "scale_bipoc", "pct_leader_bipoc", "pct_bipoc")), scale) %>% 
+  pivot_longer(cols = c(leadership_diversity, teaching_diversity, scale_bipoc, pct_leader_bipoc, pct_bipoc),
+               names_to = "category", 
+               values_to = "pct")
+  
+  
+```
+
+### t-test: 
+#### *Does the % of BIPOC leader is significantly different than the % of Bipoc Student?* 
+
+Yes! Overall, the percentage of BIPOC leader is significantly lower than the % of Bipoc Student.
+```{r}
+t1 <- anova_dat %>% 
+  filter(category == "pct_leader_bipoc" | category == "pct_bipoc")
+  t.test(pct ~ category, data=t1)
+
+t1 %>% 
+  ggplot(aes(category, pct, fill=category))+
+  geom_boxplot()+
+  scale_fill_manual(values = transcend_cols)+ 
+  theme_2()
+
+t1 %>% 
+  ggplot(aes(category, pct, fill=locale))+
+  geom_boxplot()+
+  scale_fill_manual(values = transcend_cols)
+
+
+  
+  
+```
+
+#### *Does the scaled number of BIPOCof BIPOC teaching team is significantly different than Bipoc Student?* 
+
+**Yes! Overall, the percentage of BIPOC teaching team is significantly lower than the % of Bipoc Student.**
+
+Remember that for teaching & leadership team diversity, we use 1 - 4, so does the scale_bipoc 
+
+```{r}
+
+t2 <- anova_dat %>% 
+  filter(category == "teaching_diversity" | category == "scale_bipoc",
+         pct != 5) #answer not sure)
+
+t.test(pct ~ category, data=t2)
+
+
+
+t2 %>% 
+  ggplot(aes(category, pct, fill=category))+
+  geom_boxplot()+
+  scale_fill_manual(values = transcend_cols)+ 
+  theme_2()
+
+
+```
+
+#### *Does the scaled number of BIPOC Leadership team is significantly different than  Bipoc Student?* 
+
+**Yes! Overall, the scaled number of BIPOC Leadership team is significantly lower than the Bipoc Student.**
+```{r}
+t3 <- anova_dat %>% 
+  filter(category == "leadership_diversity" | category == "scale_bipoc",
+         pct != 5) #answer not sure)
+
+t.test(pct ~ category, data=t3)
+
+
+t3 %>% 
+  ggplot(aes(category, pct, fill=category))+
+  geom_boxplot()+
+  scale_fill_manual(values = transcend_cols)+ 
+  theme_2()
+
+```
+
+ 
+### Anova / F Test
+ 
+```{r}
+
+model1 <- aov(pct ~ category * locale, data = t1)
+summary(model1)
+
+
+```
+
+
