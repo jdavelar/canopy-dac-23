@@ -60,6 +60,23 @@ mod_prep <- mod_prep %>%
 
 one_vars = c("self_reported_total_enrollment", "black_percent", "hispanic_percent", "white_percent", "native_percent", "asian_percent", "locale_urban", "locale_rural", "locale_suburban", "frpl_percent", "swd_percent", "ell_percent", "school_descriptor", "grades_prek", "grades_elementary", "grades_middle", "grades_high")
 
+## below is filtering on tags that have been selected at least 25 times
+mod_prep %>% 
+  group_by(tag, value) %>% 
+  summarise(val = n()) %>% 
+  arrange(val) %>% 
+  filter(val <= 25)
+
+## we see that low select tags are the following
+low_select_tags <- c("practices_other_leaders", "practices_heritage_language", "practices_enriched_virtual",
+                     "practices_translanguaging", "practices_flipped_classroom")
+
+## remove them for our analysis
+
+mod_prep <- mod_prep %>% 
+  filter(!(tag %in% low_select_tags))
+
+
 logistic_one_dat = 
   mod_prep %>%
   select(value, tag, one_of(one_vars)) %>%
@@ -178,7 +195,7 @@ file_names <- stringr::str_c(names(list_plot), ".png")
 
 Run code below only to resave files
 ```{r}
-# pwalk(list(file_names, list_plot), ggsave, path = "output/modeling2/")
+# pwalk(list(file_names, list_plot), ggsave, path = "output/modeling_low_tag_removed/")
 ```
 
 ```{r}
