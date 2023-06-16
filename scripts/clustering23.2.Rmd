@@ -49,9 +49,17 @@ efa_max <- efa_4 %>%
                          Variable %in% child_leadership ~ "child_leadership",
                          Variable %in% child_blended ~ "child_blended"))
 
+cluster_pracs <- efa_max %>% 
+  rename(holistic_student_justice = MR2,
+         postsec_pathways_world = MR3,
+         blended_flexible_learning = MR4,
+         learning_mastery = MR1
+         )
+
 efa_max %>%
   datatable(caption = "Max loadings") %>%
   formatRound(digits = 2, columns = 2:7) 
+
 
 efa_4 %>%
   model_parameters(sort = TRUE, threshold = 0.28) %>%
@@ -124,7 +132,24 @@ school_name_temp <- full %>%
 school_clust_temp <- left_join(clusters_by_school_wide, school_name_temp) %>% 
   select(school_name, school_city, school_state, everything())
 
+learning_mastery_schools <- school_clust_temp %>% 
+  arrange(-learning_mastery) %>% 
+  head(10)
 
+holistic_student_justice_schools <- school_clust_temp %>% 
+  arrange(-holistic_student_justice) %>% 
+  head(10)
+
+postsec_pathways_world_schools <- school_clust_temp %>% 
+  arrange(-postsec_pathways_world) %>% 
+  head(10)
+
+blended_flexible_learning_schools <- school_clust_temp %>% 
+  arrange(-blended_flexible_learning) %>% 
+  head(10)
+```
+
+```{r}
 
 ```
 
