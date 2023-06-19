@@ -23,26 +23,499 @@ source(here("scripts", "branding.R"))
 
 ```{r top tags by locale}
 disag_locale <- full %>% 
-  select(school_id, lo)
+  select(school_id, locale = exclusive_locale, starts_with("practices")) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(locale, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  group_by(locale) %>% 
+  arrange(desc(n), .by_group = TRUE) %>% 
+  slice(1:5)
+# urban
+urban_plot <- disag_locale %>% 
+  filter(locale == "Urban") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Urban Schools",
+       x = "",
+       y = "percentage of urban schools")
+urban_plot
+# suburban
+suburban_plot <- disag_locale %>% 
+  filter(locale == "Suburban") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Suburban Schools",
+       x = "",
+       y = "percentage of suburban schools")
+suburban_plot
+# rural
+rural_plot <- disag_locale %>% 
+  filter(locale == "Rural") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[3]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Rural Schools",
+       x = "",
+       y = "percentage of rural schools")
+rural_plot
+# mixed
+mixed_plot <- disag_locale %>% 
+  filter(locale == "Multiple") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[4]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Schools Serving\nStudents from all Geographic Locales",
+       x = "",
+       y = "percentage of mixed schools")
+mixed_plot
 ```
 
 
 ##By level
 
+```{r top tags by level}
+#prekindergarten
+disag_pk <- full %>% 
+  select(school_id, grades_prek, starts_with("practices")) %>% 
+  filter(grades_prek == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5) %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Pre-Kindergarten Schools",
+       x = "",
+       y = "percentage of prek schools")
+disag_pk
+# elementary schools
+disag_elem <- full %>% 
+  select(school_id, grades_elementary, starts_with("practices")) %>% 
+  filter(grades_elementary == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5) %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Elementary Schools",
+       x = "",
+       y = "percentage of elementary schools")
+disag_elem
+#middle schools
+disag_middle <- full %>% 
+  select(school_id, grades_middle, starts_with("practices")) %>% 
+  filter(grades_middle == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5) %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[3]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Middle Schools",
+       x = "",
+       y = "percentage of middle schools")
+disag_middle
+#high schools
+disag_high <- full %>% 
+  select(school_id, grades_high, starts_with("practices")) %>% 
+  filter(grades_high == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5) %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[4]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in High Schools",
+       x = "",
+       y = "percentage of high schools")
+disag_high
+```
+
+
 ##By school type
+
+```{r top tags by type}
+disag_type <- full %>% 
+  select(school_id, type = school_descriptor, starts_with("practices")) %>% 
+  mutate(type = case_when(
+    type == 1 ~ "District",
+    type == 2 ~ "Charter",
+    type == 3 ~ "Independent"
+  )) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(type, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  group_by(type) %>% 
+  arrange(desc(n), .by_group = TRUE) %>% 
+  slice(1:5)
+#Public district schools
+district_plot <- disag_type %>% 
+  filter(type == "District") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Public District Schools",
+       x = "",
+       y = "percentage of district schools")
+district_plot
+#Public charter schools
+charter_plot <- disag_type %>% 
+  filter(type == "Charter") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Public Charter Schools",
+       x = "",
+       y = "percentage of charter schools")
+charter_plot
+#Independent schools
+independent_plot <- disag_type %>% 
+  filter(type == "Independent") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[3]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Independent (Private) Schools",
+       x = "",
+       y = "percentage of independent schools")
+independent_plot
+```
+
+
+##By descriptors
+
+These plots are somewhat misleading and probably should not be displayed due to low N. For homeschools in particular, because there were only 4 schools that described themselves that way and 6 instances where they all selected the same tags, the plot displays a full 100% barchart for all 6 tags. Drawing any conclusions from this would not be a good idea, though.
+
+For reference:
+*homeschool N = 4  
+*hybrid N = 21  
+*microschool N =   
+*school-within-school N =   
+*virtual N =    
+
+```{r top tags by other descriptors}
+#homeschool
+disag_homeschool <- full %>% 
+  select(school_id, homeschool = school_descriptor_homeschool, starts_with("practices")) %>% 
+  filter(homeschool == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:6) %>% #pulled 6 because #5 had a tie with another practice -6 tags had 100% selection
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Homeschools",
+       subtitle = "Interpret with caution: only 4 homeschools",
+       x = "",
+       y = "percentage of homeschools")
+disag_homeschool
+#hybrid
+disag_hybrid <- full %>% 
+  select(school_id, hybrid = school_descriptor_hybrid, starts_with("practices")) %>% 
+  filter(hybrid == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:4) %>% #pulled 4 because 7 tags shared #5 spot
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Hybrid Schools",
+       x = "",
+       y = "percentage of hybrid schools")
+disag_hybrid
+#microschool
+disag_micro <- full %>% 
+  select(school_id, micro = school_descriptor_microschool, starts_with("practices")) %>% 
+  filter(micro == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:5) %>% #top 5 had same rate of selection (87%)
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[3]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Microschools",
+       subtitle = "The top 5 tags selected for microschools shared the same\nrate of selection",
+       x = "",
+       y = "percentage of microschools")
+disag_micro
+#school within school
+disag_sws <- full %>% 
+  select(school_id, sws = school_descriptor_sws, starts_with("practices")) %>% 
+  filter(sws == 1) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:6) %>% #pulled 6 because tie at spot #5
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[4]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Schools-within-schools",
+       x = "",
+       y = "percentage of school-within-schools")
+disag_sws
+#virtual
+```
 
 ##By leadership team
 
+I collapsed leadership team diversity variable in two:  
+*predominantly White = 0-49% BIPOC leadership  
+*predominantly BIPOC = 50% + BIPOC leadership
+
+```{r top tags by leadership diversity}
+disag_lead <- full %>% 
+  select(school_id, lead = leadership_diversity, starts_with("practices")) %>% 
+  filter(!lead == 0) %>% 
+  filter(!lead == 5) %>% 
+  mutate(lead = case_when(
+    (lead == 1 | lead == 2) ~ "PWI",
+    (lead == 3 | lead == 4) ~ "BIPOC"
+  )) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(lead, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  group_by(lead) %>% 
+  arrange(desc(n), .by_group = TRUE) %>% 
+  slice(1:6) #tie at spot #5 for both groups
+#predominantly white
+pwled_plot <- disag_lead %>% 
+  filter(lead == "PWI") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Schools led by Predominantly White Leadership Team",
+       x = "",
+       y = "percentage of schools")
+pwled_plot
+#BIPOC-led
+bipocled_plot <- disag_lead %>% 
+  filter(lead == "BIPOC") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Schools led by Predominantly BIPOC Leadership Team",
+       x = "",
+       y = "percentage of schools")
+bipocled_plot
+```
+
+
 ##By designing for specific student groups
 
+The plots below pull from all schools that selected `design to meet the needs of students who have been marginalized` and the follow-up question which asks them to specify *which* marginalized student group they are designing for.
+
 ###Multilingual students
+
+```{r top tags for design ML students}
+disag_ml <- full %>% 
+  select(school_id, ml = focus_multilingual, starts_with("practices")) %>% 
+  filter(ml == 1) %>% 
+  select(!practices_design_marginalized) %>% #dropping since all will have chosen
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1:6) %>% #pulled 6 because tie at spot #5
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[4]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Practices in Schools Designing for Multilingual students",
+       x = "",
+       y = "percentage of schools")
+disag_ml
+```
+
 
 ###Students classified as English Learners
 
 ###Students with interrupted formal education
 
 ###Newcomer students
- (add the rest)
+
+###BIPOC students
+
+###Economically disadvantaged students
+
+###Students in the foster care system
+
+###Students experiencing houselessness
+
+###Students in the juvenile justice system
+
+###Students with disabilities
 
 #What are the top *core* tags selected when disaggregated?
 
