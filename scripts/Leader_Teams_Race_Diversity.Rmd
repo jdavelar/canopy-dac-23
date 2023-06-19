@@ -562,4 +562,168 @@ school_lead_div_gen %>%
 ```{r}
 
 
+locale <- full %>% 
+  select(school_name, exclusive_locale) %>% 
+  mutate(rate = rep(1, 251)) %>% 
+  group_by(exclusive_locale) %>% 
+  summarize(N = sum(rate)) %>% 
+  rename(`Geographic Locale` = exclusive_locale)
+
+#########################################################
+
+locale_state <- full %>% 
+  select(school_name, exclusive_locale, school_state) %>% 
+  mutate(rate = rep(1, 251)) %>% 
+  group_by(exclusive_locale, school_state) %>% 
+  summarize(N = sum(rate)) %>% 
+  rename(`Geographic Locale` = exclusive_locale,
+         `State` = school_state)
+
+#########################################################
+
+# I am stuck on counting this one correctly
+
+# locale_level <- full %>% 
+#   select(starts_with("grades_"), school_name, exclusive_locale) %>%
+#   group_by(exclusive_locale) %>%
+#   mutate(across(starts_with("grades_"), ~ sum(.x, na.rm = TRUE))) %>% 
+#   pivot_longer(cols = starts_with("grades"),
+#                names_to = "School level",
+#                values_to = "N") %>%
+#   group_by(exclusive_locale, `School level`) %>%
+#   summarize(N = n()) %>% 
+#   rename(`Geographic Locale` = exclusive_locale)
+
+#########################################################
+
+locale_level_state <- full %>% 
+  select(starts_with("grades_"), school_name, exclusive_locale, school_state) %>%
+  group_by(exclusive_locale, school_state) %>%
+  mutate(across(starts_with("grades_"), ~ sum(.x, na.rm = TRUE))) %>% 
+  pivot_longer(cols = starts_with("grades"),
+               names_to = "School level",
+               values_to = "N") %>%
+  group_by(exclusive_locale, school_state, `School level`) %>%
+  summarize(N = sum(N)) %>% 
+  rename(`Geographic Locale` = exclusive_locale,
+         `School state` = school_state)
+
+#########################################################
+
 ```
+
+
+```{r, fig.height=16, fig.width=12}
+
+# ggplot(locale_state, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale`)) +
+#   geom_col(position = "dodge") +
+#   scale_fill_manual(values = transcend_cols) +
+#   scale_y_continuous(limits=c(0, 150), expand = c(0,0)) +
+#   labs(title = "Canopy Learning Environments by Geographic Region",
+#        x = "",
+#        y = "") +
+#   theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
+#     geom_text(aes(label = signif(N)), 
+#             nudge_y = 3, 
+#             color = "black",
+#             fontface = "bold",
+#             size = 5,
+#             family = "sans")
+
+
+
+locale_state %>%
+  ggplot(aes(x = reorder(`Geographic Locale`, N), y = N, fill = `Geographic Locale`)) +
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = transcend_cols) +
+  facet_wrap(~State, ncol = 4, nrow = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  coord_flip() +
+  labs(title = "Canopy Learning Environments by Geographic Region and State",
+       x = "",
+       y = "")
+
+```
+
+
+```{r}
+
+# As I couldn't get the filtering to work, this also doesn't work. 
+
+# locale_level %>%
+#   ggplot(aes(x = reorder(`Geographic Locale`, N), y = N, fill = `School level`)) +
+#   geom_col(position = "dodge") + 
+#   scale_fill_manual(values = transcend_cols) +
+#   facet_wrap(~`School level`, ncol = 1) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+#   coord_flip() +
+#   labs(title = "Canopy Learning Environments by Geographic Region and School Level",
+#        x = "",
+#        y = "")
+
+```
+
+
+```{r, fig.width= 12, fig.height=16}
+locale_level_state %>%
+  ggplot(aes(x = reorder(`Geographic Locale`, N), y = N, fill = `School level`)) +
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = transcend_cols) +
+  facet_wrap(~`School state`, ncol = 5, nrow = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  coord_flip() +
+  labs(title = "Canopy Learning Environments by Geographic Region, School Level, and State",
+       x = "",
+       y = "")
+
+
+```
+
+
+
+```{r}
+library(datasets)
+
+regions <- as.data.frame(state.region)
+regions <- regions %>% mutate(State_ID = row_number())
+
+states <- as.data.frame(state.name)
+states <- states %>% mutate(State_ID = row_number())
+
+# I realized that this data set doesn't have the District of Columbia 
+# It leads to some NA values
+# I will sort them out later and for now just filter them out
+
+regions <- full_join(states, regions, by = "State_ID")
+regions <- regions %>% select(-"State_ID")
+regions <- regions %>% rename(school_state = state.name,
+                              school_region = state.region)
+
+full_region <- left_join(full, regions, by = "school_state")
+
+
+
+
+locale_region <- full_region %>% 
+  select(school_name, exclusive_locale, school_region) %>% 
+  mutate(rate = rep(1, 251)) %>% 
+  filter(!is.na(school_region)) %>%
+  group_by(exclusive_locale, school_region) %>% 
+  summarize(N = sum(rate, na.rm = TRUE)) %>% 
+  rename(`Geographic Locale` = exclusive_locale,
+         `Region` = school_region)
+
+locale_region %>%
+  ggplot(aes(x = reorder(`Geographic Locale`, N), y = N, fill = `Region`)) +
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = transcend_cols) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  coord_flip() +
+  labs(title = "Canopy Learning Environments by Geographic \nRegion and Locale",
+       subtitle = "Schools from District of Columbia are currently excluded",
+       x = "",
+       y = "")
+
+```
+
+
