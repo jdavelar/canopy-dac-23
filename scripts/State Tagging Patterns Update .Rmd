@@ -135,7 +135,8 @@ bar_chart <- ggplot(state_tag_summary, aes(x = reorder(school_state, -Total_Coun
 
 # Display the bar chart
 print(bar_chart)
-
+# ggsave("finding-12b.png", plot = bar_chart, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 
 ```
 

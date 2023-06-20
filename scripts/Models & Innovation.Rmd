@@ -163,10 +163,11 @@ For this graph, I recoded the response of 1 (somewhat) & 2 (to a large extent) t
 
 ```{r}
 #Check whether or not school implemented any adoptable models
+#mod_adopt <- 
 model %>% 
   mutate(across(c(4:9),
                 ~ case_when(. > 0 ~ "Yes",TRUE ~ "No"))) %>% 
-  pivot_longer(cols = 4:9, 
+  tidyr::pivot_longer(cols = 4:9, 
                names_to = "models",
                values_to = "response") %>% 
   ggplot(aes(x=models, 
@@ -178,7 +179,8 @@ model %>%
   labs(title = "How many schools reported implementing adoptable models?",
        x="") +
   theme_1()
-
+# ggsave("finding-10.png", plot = mod_adopt, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 
@@ -434,6 +436,7 @@ full %>%
 ```
 ### Political Debates by Locale
 ```{r}
+# pol_locale <-
 model %>%
   pivot_longer(cols = starts_with("self_"),
                names_to = "category", 
@@ -463,6 +466,8 @@ model %>%
   labs(title = "By Locale: To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
   coord_flip() +
   theme_2()
+# ggsave("finding-15.png", plot = pol_locale, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 

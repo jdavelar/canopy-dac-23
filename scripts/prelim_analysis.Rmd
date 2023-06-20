@@ -47,8 +47,8 @@ samp_states <- dat %>%
 datatable(samp_states)
 #viz
 plot_states <- samp_states %>% 
-  filter(!is.na(State))
-ggplot(plot_states, aes(reorder(State, -N), N)) +
+  filter(!is.na(State)) %>% 
+ggplot(., aes(reorder(State, -N), N)) +
   geom_col(fill = transcend_cols[1]) +
   scale_y_continuous(limits=c(0, 25), expand = c(0,0)) +
   coord_flip() +
@@ -61,6 +61,9 @@ ggplot(plot_states, aes(reorder(State, -N), N)) +
             fontface = "bold",
             size = 3.5,
             family = "sans")
+plot_states
+# ggsave("finding-12a.png", plot = plot_states, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 In total: 42 states were represented + D.C.
@@ -115,6 +118,7 @@ locale <- dat %>%
 #table
 datatable(locale)
 #viz
+#locale_plot <-
 ggplot(locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale`)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
@@ -129,6 +133,8 @@ ggplot(locale, aes(reorder(`Geographic Locale`, N), N, fill = `Geographic Locale
             fontface = "bold",
             size = 5,
             family = "sans")
+# ggsave("finding-11.png", plot = locale_plot, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 ## How do schools that identified as Other describe their locale?
@@ -167,7 +173,8 @@ level <- dat %>%
 #table
 datatable(level, rownames = FALSE)
 #viz
-ggplot(level, aes(reorder(`School level`, N), N, fill = `School level`)) +
+# level <- 
+  ggplot(level, aes(reorder(`School level`, N), N, fill = `School level`)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
   scale_y_continuous(limits=c(0, 155), expand = c(0,0)) +
@@ -181,6 +188,8 @@ ggplot(level, aes(reorder(`School level`, N), N, fill = `School level`)) +
             fontface = "bold",
             size = 5,
             family = "sans")
+# ggsave("finding-1.png", plot = level, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 
@@ -204,7 +213,8 @@ type <- dat %>%
 #table
 datatable(type, rownames = FALSE)
 #viz
-ggplot(type, aes(reorder(`School Type`, N), N, fill = `School Type`)) +
+# type <- 
+  ggplot(type, aes(reorder(`School Type`, N), N, fill = `School Type`)) +
   geom_col() +
   scale_fill_manual(values = c(transcend_cols[1], transcend_cols[2], transcend_cols[4])) +
   scale_y_continuous(limits=c(0, 155), expand = c(0,0)) +
@@ -218,6 +228,8 @@ ggplot(type, aes(reorder(`School Type`, N), N, fill = `School Type`)) +
             fontface = "bold",
             size = 5,
             family = "sans")
+# ggsave("finding-2.png", plot = type, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 
@@ -346,6 +358,41 @@ ggplot(plot_time_prac, aes(reorder(Practice, -N), N, fill = Time)) +
         text = element_text(size = 7),
         axis.text.x = element_text(angle = 45, hjust = 1))
 ###plan to facet by cluster once cluster analysis presented
+```
+
+## Top 10
+
+```{r top 10 core practices with time}
+top_prac <- 
+  plot_time_prac %>% 
+  group_by(Practice) %>% 
+  mutate(sum = sum(N)) %>% 
+  ungroup() %>% 
+  group_by(Practice, Time) %>% 
+  arrange(desc(sum)) %>% 
+  ungroup() %>% 
+  slice_head(., n = 40) %>% 
+  ggplot(., aes(reorder(Practice, -sum), N, fill = Time)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+  scale_y_continuous(limits=c(0, 100), expand = c(0,0)) +
+  labs(title = "Top 10 Practices by Time Implemented",
+       x = "",
+       y = "") +
+  scale_x_discrete(labels = label_tags()) +
+  theme(legend.position = "bottom", 
+        legend.direction = "horizontal",
+        text = element_text(size = 7),
+        axis.text.x = element_text(angle = 45, hjust = 1)) #+
+    # geom_text(aes(y = Practice, label = signif(sum)),
+    #         #nudge_y = .5,
+    #         color = transcend_cols[3],
+    #         fontface = "bold",
+    #         size = 5,
+    #         family = "sans")
+top_prac
+# ggsave("finding-8.png", plot = top_prac, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 ```
 
 

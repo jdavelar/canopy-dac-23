@@ -11,6 +11,7 @@ library(here)
 library(tidyverse)
 library(rio)
 library(DT)
+library(cowplot)
 #data
 load(here("data", "complete_canopy_2023.Rdata"))
 #branding
@@ -441,7 +442,7 @@ pwled_plot <- disag_lead %>%
   scale_y_continuous(limits = c(0, 1), 
                      expand = c(0,0),
                      labels = scales::percent) +
-  labs(title = "Top Practices in Schools led by Predominantly White Leadership Team",
+  labs(title = "Top Practices in Schools led\nby Predominantly White\nLeadership Team",
        x = "",
        y = "percentage of schools")
 pwled_plot
@@ -455,16 +456,66 @@ bipocled_plot <- disag_lead %>%
   scale_y_continuous(limits = c(0, 1), 
                      expand = c(0,0),
                      labels = scales::percent) +
-  labs(title = "Top Practices in Schools led by Predominantly BIPOC Leadership Team",
+  labs(title = "Top Practices in Schools led\nby Predominantly BIPOC\nLeadership Team",
        x = "",
        y = "percentage of schools")
 bipocled_plot
+#combine plots
+# combined <-
+plot_grid(pwled_plot, bipocled_plot, 
+          ncol = 2)
+# ggsave("finding-17.png", plot = combined, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 
 ##By designing for specific student groups
 
 The plots below pull from all schools that selected `design to meet the needs of students who have been marginalized` and the follow-up question which asks them to specify *which* marginalized student group they are designing for.
+
+### Which student groups?
+
+The chart below displays the frequency with which Canopy learning environments identified specific student groups as the historically marginalized groups they're designing their schools for.
+
+```{r marginalized student group freq}
+marg_freq <- full %>% 
+  select(starts_with("focus"), practices_design_marginalized) %>% #191/251 schools selected
+  select(!focus_other_student_group_text) %>% 
+  filter(practices_design_marginalized == 1) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  summarise(across(where(is.numeric), ~ sum(.x, na.rm = TRUE))) %>% 
+  pivot_longer(cols = starts_with("focus"),
+               names_to = "group",
+               values_to = "n") %>% 
+  mutate(pct = n/rate,
+         group = case_when(
+           group == "focus_bipoc" ~ "BIPOC students",
+           group == "focus_economic_disadvantage" ~ "Economically Disadvantaged Students",
+           group == "focus_emergent_bilingual" ~ "Students Classified as English Learners",
+           group == "focus_foster" ~ "Students in the Foster Care System",
+           group == "focus_homeless" ~ "Students Experiencing Houselessness",
+           group == "focus_interrupted" ~ "Students with Interrupted Formal Education",
+           group == "focus_juvenile_justice" ~ "Students in the Juvenile Justice System",
+           group == "focus_multilingual" ~ "Multilingual Students",
+           group == "focus_newcomer" ~ "Newcomer and Recently Arrived Students",
+           group == "focus_other_student_group" ~ "Other",
+           group == "focus_swd" ~ "Students with Disabilities"
+         )) %>% 
+  ggplot(., aes(reorder(group, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Who are learning environments designing for?",
+       x = "",
+       y = "percentage of schools indicating designing for specific student groups")
+marg_freq
+# ggsave("finding-18.png", plot = marg_freq, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
+```
+
 
 ###Multilingual students
 

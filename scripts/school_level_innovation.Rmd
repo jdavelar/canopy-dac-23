@@ -30,10 +30,12 @@ library(corrr)
 library(gt)
 library(dplyr)
 
-load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
-source("~/Desktop/canopy-dac-23/scripts/branding.R")
-
-
+# load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
+# source("~/Desktop/canopy-dac-23/scripts/branding.R")
+## Janette updated to relative path for universality
+library(here)
+load(here("data", "complete_canopy_2023.RData"))
+source(here("scripts", "branding.R"))
 ```
 
 
@@ -178,7 +180,7 @@ central_percentage <- rbind(central_percentage, data.frame(name = i, percent_yes
 gt(central_percentage)
 
 bar_colors <- c("#1A4C81", "#59C3B4", "#EF464B", "#ADE0EE", "#BC2582","#FFA630", "#99C24D", "#FFDE42")  # Color palette for the bars
-
+#supports <-
 central_percentage %>%
   ggplot(aes(x=name, y = percent_yes, fill = name))+
   geom_col(show.legend = FALSE) +
@@ -188,7 +190,8 @@ central_percentage %>%
   scale_y_continuous(limits = c(0,100), n.breaks = 5)+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
   
-
+# ggsave("finding-13.png", plot = supports, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 
 ```
 
@@ -248,7 +251,9 @@ percentages <- round(100 * inno_plot / sum(inno_plot), 1)
 labels <- paste0(custom_labels, " (", percentages, "%)")
 
 # Pie Chart for importance of innovation network to schools i nthe network
+# png(filename = "finding-16.png")
 pie(inno_plot, radius = 1, col = transcend_cols, labels = labels, main = "Importance of Innovation Network to Schools in the Network")
+# dev.off()
 
 # Percentage of responses to the importance question
 ## Quick note: only schools that responded yes to having a network answered this question

@@ -52,11 +52,16 @@ lead_race <- confidential %>%
     leadership_diversity == 3 ~ "50-74%\nBIPOC",
     leadership_diversity == 4 ~ "75-100%\nBIPOC"
   ))
-
+#lead_race_plot <-
 ggplot(lead_race, aes(leadership_diversity, fill = leadership_diversity)) +
   geom_bar() +
   scale_fill_manual(values = transcend_cols) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  labs(title = "What is the racial/ethnic breakdown of Canopy school leadership teams?",
+        x = "",
+        y = "Number of Schools")
+# ggsave("finding-4.png", plot = lead_race_plot, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 
 lead_race_table <- lead_race %>% 
   mutate(rate = rep(1, length(251))) %>% 

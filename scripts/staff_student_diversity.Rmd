@@ -230,6 +230,7 @@ In the second graph, I grouped by state and calculated percent total of bipoc le
 
 
 ```{r fig.height=8, fig.width=8}
+#gap <-
 dat2 %>% 
   pivot_longer(cols = c(pct_leader_bipoc, pct_bipoc),
                names_to = "category",
@@ -259,7 +260,8 @@ dat2 %>%
   labs(title = "School Leader & Student Diveristy Gap (Canopy School Sample)") +
   theme_3()
    
-  
+# ggsave("finding-5.png", plot = gap, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 ### Mean comparison
@@ -297,12 +299,13 @@ t1 %>%
   geom_boxplot()+
   scale_fill_manual(values = transcend_cols)+ 
   theme_2()
-
+#locale<-
 t1 %>% 
   ggplot(aes(category, pct, fill=locale))+
   geom_boxplot()+
   scale_fill_manual(values = transcend_cols)
-
+# ggsave("finding-6.png", plot = locale, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 
   
   
