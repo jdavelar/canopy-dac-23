@@ -2,7 +2,15 @@
 title: "Disaggregated Tagging Patterns"
 author: "Janette Avelar"
 date: '2023-06-02'
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -18,9 +26,9 @@ load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
 ```
 
-#What are the top tags selected when disaggregated?
+# What are the top tags selected when disaggregated?
 
-##By locale
+## By locale
 
 ```{r top tags by locale}
 disag_locale <- full %>% 
@@ -97,7 +105,7 @@ mixed_plot
 ```
 
 
-##By level
+## By level
 
 ```{r top tags by level}
 #prekindergarten
@@ -211,7 +219,7 @@ disag_high
 ```
 
 
-##By school type
+## By school type
 
 ```{r top tags by type}
 disag_type <- full %>% 
@@ -279,7 +287,7 @@ independent_plot
 ```
 
 
-##By descriptors
+## By descriptors
 
 These plots are somewhat misleading and probably should not be displayed due to low N. For homeschools in particular, because there were only 4 schools that described themselves that way and 6 instances where they all selected the same tags, the plot displays a full 100% barchart for all 6 tags. Drawing any conclusions from this would not be a good idea, though.
 
@@ -404,7 +412,7 @@ disag_sws
 #virtual
 ```
 
-##By leadership team
+## By leadership team
 
 I collapsed leadership team diversity variable in two:  
 *predominantly White = 0-49% BIPOC leadership  
@@ -469,7 +477,7 @@ plot_grid(pwled_plot, bipocled_plot,
 ```
 
 
-##By designing for specific student groups
+## By designing for specific student groups
 
 The plots below pull from all schools that selected `design to meet the needs of students who have been marginalized` and the follow-up question which asks them to specify *which* marginalized student group they are designing for.
 
@@ -508,7 +516,7 @@ marg_freq <- full %>%
   scale_y_continuous(limits = c(0, 1), 
                      expand = c(0,0),
                      labels = scales::percent) +
-  labs(title = "Who are learning environments designing for?",
+  labs(title = "When schools are designing for margianlized groups,\nwhich groups are they designing for?",
        x = "",
        y = "percentage of schools indicating designing for specific student groups")
 marg_freq
@@ -517,7 +525,7 @@ marg_freq
 ```
 
 
-###Multilingual students
+### Multilingual students
 
 ```{r top tags for design ML students}
 disag_ml <- full %>% 
@@ -550,30 +558,95 @@ disag_ml
 ```
 
 
-###Students classified as English Learners
+### Students classified as English Learners
 
-###Students with interrupted formal education
+### Students with interrupted formal education
 
-###Newcomer students
+### Newcomer students
 
-###BIPOC students
+### BIPOC students
 
-###Economically disadvantaged students
+### Economically disadvantaged students
 
-###Students in the foster care system
+### Students in the foster care system
 
-###Students experiencing houselessness
+### Students experiencing houselessness
 
-###Students in the juvenile justice system
+### Students in the juvenile justice system
 
-###Students with disabilities
+### Students with disabilities
 
-#What are the top *core* tags selected when disaggregated?
+# What are the top *core* tags selected when disaggregated?
 
-##By locale
+## By locale
 
-##By level
+## By level
 
 ##By school type
 
 ##By leadership team
+
+## By leadership team
+
+I collapsed leadership team diversity variable in two:  
+*predominantly White = 0-49% BIPOC leadership  
+*predominantly BIPOC = 50% + BIPOC leadership
+
+```{r top core tags by leadership diversity}
+core_lead <- full %>% 
+  select(school_id, lead = leadership_diversity, starts_with("core")) %>% 
+  filter(!lead == 0) %>% 
+  filter(!lead == 5) %>% 
+  mutate(lead = case_when(
+    (lead == 1 | lead == 2) ~ "PWI",
+    (lead == 3 | lead == 4) ~ "BIPOC"
+  )) %>%
+  rename_all(funs(sub("core", "practices", .))) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(lead, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  group_by(lead) %>% 
+  arrange(desc(n), .by_group = TRUE) %>% 
+  slice(1:6) #tie at spot #5 for one group
+#predominantly white
+pwcore_plot <- core_lead %>% 
+  filter(lead == "PWI") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[1]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Core Practices in Schools\nled by Predominantly\nWhite Leadership Team",
+       x = "",
+       y = "percentage of schools")
+pwcore_plot
+#BIPOC-led
+bipoccore_plot <- core_lead %>% 
+  filter(lead == "BIPOC") %>% 
+  ggplot(., aes(reorder(tag, pct), pct)) +
+  geom_col(fill = transcend_cols[2]) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 1), 
+                     expand = c(0,0),
+                     labels = scales::percent) +
+  labs(title = "Top Core Practices in Schools\nled by Predominantly\nBIPOC Leadership Team",
+       x = "",
+       y = "percentage of schools")
+bipoccore_plot
+#combine plots
+# combined_core <-
+plot_grid(pwcore_plot, bipoccore_plot,
+          ncol = 2)
+# ggsave("finding-17b.png", plot = combined_core, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
+```
