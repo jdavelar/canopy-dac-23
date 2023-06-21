@@ -19,12 +19,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r library, include = FALSE}
 library(pacman)
-p_load(here, tidyverse, psych, DT)
+p_load(here, tidyverse, psych, DT, outliers)
 source(here("scripts/branding.R"))
 load(here("data/complete_canopy_2023.RData"))
 ```
 
-What was the average size of Canopy schools?
+## What was the average size of Canopy schools?
 
 Average size is `r mean(full$self_reported_total_enrollment)` students. Let's visualize that below.
 
@@ -43,10 +43,49 @@ plot_size <- full %>%
 
 plot_size
 
-ggsave("finding-3.png", plot = plot_size, path = here("final_products", "draft-findings"),
-       width = 12, height = 8, units = "in")
+# ggsave("finding-3.png", plot = plot_size, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 Note that one really large outlier. The median is almost half that number: `r median(full$self_reported_total_enrollment)`
 
-I modified the graph to include both, but you might chose to highlight one or the other.
+I modified the graph to include both, but you might choose to highlight one or the other.
+
+## Janette modifications 6.21.23
+Modified mean:
+
+I replaced the extreme outlier value with the median value for our sample, and recalculated the average size. With imputation for that single value, the average size of Canopy schools is: 411
+
+However, when creating thresholds for outliers using interquartile range, there are actually 10 outliers identified. With imputation for all 10 outliers, the average size of Canopy schools is: 333
+
+```{r results = FALSE}
+#check out quartiles
+summary(full$self_reported_total_enrollment)
+#get IQR
+IQR(full$self_reported_total_enrollment)
+#generate extreme threshold value 
+#3rd quartile +/- (3*IQR)
+tmin = 480-(3*354.5)
+tmax = 480+(3*354.5)
+#identify extreme outliers
+full$self_reported_total_enrollment[which(full$self_reported_total_enrollment < tmin | full$self_reported_total_enrollment > tmax)]
+#test if it's an extreme outlier
+chisq.out.test(full$self_reported_total_enrollment)
+#correcting for single extreme outlier
+correct_avg1 <- full %>% 
+  select(school_id, size = self_reported_total_enrollment) %>% 
+  mutate(size = case_when(
+    size == 10000 ~ median(size, na.rm = TRUE),
+    TRUE ~ as.numeric(size)
+  )) %>% 
+  summarize(mean = mean(size))
+#correcting for all outliers
+correct_avg2 <- full %>% 
+  select(school_id, size = self_reported_total_enrollment) %>% 
+  mutate(size = case_when(
+    size > tmax ~ median(size, na.rm = TRUE),
+    TRUE ~ as.numeric(size)  
+  )) %>% 
+  summarize(mean = mean(size))
+```
+

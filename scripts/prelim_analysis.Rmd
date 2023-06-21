@@ -28,7 +28,7 @@ dat <- full
 
 # Q1: Which states are represented or not?
 
-Note that we have 3 unknowns in the data. These may have been introduced in the raw data, because I do not remember there being missing state values when cleaning the data. Either these schools chose to delete the pre-filled state, or we did not have data to begin with. Something to look into.
+We had 3 unknowns in the data, which are resolved in the table and figure below.
 
 ```{r states, fig.height=9, fig.width=9}
 # ("N states in sample
@@ -36,8 +36,15 @@ Note that we have 3 unknowns in the data. These may have been introduced in the 
 # List (if any) U.S. territories represented")
 #pull unique states
 samp_states <- dat %>% 
-  select(school_state) %>% 
-  mutate(value = rep(1, 251)) %>% 
+  select(school_id, school_state) %>% 
+  mutate(value = rep(1, 251),
+         school_state = case_when(
+           school_id == 753 ~ "Tennessee",
+           school_id == 665 ~ "District of Columbia",
+           school_id == 577 ~ "Florida",
+           TRUE ~ as.character(school_state)
+         )) %>% 
+  select(!school_id) %>% 
   group_by(school_state) %>% 
   summarize(N = sum(value)) %>% 
   mutate(school_state = case_when(school_state == "" ~ "Unknown",
