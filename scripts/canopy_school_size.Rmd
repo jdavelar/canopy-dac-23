@@ -1,0 +1,52 @@
+---
+title: "canopy_school_size"
+author: "Anwesha Guha"
+date: "6/20/2023"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library, include = FALSE}
+library(pacman)
+p_load(here, tidyverse, psych, DT)
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+```
+
+What was the average size of Canopy schools?
+
+Average size is `r mean(full$self_reported_total_enrollment)` students. Let's visualize that below.
+
+```{r fig.height=8, fig.width=12}
+plot_size <- full %>% 
+  ggplot(aes(self_reported_total_enrollment)) +
+  geom_histogram(fill = transcend_cols[1], col = "black", bins = 45, linewidth = .2) +
+  geom_vline(aes(xintercept = mean(self_reported_total_enrollment)), col = transcend_cols[3]) +
+  geom_vline(aes(xintercept = median(self_reported_total_enrollment)), col = transcend_cols[3]) +  
+  annotate("text", x=530, y=70, label="Mean = 450", size = 4, col = transcend_cols[3], angle = 270) +
+  annotate("text", x=350, y=95, label="Median = 270", size = 4, col = transcend_cols[3], angle = 270) +
+  labs(x = "Reported Enrollment",
+       y = "Number of Schools", 
+       title = "What was the average size of Canopy schools?") +
+  ylim(0, 100)
+
+plot_size
+
+ggsave("finding-3.png", plot = plot_size, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+Note that one really large outlier. The median is almost half that number: `r median(full$self_reported_total_enrollment)`
+
+I modified the graph to include both, but you might chose to highlight one or the other.
