@@ -41,7 +41,21 @@ mod_prep <- full %>%
 
 mod_prep <- left_join(mod_prep, region, by = c("school_state"= "state")) %>% 
   drop_na()
+## below is filtering on tags that have been selected at least 25 times
+mod_prep %>% 
+  group_by(tag, value) %>% 
+  summarise(val = n()) %>% 
+  arrange(val) %>% 
+  filter(val <= 25)
 
+## we see that low select tags are the following
+low_select_tags <- c("practices_other_leaders", "practices_heritage_language", "practices_enriched_virtual",
+                     "practices_translanguaging", "practices_flipped_classroom")
+
+## remove them for our analysis
+
+mod_prep <- mod_prep %>% 
+  filter(!(tag %in% low_select_tags))
 
 
 
@@ -97,7 +111,7 @@ for(this_tag in unique(mod_prep$tag)) {
     data = filter(logistic_one_dat, tag == this_tag),
     family = binomial(link = "logit"),
     prior = student_t( #df and scale are recommended values of 7 & 2.5, respectively
-      df = 7,
+      df = 10,
       location = 0,
       scale = 2.5
     )
@@ -106,8 +120,8 @@ for(this_tag in unique(mod_prep$tag)) {
 }
 
 bayes_tidy = lapply(bayes_mods, tidy) %>%
-  bind_rows(.id = "response") %>%
-  filter(term != "(Intercept)")
+  bind_rows(.id = "response")
+#%>% filter(term != "(Intercept)") # Take this out so intercept/ reference group image is produced. 
 
 ```
 
