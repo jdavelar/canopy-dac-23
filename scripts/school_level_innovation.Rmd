@@ -29,13 +29,28 @@ library(corrplot)
 library(corrr)
 library(gt)
 library(dplyr)
+library(ggplot2)
 
 # load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
 # source("~/Desktop/canopy-dac-23/scripts/branding.R")
 ## Janette updated to relative path for universality
 library(here)
 load(here("data", "complete_canopy_2023.RData"))
-source(here("scripts", "branding.R"))
+#source(here("scripts", "branding.R"))
+
+transcend_cols = c(
+  "#1A4C81",
+  "#59C3B4",
+  "#EF464B",
+  "#ADE0EE"
+)
+
+transcend_grays = c(
+  "#4D4D4F",
+  "#9D9FA2",
+  "#D1D3D4"
+)
+
 ```
 
 
@@ -264,6 +279,51 @@ prop.table(table(central_network$innovation_initiative_importance))
 
 
 ```
+
+```{r}
+#pie <- 
+  confidential %>% 
+  select(innovation_initiative_importance) %>% 
+  drop_na() %>% 
+  ggplot(aes(x ="", fill = as.factor(innovation_initiative_importance)))+ 
+  geom_bar(position = "fill", width = 1, color = "white") + 
+  coord_polar(theta = "y",start = 2) +
+  geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3, 
+            color = "white",
+            fontface= "bold") +
+  scale_fill_manual(name="",
+   values = transcend_cols,
+    breaks=c("5","4","3","2"),
+    labels = c("Very Important",
+                "Important",
+                "Fairly Important",
+                "Slightly Important"))+
+  scale_y_continuous(expand = c(0,0))+
+  labs(title = "Importance of Innovation Network to Schools in the Network") +
+theme(
+    plot.title.position = "plot",
+   plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+   legend.text=element_text(size=8)
+  ) 
+  
+# ggsave("finding-16-V2.png", plot = pie, path = here("final_products", "draft-findings"),
+  #      width = 12, height = 8, units = "in")
+```
+
 
 A quick look tells us that 68 of the schools, 29%, reported that they were part of a larger innovation initiative within their district or charter network. The remaining schools were either unsure, 13%, or responded no, 58%.
 
