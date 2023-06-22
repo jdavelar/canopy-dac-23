@@ -19,6 +19,7 @@ library(here)
 library(rio)
 library(tidyverse)
 library(DT)
+library(scales)
 # test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
@@ -173,24 +174,78 @@ level <- dat %>%
                values_to = "N")
 #table
 datatable(level, rownames = FALSE)
-#viz
-# level <- 
-  ggplot(level, aes(reorder(`School level`, N), N, fill = `School level`)) +
+#factor viz data to reorder columns and generate percent
+level <- level %>% 
+  mutate(`School level` = factor(`School level`,
+                levels = c("Prekindergarten", "Elementary", "Middle", "High"),
+                labels = c("Prekindergarten", "Elementary", "Middle", "High")),
+         pct = N/251)
+#Modified V2 plot - added subtitle, converted to pct from count, added pct labels
+#level_plot <-
+ggplot(level, aes(`School level`, pct, fill = `School level`)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
-  scale_y_continuous(limits=c(0, 155), expand = c(0,0)) +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
   labs(title = "Canopy Learning Environments by Level",
+       subtitle = "Note: Some schools serve grades that cross levels, making our total percentage greater than 100%.",
        x = "",
        y = "") +
   theme(legend.position = "none") +
-    geom_text(aes(label = signif(N)), 
+    geom_text(aes(label = scales::label_percent(accuracy = 1)(level$pct)), 
             nudge_y = 3, 
             color = "black",
             fontface = "bold",
             size = 5,
             family = "sans")
-# ggsave("finding-1.png", plot = level, path = here("final_products", "draft-findings"),
-#        width = 12, height = 8, units = "in")
+ggsave("finding-1-V2.png", plot = level_plot, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+```{r}
+#I intended to make a pie chart to show percentages, but realized our schools do not add up to 100%
+#pie chart for report
+#pie <- 
+#   dat %>% 
+#   select(starts_with("grades")) %>% 
+#   rename("Prekindergarten" = grades_prek,
+#          "Elementary" = grades_elementary,
+#          "Middle" = grades_middle,
+#          "High" = grades_high) %>% 
+#   pivot_longer(cols = c(Prekindergarten, Elementary, Middle, High),
+#                names_to = "level",
+#                values_to = "n") %>% 
+#   mutate(level = factor(level,
+#                            levels = c("Prekindergarten", "Elementary", "Middle", "High"),
+#                            labels = c("Prekindergarten", "Elementary", "Middle", "High")))
+# ggplot(level, aes(x ="", y = -N, fill = `School level`)) + 
+#   geom_bar(width = 1, stat = "identity") + 
+#   coord_polar("y", start = 0) + 
+#   geom_text(aes(y = N/2 + c(0, cumsum(N)[-length(N)]),
+#                 label = percent(N/251)), 
+#             size = 3) +
+#   scale_fill_manual(values = transcend_cols) +
+#   theme_transcend 
+#   theme(axis.title.x = element_blank(),
+#         axis.title.y = element_blank(),
+#         panel.border = element_blank(),
+#         panel.grid = element_blank(),
+#         axis.ticks = element_blank(),
+#         axis.text.x = element_blank()) +
+#   geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+#             position = position_stack(vjust = 0.5),
+#             size = 3, 
+#             color = "white") 
+#   scale_fill_manual(name="",
+#    values = transcend_cols,
+#     breaks = c("3","1","2","0"),
+#     labels = c("Consider, but did not apply",
+#                 "Applied & Received",
+#                 "Applied, but did not receive it",
+#                 "No")) +
+#   scale_y_continuous(expand = c(0,0))+
+#   labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
+#   theme_3()
 ```
 
 
