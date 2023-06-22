@@ -37,13 +37,7 @@ We had 3 unknowns in the data, which are resolved in the table and figure below.
 #pull unique states
 samp_states <- dat %>% 
   select(school_id, school_state) %>% 
-  mutate(value = rep(1, 251),
-         school_state = case_when(
-           school_id == 753 ~ "Tennessee",
-           school_id == 665 ~ "District of Columbia",
-           school_id == 577 ~ "Florida",
-           TRUE ~ as.character(school_state)
-         )) %>% 
+  mutate(value = rep(1, 251)) %>% 
   select(!school_id) %>% 
   group_by(school_state) %>% 
   summarize(N = sum(value)) %>% 

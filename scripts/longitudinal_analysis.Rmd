@@ -19,10 +19,11 @@ library(here)
 library(rio)
 library(tidyverse)
 library(DT)
+library(broom)
 #data
 load(here("data", "complete_canopy_2023.Rdata"))
 #branding
-# source(here("scripts", "branding.R"))
+source(here("scripts", "branding.R"))
 # theme_update(plot.title = element_text(hjust = 0.5))
 dat <- full
 ```
@@ -108,5 +109,126 @@ datatable(long_schls)
 
 
 #What practices are being adopted or retired over time? 
+
+```{r}
+#load all data
+canopy_old <- readRDS(here("data", "canopy-2019-2021.rds"))
+dat_22 <- readRDS(here("data", "canopy-2022.rds")) %>% 
+  mutate(year = rep(2022, nrow(.)))
+xwalk = read_csv(here("data/SY2022-23 Tags.csv"), show_col_types = FALSE) %>%
+  select(tag = `2022-23 Variable name`, tag_21_22 = `2021-22 equivalent`, tag_20_21 = `2020-21 equivalent`, tag_18_19 = `2018-19 equivalent`)
+#look at all schools all years
+#create full list of tags across years
+all_tags = unique(na.omit(unlist(xwalk)))
+#rename this one tag? not sure why
+canopy_old = canopy_old %>%
+  mutate(expanded_success = coalesce(expanded_success, redefining_success)) %>%
+  select(-redefining_success)
+#figure out which names need renaming
+rn_18_19 = which(xwalk$tag_18_19 %in% names(canopy_old))
+rn_20_21 = which(xwalk$tag_20_21 %in% names(canopy_old))
+rn_21_22 = which(xwalk$tag_21_22 %in% names(dat_22))
+#rename AY21-22 data
+dat_22 = dat_22 %>%
+  select(year, school_id, any_of(all_tags)) %>%
+  rename(setNames(xwalk[["tag_21_22"]][rn_21_22], xwalk[["tag"]][rn_21_22]))
+#rename AY20-21 data
+canopy_old = canopy_old %>%
+  select(year, school_id, any_of(all_tags)) %>%
+  rename(setNames(xwalk[["tag_20_21"]][rn_20_21], xwalk[["tag"]][rn_20_21]))
+#rename AT 18-19 data
+# canopy_old = canopy_old %>%
+#   rename(setNames(xwalk[["tag_18_19"]][rn_18_19], xwalk[["tag"]][rn_18_19]))
+#convert all to character
+canopy_old = canopy_old %>% mutate(across(everything(), as.character))
+dat_22 = dat_22 %>% mutate(across(everything(), as.character))
+#combine datasets
+over_time = tags %>%
+  select(school_id, starts_with("practices")) %>% 
+  mutate(year = "2023", school_id = as.character(school_id)) %>%
+  select(school_id, year, any_of(all_tags)) %>%
+  mutate(across(everything(), as.character)) %>%
+  bind_rows(canopy_old, dat_22)
+#convert school year names
+sy_all = c("18-19", "19-20", "20-21", "21-22", "22-23")
+over_time %>%
+  mutate(
+    sy = case_when(
+      year == "2019" ~ "18-19",
+      year %in% c("2020", "2021") ~ "20-21",
+      year == "2022" ~ "21-22",
+      year == "2023" ~ "22-23"
+    ),
+    sy = factor(sy, levels = sy_all),
+    sy_i = as.integer(sy) - 1
+    # setting levels here accounts for the missing school year in the spacing.
+  ) -> over_time
+
+if((over_time %>% 
+  group_by(school_id, sy) %>%
+  filter(n() > 1) %>%
+  nrow) > 0) stop("duplicates introduced!")
+
+over_time %>%
+  pivot_longer(cols = starts_with("practice"), names_to = "tag") %>%
+  mutate(flag = case_when(is.na(value) | value == "0" ~ 0L, TRUE ~ 1L)) %>%
+  group_by(sy) %>%
+  mutate(n_sch_year = n_distinct(school_id)) %>%
+  group_by(sy, sy_i, tag) %>%
+  summarize(pct_practicing = mean(flag), n_sch_year = first(n_sch_year), .groups = "drop") %>%
+  filter(pct_practicing > 0) ->
+  long
+
+#create plot 1
+ggplot(long, aes(x = sy, y = pct_practicing, group = tag)) +
+  geom_line(alpha = 0.6, color = transcend_cols[2], size = 0.3) +
+  geom_point(alpha = 0.9, color = transcend_cols[2], size = 1.2) +
+  bar_y_scale_percent +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    y = "Percent of schools identifying practice",
+    x = "Canopy survey school year",
+    title = "Changes in practices over time"
+  )
+
+#convert to long file for changes over time plot 2
+long %>% 
+  group_by(tag) %>%
+  nest() %>%
+  mutate(
+    models = lapply(data, \(df) tidy(lm(pct_practicing ~ sy_i, data = df, weights = n_sch_year)))
+  ) -> mods 
+
+mods %>%
+  unnest(models) %>%
+  filter(term == "sy_i") ->
+  coefs
+
+coefs %>%
+  ungroup %>%
+  filter(!is.na(estimate)) %>%
+  mutate(rank = rank((-estimate))) %>%
+  arrange(rank) %>%
+  mutate(tag = reorder(factor(tag), estimate)) -> coefs
+
+#plot 2
+tag_change <-
+coefs %>% slice(1:15) %>%
+  ggplot(aes(y = tag, x = estimate)) +
+  geom_point(aes(color = rank), size = 3) +
+  scale_color_continuous(guide = "none", trans = "reverse") +
+  scale_y_discrete(labels = label_tags()) +
+  scale_x_continuous(labels = scales::label_percent(accuracy = 1), limits = c(0, .25), expand = expansion()) +
+  labs(
+    x = "Average Annual Percentage point change\nin schools selecting practices",
+    y = "",
+    title = "Average change in tagging patterns"
+  ) +
+  theme(axis.text.y = element_text(size = rel(0.5)))
+tag_change
+# ggsave("finding-22.png", plot = tag_change, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
+```
+
 
 #How many tags have been retained across years?

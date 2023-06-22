@@ -55,6 +55,22 @@ dat <- dat %>%
   ))
 ```
 
+States
+3 hold NA values:  
+* ID 753 = Tennessee (University High School)  
+* ID 665 = District of Columbia (Capital Experience Lab)  
+* ID 577 = Florida (North Florida School of Special Education)
+
+```{r fix NA states}
+dat <- dat %>% 
+  mutate(school_state = case_when(
+           school_id == 753 ~ "Tennessee",
+           school_id == 665 ~ "District of Columbia",
+           school_id == 577 ~ "Florida",
+           TRUE ~ as.character(school_state)))
+```
+
+
 Practices
 create core_ and time_ variables
 
