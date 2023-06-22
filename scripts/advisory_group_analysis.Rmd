@@ -54,24 +54,28 @@ lead_race <- confidential %>%
   ),
   rate = rep(1, nrow(.))) %>% 
   group_by(leadership_diversity) %>% 
-  mutate(sum = sum(rate))
-#lead_race_plot <-
-ggplot(lead_race, aes(leadership_diversity, fill = leadership_diversity)) +
-  geom_bar() +
+  summarize(sum = sum(rate),
+         pct = sum/251)
+# lead_race_plot <-
+ggplot(lead_race, aes(leadership_diversity, pct, fill = leadership_diversity)) +
+  geom_col() +
   scale_fill_manual(values = transcend_cols) +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
   theme(legend.position = "none") +
-  labs(title = "What is the racial/ethnic breakdown of Canopy school leadership teams?",
+  labs(title = "Canopy Learning Environments' Leadership Teams",
         x = "",
-        y = "Number of Schools") +
-  scale_y_continuous(limits = c(0, 110), expand = c(0,0)) +
-  geom_text(aes(label = ..count..), 
-            stat = "count", 
-            vjust = -.5, 
+        y = "Percentage of Schools") +
+  geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)), 
+            nudge_y = .01,
+            vjust = 0, 
             colour = "black",
             fontface = "bold",
             size = 5,
             family = "sans")
-
+# ggsave("finding-4-V2.png", plot = lead_race_plot, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
+#create table
 lead_race_table <- lead_race %>% 
   mutate(rate = rep(1, length(251))) %>% 
   group_by(leadership_diversity) %>% 
