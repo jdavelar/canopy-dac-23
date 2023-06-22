@@ -249,34 +249,32 @@ ggplot(type, aes(reorder(`School Type`, pct), pct, fill = `School Type`)) +
 ```
 
 ```{r type pie chart}
-#prep data
-type_plot2 <- type %>%
-  arrange(desc(`School Type`)) %>% 
-  mutate(pct = round(pct*100, 0)) %>% 
+ type_plot2 <- 
+
 #create pie chart
-ggplot(., aes(x = "", y = N, fill = `School Type`)) +
+ggplot(type, aes(x = "", y = N, fill = `School Type`)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
   theme_void() +
-  geom_text(aes(label = paste0(pct, "%")),
-            position = position_stack(vjust = 0.5),
+  geom_text(aes(label = str_wrap(paste(label_percent(accuracy = 1)(pct), `School Type`, sep = "\n"), 10)),
+            position = position_stack(vjust = .5),
             color = "white",
             fontface = "bold",
-            size = 5,
+            size = 4.5,
             family = "sans") +
   scale_fill_manual(values = c(transcend_cols[1], transcend_cols[2], transcend_cols[3])) +
   theme(plot.title = element_text(family = "Bebas Neue", 
                                   color = "black",
                                   size = 30,
                                   hjust = 0.5),
-        legend.position = "bottom", 
-        legend.direction = "horizontal",
+        legend.position = "none",
         text = element_text(size = 14,
                             family = "sans",
                             color = transcend_grays[1])) +
   labs(title = "Canopy Learning Environments by Type",
        x = "",
        y = "")
+type_plot2
 ggsave("finding-2-V2.png", plot = type_plot2, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
