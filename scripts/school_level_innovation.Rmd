@@ -416,7 +416,7 @@ support_comparison <- full_join(central_importance_pct,central_percentage,by = c
 
 support_labels <- c("Exemptions", "Direction \n& Vision", "Peer Cohort", "Policy \nNavigation", "Funding", "Curriculum \nSupport", "Public Support", "People & \nCapacity")
 
-#supports3 <- 
+#finding_13a <- 
 support_comparison %>%
   ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = factor(innovation)))+
   geom_bar(position = "dodge",stat = "identity") +
@@ -425,12 +425,12 @@ support_comparison %>%
        x = " ",
       fill = "Innovation Group") +
   scale_x_discrete(labels = support_labels) +
-  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%")) +
+  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0)) +
     scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Non-Innovation", "Innovation")) +
   coord_flip() +
   theme(legend.position = c(0.8, 0.2))
 
-# ggsave("finding-13-v3.png", plot = supports3, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+## ggsave("finding-13-v3.png", plot = finding_13a, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 ```
 
 
@@ -1029,34 +1029,35 @@ central_odds <- data.frame(odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.
 supports <- c("Direction \n& Vision", "Exemptions", "Funding", "Policy \nNavigation", "Peer Cohort", "People \n& Capacity", "Public Support", "Curriculum \nSupport")
 
 #plot
-#odds_plot <- 
+#finding_13b <- 
 central_odds %>%
   ggplot(aes(reorder(supports, lor), lor)) +
   geom_col(fill = "#1A4C81") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip() +
-  labs(title = "Most & Least Likely Supports for Charter \n& Public Schools in Innovative Networks",
+  labs(title = "Most Likely Supports for Charter & Public \nSchools in Innovative Networks",
        subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",
        x = "",
        y = "") +
   scale_y_continuous(limits=c(0, 3),
                      labels = c(
-                            "0" = "Even",
+                            "0" = "Even \nlikelihood",
                             "1" = "",
-                            "2" = "2x more",
-                            "3" = "3x more"),
-                     n.breaks = 4) +
+                            "2" = "2x more \nlikely",
+                            "3" = "3x more \nlikely"),
+                     n.breaks = 4,
+                     expand = c(0,0)) +
   geom_hline(yintercept = 0, color = transcend_cols[3]) +
   geom_text(aes(label = round(lor, 2)), 
-             nudge_y = .5, 
+             nudge_y = .15, 
              color = transcend_cols[3],
              fontface = "bold",
-             size = 5,
+             size = 7,
             family = "sans")
 
 
-# ggsave("finding-13-v4.png", plot = odds_plot, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+# ggsave("finding-13-v4.png", plot = finding_13b, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 
 ```
 
