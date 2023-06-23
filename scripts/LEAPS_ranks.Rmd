@@ -770,7 +770,7 @@ leaps_cols
 custom_labels <- c("Whole Child", "Anytime Anywhere", "High Expectations", "Self Direction", " Connection",
                    "Relevance", "Affirmation", "Social Consciousness", "Customization", "Rigorous Learning")
 # Create the bar chart ordered by rank
-ggplot(rank_data, aes(x = reorder(Practice, Ranking))) +
+finding_7 <- ggplot(rank_data, aes(x = reorder(Practice, Ranking))) +
   geom_bar(aes(y = Implementation), stat = "identity", fill = "#1A4C81") +
   scale_y_continuous(
     name = "Percentage of Implementation",
@@ -778,14 +778,15 @@ ggplot(rank_data, aes(x = reorder(Practice, Ranking))) +
                         name = "")
   ) +
   geom_text(aes(y = Ranking, label = Ranking), color = "#EF464B", size = 6, vjust = -0.25) +
-  geom_text(aes(y = Implementation, label = Implementation), color = "black", size = 4, vjust = 2.25) +
+  geom_text(aes(y = Implementation, label = Implementation), color = "white", size = 4, vjust = 2.25) +
   scale_x_discrete(labels = custom_labels) +
-  labs(title = "Ranking and Percentage of Implementation", x = "") +
-  theme_minimal()+
+  labs(title = "High expectations and connection \nwere the biggest shifts in student experience", x = "", y = "Implementation Percentage") +
   ylim(0, 100)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
+# Finding 7 plot
+## ggsave(filename = "finding-7.png", plot = finding_7, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 ```
 

@@ -174,6 +174,8 @@ The majority of the supports reported were around 30%.
 ```{r central office, fig.width=10, fig.height=8, warning=FALSE}
 library(ggplot2)
 
+#table(central_network$central_n_a)
+
 central_network_yes <- central_network %>%
   filter(central_n_a == 1)
 
@@ -195,18 +197,24 @@ central_percentage <- rbind(central_percentage, data.frame(name = i, percent_yes
 gt(central_percentage)
 
 bar_colors <- c("#1A4C81", "#59C3B4", "#EF464B", "#ADE0EE", "#BC2582","#FFA630", "#99C24D", "#FFDE42")  # Color palette for the bars
-#supports <-
+
+
+support_labels <- c("Exemptions", "Direction \n& Vision", "Peer Cohort", "Curriculum \nSupport", "Policy \nNavigation", "People \nCapacity", "Funding", "Public Support")
+
+#supports <- 
 central_percentage %>%
-  ggplot(aes(x=name, y = percent_yes, fill = name))+
+  ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = "#59C3B4"))+
   geom_col(show.legend = FALSE) +
   scale_fill_manual(values = bar_colors) +
-  ylab("Percent") +
-  xlab("")+
+  labs(title = "Public Support, People capcity, and funding \nwere the most common supports received", subtitle = "Based on schools that reported receiving central office supports",
+       y = "Percent",
+       x = " ") +
+  scale_x_discrete(labels = support_labels) +
   scale_y_continuous(limits = c(0,100), n.breaks = 5)+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
   
-# ggsave("finding-13.png", plot = supports, path = here("final_products", "draft-findings"),
-#        width = 12, height = 8, units = "in")
+#ggsave("finding-13.png", plot = supports, path = here("final_products", "draft-findings"),
+#      width = 12, height = 8, units = "in")
 
 ```
 
@@ -370,13 +378,59 @@ central_importance_pct <- rbind(central_importance_pct, data.frame(name = i, per
 gt(central_importance_pct)
 
 
-
 ```
 
 **Schools that answered yes to being part of a larger district initiative**   
 These schools were more likely than other schools to report receiving supports. The trends in terms of which supports were provided stayed the same, but the percentages changed. In this group of schools, 73% reported receiving support in terms of people or time for the innovation project. 70% reported tools/supports from a central office focus on the innovative project. The third most frequently reported support was public support for their project with 65%. 
 
 The least reported support was still central office exemptions which was reported for 29% of schools.
+
+Here is a look at the supports received by schools in an innovation network. 
+```{r, fig.width=10, fig.height=8, warning=FALSE}
+
+support_labels <- c("Exemptions", "Direction \n& Vision", "Policy \nNavigation", "Funding", "Peer \nCohort", "Public Support", "Curriculum \nSupport", "People & \nCapacity")
+
+#supports2 <- 
+central_importance_pct %>%
+  ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = "#59C3B4"))+
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = bar_colors) +
+  labs(title = "Schools in Innovation Networks tend to receive \nmore support", subtitle = "Based on schools that reported being part of an innovation network",
+       y = "Percent",
+       x = " ") +
+ scale_x_discrete(labels = support_labels) +
+  scale_y_continuous(limits = c(0,100), n.breaks = 5)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+  
+# ggsave("finding-13-v2.png", plot = supports2, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+
+```
+
+
+```{r}
+
+central_importance_pct$innovation <- c(1,1,1,1,1,1,1,1)
+central_percentage$innovation <- c(0,0,0,0,0,0,0,0)
+
+support_comparison <- full_join(central_importance_pct,central_percentage,by = c("innovation", "name", "percent_yes"))
+
+support_labels <- c("Exemptions", "Direction \n& Vision", "Peer Cohort", "Policy \nNavigation", "Funding", "Curriculum \nSupport", "Public Support", "People & \nCapacity")
+
+#supports3 <- 
+support_comparison %>%
+  ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = factor(innovation)))+
+  geom_bar(position = "dodge",stat = "identity") +
+  labs(title = "Schools in Innovation Networks Receive more Support", subtitle = "A comparison of supports for schools in an innovation network \n to those not a part of an innovation network",
+       y = "Percent",
+       x = " ",
+      fill = "Innovation Group") +
+  scale_x_discrete(labels = support_labels) +
+  scale_y_continuous(limits = c(0,100), n.breaks = 5)+
+    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Non-Innovation", "Innovation")) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+
+# ggsave("finding-13-v3.png", plot = supports3, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+```
 
 
 We can look at the percentages of supports for each rating.  
