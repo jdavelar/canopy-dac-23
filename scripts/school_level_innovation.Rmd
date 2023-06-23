@@ -420,14 +420,15 @@ support_labels <- c("Exemptions", "Direction \n& Vision", "Peer Cohort", "Policy
 support_comparison %>%
   ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = factor(innovation)))+
   geom_bar(position = "dodge",stat = "identity") +
-  labs(title = "Schools in Innovation Networks Receive more Support", subtitle = "A comparison of supports for schools in an innovation network \n to those not a part of an innovation network",
-       y = "Percent",
+  labs(title = "Schools in Innovation Networks Receive \nmore Support", subtitle = "A comparison of supports for schools in an innovation \nnetwork to those not a part of an innovation network",
+       y = "",
        x = " ",
       fill = "Innovation Group") +
   scale_x_discrete(labels = support_labels) +
-  scale_y_continuous(limits = c(0,100), n.breaks = 5)+
+  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%")) +
     scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Non-Innovation", "Innovation")) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+  coord_flip() +
+  theme(legend.position = c(0.8, 0.2))
 
 # ggsave("finding-13-v3.png", plot = supports3, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 ```
