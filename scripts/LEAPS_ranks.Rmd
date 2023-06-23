@@ -237,14 +237,22 @@ leaps_percentage <- rbind(leaps_percentage, data.frame(name = i, percent_yes = p
 leaps_percentage_long <- leaps_percentage %>%
   pivot_longer(cols = c("percent_yes"), names_to = "Status", values_to = "Percentage")
 
+custom_labels <- rev(c("High \nExpectations", "Connection", "Whole Child", "Rigorous \nLearning", "Relevance", "Customization", "Self Direction", "Affirmation", "Social \nConsciousness", "Anytime \nAnywhere"))
+
+leaps_percentage_long <- leaps_percentage_long %>% select(-"Status")
+
 # Create a grouped bar plot
-ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage, fill = Status)) +
-  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE) +
-  geom_text(aes(label = Percentage), color = "black", size = 4, hjust = -.25) +
-  theme_minimal() +
-  labs(title = "Leaps Implementation", x = "Practice", y = "Percentage") +
-  scale_fill_manual(values = c("percent_yes" = "#1A4C81")) +
+#finding_7a <- 
+ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage)) +
+  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE, fill = "#1A4C81") +
+  geom_text(aes(label = paste0(round(Percentage), "%")), color = "black", size = 4, hjust = -.25) +
+  labs(title = "Leaps Shifts in Student Experience Implementation", x = " ", y = " ") +
+  scale_x_discrete(labels = custom_labels)+
+  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0))+
   coord_flip()
+
+# Finding 7 plot
+## ggsave(filename = "finding-7a.png", plot = finding_7a, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 
 ```
