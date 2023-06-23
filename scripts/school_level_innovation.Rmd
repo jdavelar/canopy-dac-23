@@ -1011,7 +1011,7 @@ Schools in the Innovation Network were 2.29 times more likely to report central 
 Schools in the Innovation Network were 5.46 times more likely to report central support in curriculum and tools, p < 0.001  
 
 
-```{r odds graph}
+```{r odds graph, eval=FALSE, include=FALSE}
 
 odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.46)
 lor <- log(odds)
@@ -1021,10 +1021,17 @@ central_odds <- data.frame(odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.
                            lor = lor,
                            supports = c("Direction", "Exemptions", "Funding", "Navigation", "Peer Connections", "People Capacity", "Public Support", "Curriculum"))
 
+```
+
+
+```{r}
+supports <- c("Direction \n& Vision", "Exemptions", "Funding", "Policy \nNavigation", "Peer Cohort", "People \n& Capacity", "Public Support", "Curriculum \nSupport")
+
 #plot
+#odds_plot <- 
 central_odds %>%
   ggplot(aes(reorder(supports, lor), lor)) +
-  geom_col(fill = "#59C3B4") +
+  geom_col(fill = "#1A4C81") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip() +
@@ -1032,16 +1039,13 @@ central_odds %>%
        subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",
        x = "",
        y = "") +
-  scale_y_continuous(limits=c(0, 6),
+  scale_y_continuous(limits=c(0, 3),
                      labels = c(
                             "0" = "Even",
                             "1" = "",
                             "2" = "2x more",
-                            "3" = "",
-                            "4" = "4x more",
-                            "5" = "",
-                            "6" = "6x more"),
-                     n.breaks = 7) +
+                            "3" = "3x more"),
+                     n.breaks = 4) +
   geom_hline(yintercept = 0, color = transcend_cols[3]) +
   geom_text(aes(label = round(lor, 2)), 
              nudge_y = .5, 
@@ -1050,6 +1054,8 @@ central_odds %>%
              size = 5,
             family = "sans")
 
+
+# ggsave("finding-13-v4.png", plot = odds_plot, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 
 ```
 
