@@ -338,7 +338,9 @@ var_max_15 <- var_all %>%
   arrange(variance) %>%
   ggplot(aes(Tag, proportion, fill = type)) +
   geom_bar(stat = "identity", position = "dodge") +
-scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040"))+
+  scale_fill_manual(values = c("#EF464B", "#5F9ED1", "#FBB040"),
+                    labels = c("Charter", "District", "Independent"),
+                    guide = guide_legend(title = "Type of School")) +
   theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
   labs(x = "", y = "Tags with Most Variability",
        title = "Top 15 Tags with Largest Variability for Charter, District, and Independent Schools",
@@ -359,7 +361,9 @@ var_min_15 <- var_all %>%
   arrange(variance) %>%
   ggplot(aes(Tag, proportion, fill = type)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  scale_fill_manual(values = c("#EF464B", "#5F9ED1", "#FBB040"),
+                    labels = c("Charter", "District", "Independent"),
+                    guide = guide_legend(title = "Type of School")) +
   theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
   labs(x = "", y = "Tags with Least Variability",
        title = "Top 15 Tags with Lowest Variability for Charter, District, and Independent Schools",
@@ -378,13 +382,16 @@ var_max_20 <- var_all %>%
   arrange(variance) %>%
   ggplot(aes(Tag, proportion, fill = type)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  scale_fill_manual(values = c("#EF464B", "#5F9ED1", "#FBB040"),
+                    labels = c("Charter", "District", "Independent"),
+                    guide = guide_legend(title = "Type of School")) +
   theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
   labs(x = "", y = "Tags with Most Variability",
        title = "Top 20 Tags with Largest Variability for Charter, District, and Independent Schools",
        subtitle = "In order of increasing variability")
 
 var_max_20
+
 
 ```
 
@@ -398,7 +405,9 @@ var_min_20 <- var_all %>%
   arrange(variance) %>%
   ggplot(aes(Tag, proportion, fill = type)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("Charter" = "#EF464B", "District" = "#5F9ED1", "Independent" = "#FBB040")) +
+  scale_fill_manual(values = c("#EF464B", "#5F9ED1", "#FBB040"),
+                    labels = c("Charter", "District", "Independent"),
+                    guide = guide_legend(title = "Type of School")) +
   theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
   labs(x = "", y = "Tags with Least Variability",
        title = "Top 20 Tags with Lowest Variability for Charter, District, and Independent Schools",
@@ -407,4 +416,6 @@ var_min_20 <- var_all %>%
 var_min_20
 
 ```
+
+
 

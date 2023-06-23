@@ -20,6 +20,7 @@ library(tidyverse)
 library(rio)
 library(DT)
 library(cowplot)
+library(ggtext)
 #data
 load(here("data", "complete_canopy_2023.Rdata"))
 #branding
@@ -557,6 +558,72 @@ disag_ml <- full %>%
 disag_ml
 ```
 
+### How many of the schools designing for multilingual learners also utilize dual language programming or heritage language instruction?
+
+Of the schools indicating they were designing specifically for multilingual learners, 18% utilized dual language programming and 13% offered heritage language instruction for their multilingual students. These schools also leverage translanguaging (14%) at double the rate observed in our overall Canopy sample.
+
+```{r ML focus + DL and HL}
+#all MLLs
+ml<-
+full %>% 
+  select(practices_dual_language, practices_heritage_language, practices_translanguaging, focus_multilingual) %>% 
+  filter(focus_multilingual == 1) %>% #111 schools focus on MLLs
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>%
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            pct = paste0(round(100*(n/111)), "%"))
+datatable(ml)
+```
+
+The same pattern holds when observing schools designing specifically for students classified as English Learners, though the rates are slightly lower for dual language programming and heritage language instruction.
+
+```{r EL focus + DL and HL}
+#ELs specifically
+el <-
+full %>% 
+  select(practices_dual_language, practices_heritage_language, practices_translanguaging, focus_emergent_bilingual) %>% 
+  filter(focus_emergent_bilingual == 1) %>% #111 schools focus on MLLs
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>%
+  group_by(tag) %>% 
+  summarize(n = sum(n),
+            pct = paste0(round(100*(n/111)), "%"))
+datatable(el)
+```
+
+Comparative chart
+
+```{r compare EL/ML/none}
+not = data.frame(tag = c("practices_dual_language", "practices_heritage_language", "practices_translanguaging"),
+                    n = c(31, 17, 19),
+                    pct = c(12, 7, 8),
+                 focus = rep("none", 3))
+comp_ml <- ml %>% 
+  mutate(focus = rep("MLL", nrow(.))) %>% 
+  bind_rows(el) %>% 
+  mutate(focus = replace_na(focus, "EL")) %>% 
+  mutate(pct = str_remove_all(pct, "[:punct:]"),
+         pct = as.numeric(pct)) %>% 
+  bind_rows(not) %>% 
+  mutate(pct = pct/100) %>% 
+ggplot(., aes(tag, pct, fill = focus)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_fill_manual(values = transcend_cols) +
+  labs(title = "Canopy Learning Environments by Student Focus",
+       x = "",
+       y = "") +
+  scale_x_tag() +
+  theme(legend.position = c(.8,.8)) 
+comp_ml
+ggsave("finding-19.png", plot = comp_ml, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
 
 ### Students classified as English Learners
 
@@ -615,6 +682,18 @@ core_lead <- full %>%
   group_by(lead) %>% 
   arrange(desc(n), .by_group = TRUE) %>% 
   slice(1:6) #tie at spot #5 for one group
+#all top 6:
+#practices_pbl
+#practices_culturally_responsive
+#practices_restorative
+#practices_sel_integrated
+#practices_all_courses_designed_for_inclusion
+#practices_design_marginalized
+#practices_competency_education
+#practices_community_partnerships
+#practices_learning_paths
+#practices_career_prep
+
 #predominantly white
 pwcore_plot <- core_lead %>% 
   filter(lead == "PWI") %>% 
@@ -650,3 +729,117 @@ plot_grid(pwcore_plot, bipoccore_plot,
 # ggsave("finding-17b.png", plot = combined_core, path = here("final_products", "draft-findings"),
 #        width = 12, height = 8, units = "in")
 ```
+
+Alternate plot: biggest differences in tagging between PW & BIPOC leaders
+
+```{r biggest tagging diffs - BIPOC vs. not}
+labs = c("Difference = 14%", "", "Difference = 13%", "", "Difference = 12%","", "Difference = 11%","", "Difference = 10%","", "Difference = 10%","",  "Difference = 9%","", "Difference = 8%","", "Difference = 8%", "", "Difference = 6%", "")
+diff_core <- full %>% 
+  select(school_id, lead = leadership_diversity, starts_with("core")) %>% 
+  filter(!lead == 0) %>% 
+  filter(!lead == 5) %>% 
+  mutate(lead = case_when(
+    (lead == 1 | lead == 2) ~ "White",
+    (lead == 3 | lead == 4) ~ "BIPOC"
+  )) %>%
+  rename_all(funs(sub("core", "practices", .))) %>%
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(lead, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = lead,
+              values_from = c(n, rate, pct)) %>% 
+  mutate(diff = abs(round(100*(pct_BIPOC - pct_White), 2))) %>% 
+  pivot_longer(cols = !c(tag, diff),
+               names_to = c("col", "Leadership Team"),
+               names_sep = "_",
+               values_to = "value") %>% 
+  pivot_wider(names_from = col,
+              values_from = value) %>% 
+  arrange(desc(diff)) %>% 
+  slice(1:20) %>% 
+ggplot(., aes(reorder(tag, -diff), pct, fill = `Leadership Team`)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.y = element_blank()) +
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  labs(title = "Largest differences in core practices between<br>predominantly <span style = 'color: #1A4C81;'>BIPOC</span> and <span style = 'color: #EF464B;'>White</span> Leadership Teams",
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown()) +
+  theme(legend.position = "none") +
+  geom_text(aes(y = .4, label = labs),
+            color = transcend_grays[1],
+            family = "sans",
+            size = 4)
+diff_core
+ggsave("finding-17-V2.png", plot = diff_core, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+# What are the biggest tagging differences between "inclusive" schools and those that are not inclusive?
+
+We should look at modeling results to draw any strong conclusions, but I've created a barplot below displaying the biggest tagging differences between the two groups for the core tags selected.
+
+I defined "inclusive" as those schools that indicated they were either designing for the needs of marginalized student groups or have all courses designed for inclusion.
+
+**Analyst note** I do not trust the plot below - simple difference in tagging is good to see, however, the number of schools that fell into the "inclusive" bucket (N = 217) was far bigger than those that were not (N = 34). Might be good to think more about how to account for such a difference in sample.
+
+```{r inclusive school vs not}
+inclusive_diff <-
+full %>% 
+  select(school_id, inc = practices_all_courses_designed_for_inclusion, marg = practices_design_marginalized, starts_with("core")) %>% 
+  mutate(inclusive = case_when(
+    (inc == 1 | marg == 1) ~ "inclusive",
+    (inc == 0 & marg == 0) ~ "not"
+  )) %>%
+  select(!c(inc, marg)) %>% 
+  rename_all(funs(sub("core", "practices", .))) %>%
+  select(!c(practices_all_courses_designed_for_inclusion, practices_design_marginalized)) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(inclusive, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = inclusive,
+              values_from = c(n, rate, pct)) %>% 
+  mutate(diff = abs(round(100*(pct_inclusive - pct_not), 2))) %>% 
+  pivot_longer(cols = !c(tag, diff),
+               names_to = c("col", "inclusive"),
+               names_sep = "_",
+               values_to = "value") %>% 
+  pivot_wider(names_from = col,
+              values_from = value) %>% 
+  arrange(desc(diff)) %>% 
+  slice(1:20) %>% 
+
+ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.y = element_blank()) +
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  labs(title = "Largest differences in core practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown()) +
+  theme(legend.position = "none")
+inclusive_diff
+ggsave("finding-20.png", plot = inclusive_diff, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
