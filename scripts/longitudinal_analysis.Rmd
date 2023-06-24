@@ -213,9 +213,10 @@ coefs %>%
 
 #plot 2
 tag_change <-
-coefs %>% slice(1:15) %>%
+coefs %>% slice(1:16) %>%
+  filter(!(tag == "practices_learner_profiles")) %>% #removed b/c dropped 2023
   ggplot(aes(y = tag, x = estimate)) +
-  geom_point(aes(color = rank), size = 3) +
+  geom_point(aes(color = rank), size = 5) +
   scale_color_continuous(guide = "none", trans = "reverse") +
   scale_y_discrete(labels = label_tags()) +
   scale_x_continuous(labels = scales::label_percent(accuracy = 1), limits = c(0, .25), expand = expansion()) +
@@ -224,10 +225,10 @@ coefs %>% slice(1:15) %>%
     y = "",
     title = "Average change in tagging patterns"
   ) +
-  theme(axis.text.y = element_text(size = rel(0.5)))
+  theme(axis.text.y = element_text(size = rel(1)))
 tag_change
-# ggsave("finding-22.png", plot = tag_change, path = here("final_products", "draft-findings"),
-#        width = 12, height = 8, units = "in")
+ggsave("finding-22-V2.png", plot = tag_change, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
 ```
 
 
