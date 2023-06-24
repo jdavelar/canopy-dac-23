@@ -300,16 +300,17 @@ ggplot(aes(x = rank, y = Leaps, color = Leaps)) +
 ## ggsave(filename = "finding-7scatter.png", plot = finding_7scatter, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 
-#finding_7c <- 
+# finding_7heat <- 
 leaps_counts %>%
 ggplot(aes(x = rank, y = Leaps, fill = count)) +
   geom_tile()+
   scale_x_discrete(expand = c(0,0), limits = c(1:10))+
   scale_y_discrete(expand = c(0,0), labels = custom_labels)+
+ scale_fill_viridis_c()+
   labs(title = "Whole child and high expectations were rated \n the most important shifts in student experience", y = " ", x = "Rank (1 = Most important \n10 = Least important)", fill = "Count")
 
 # Finding 7 plot
-## ggsave(filename = "finding-7c.png", plot = finding_7c, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
+## ggsave(filename = "finding-7heat.png", plot = finding_7heat, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 ```
 
