@@ -258,21 +258,83 @@ ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage)
 
 ```
 
-
+### Heat Map  
 
 ```{r}
 
-school_leap
+school_leap <- school_leap %>% select(-c(5:13, 29, 37:41, 43:55))
 
-ggplot(school_leap, aes(x = , y = Percentage)) +
-  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE, fill = "#1A4C81") +
-  geom_text(aes(label = paste0(round(Percentage), "%")), color = "black", size = 4, hjust = -.25) +
-  labs(title = "Leaps Shifts in Student Experience Implementation", x = " ", y = " ") +
-  scale_x_discrete(labels = custom_labels)+
-  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0))+
-  coord_flip()
+school_leap <- school_leap %>% select(-c(25,26))
 
 
+
+school_leap_long <- pivot_longer(school_leap, cols = c(15:24), names_to = "Leaps", names_prefix = "leaps_", values_to = "implementation")
+
+school_leap_long <- pivot_longer(school_leap_long, cols = c(5:14), names_to = "Leap_Rank", names_prefix = "leaps_rank_", values_to = "rank")
+
+
+
+school_leap_long <- school_leap_long %>%
+  group_by(school_name) %>%
+  filter(Leaps == Leap_Rank & implementation == 1) 
+
+
+
+leaps_counts <- school_leap_long %>%
+  group_by(Leaps, rank) %>%
+  dplyr::summarize(count = n())
+
+
+custom_labels <- rev(c("Whole Child", "Social Consciousness", "Self Direction", "Rigorous Learning", "Relevance", "High Expectation", "Customization", "Connection", "Anytime Anywhere", "Affirmation"))
+
+#finding_7scatter <- 
+leaps_counts %>%
+ggplot(aes(x = rank, y = Leaps, color = Leaps)) +
+  geom_point(position = position_jitter(), show.legend = FALSE)+
+    scale_y_discrete(expand = c(0,0), labels = custom_labels)+
+    scale_x_discrete(expand = c(0,0), limits = c(1:10))+
+    labs(title = "Distribution of Ranking by Shift in Student experience",
+         y = " ",
+         x = "Rank")
+
+## ggsave(filename = "finding-7scatter.png", plot = finding_7scatter, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
+
+
+#finding_7c <- 
+leaps_counts %>%
+ggplot(aes(x = rank, y = Leaps, fill = count)) +
+  geom_tile()+
+  scale_x_discrete(expand = c(0,0), limits = c(1:10))+
+  scale_y_discrete(expand = c(0,0), labels = custom_labels)+
+  labs(title = "Whole child and high expectations were rated \n the most important shifts in student experience", y = " ", x = "Rank (1 = Most important \n10 = Least important)", fill = "Count")
+
+# Finding 7 plot
+## ggsave(filename = "finding-7c.png", plot = finding_7c, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
+
+```
+
+### Heat map by Locale  
+
+```{r}
+
+leaps_counts <- school_leap_long %>%
+  group_by(Leaps, rank, exclusive_locale) %>%
+  dplyr::summarize(count = n())
+
+custom_labels <- rev(c("Whole Child", "Social Consciousness", "Self Direction", "Rigorous Learning", "Relevance", "High Expectation", "Customization", "Connection", "Anytime Anywhere", "Affirmation"))
+
+# Fix this with n count
+#finding_7heat_locale <- 
+leaps_counts %>%
+ggplot(aes(x = rank, y = Leaps, fill = count)) +
+  geom_tile()+
+  facet_wrap(~exclusive_locale)+
+  scale_x_discrete(expand = c(0,0), limits = c(1:10))+
+  scale_y_discrete(expand = c(0,0), labels = custom_labels)+
+  scale_fill_viridis_c() +
+  labs(title = "Urban school rankings drive the prioritization of \nWhole child and high expectations for shifts in school experience", y = " ", x = "Rank (1 = Most important \n10 = Least important)", fill = "Count")
+
+## ggsave(filename = "finding-7heat-locale.png", plot = finding_7heat_locale, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 ```
 
