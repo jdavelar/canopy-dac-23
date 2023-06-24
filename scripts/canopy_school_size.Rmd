@@ -89,3 +89,15 @@ correct_avg2 <- full %>%
   summarize(mean = mean(size))
 ```
 
+## What is the average size for Canopy high schools?
+
+```{r}
+full %>% 
+  group_by(grades_high) %>% 
+  summarize(mean = mean(self_reported_total_enrollment, na.rm = TRUE),
+            median = median(self_reported_total_enrollment, na.rm = TRUE), 
+            min = min(self_reported_total_enrollment),
+            max = max(self_reported_total_enrollment))
+  
+```
+

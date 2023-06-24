@@ -613,14 +613,22 @@ ggplot(., aes(tag, pct, fill = focus)) +
   geom_bar(position = "dodge", stat = "identity") +
   bar_y_scale_percent +
   theme(panel.grid.major.x = element_blank()) +
-  scale_fill_manual(values = transcend_cols) +
+  scale_fill_manual(values = transcend_cols,
+                    labels=c('Students Classified as English Learners', 'All Multilingual Students', 'None')) +
   labs(title = "Canopy Learning Environments by Student Focus",
        x = "",
        y = "") +
   scale_x_tag() +
-  theme(legend.position = c(.8,.8)) 
+  theme(legend.position = c(.75,.85)) +
+  geom_text(aes(group = focus, label = scales::label_percent(accuracy = 1)(pct)),
+            nudge_y = .01,
+            vjust = 0,
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
 comp_ml
-ggsave("finding-19.png", plot = comp_ml, path = here("final_products", "draft-findings"),
+ggsave("finding-19-V2.png", plot = comp_ml, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 
@@ -649,9 +657,7 @@ ggsave("finding-19.png", plot = comp_ml, path = here("final_products", "draft-fi
 
 ## By level
 
-##By school type
-
-##By leadership team
+## By school type
 
 ## By leadership team
 
@@ -766,12 +772,14 @@ diff_core <- full %>%
   slice(1:20) %>% 
 ggplot(., aes(reorder(tag, -diff), pct, fill = `Leadership Team`)) + 
   geom_bar(position = "dodge", stat = "identity") +
-  bar_y_scale_percent +
+  scale_y_continuous(limits = c(0, .55), expand = c(0,0), labels = scales::percent) +
+  # bar_y_scale_percent +
   theme(panel.grid.major.y = element_blank()) +
   scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
   scale_x_discrete(labels = label_tags(wrap = 25)) +
   coord_flip() +
   labs(title = "Largest differences in core practices between<br>predominantly <span style = 'color: #1A4C81;'>BIPOC</span> and <span style = 'color: #EF464B;'>White</span> Leadership Teams",
+       subtitle = "When Canopy schools select the practices they use,they also have the option to\nselect up to 5 practices they consider central to their learning environment.\nThe comparison below displays the difference for the 5 practices schools selected.",
        x = "",
        y = "") +
   theme(plot.title = element_markdown()) +
@@ -781,7 +789,7 @@ ggplot(., aes(reorder(tag, -diff), pct, fill = `Leadership Team`)) +
             family = "sans",
             size = 4)
 diff_core
-ggsave("finding-17-V2.png", plot = diff_core, path = here("final_products", "draft-findings"),
+ggsave("finding-17-V3.png", plot = diff_core, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 
@@ -841,5 +849,128 @@ ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) +
 inclusive_diff
 ggsave("finding-20.png", plot = inclusive_diff, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+```
+
+## Modification 1 - Core tags
+
+```{r core inclusive differences}
+inclusive_diff3 <-
+full %>% 
+  select(school_id, inc = practices_all_courses_designed_for_inclusion, marg = practices_design_marginalized, starts_with("practices")) %>% 
+  mutate(inclusive = case_when(
+    (inc == 1 | marg == 1) ~ "inclusive",
+    (inc == 0 & marg == 0) ~ "not"
+  )) %>%
+  select(!c(inc, marg)) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(inclusive, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = inclusive,
+              values_from = c(n, rate, pct)) %>% 
+  mutate(diff = abs(round(100*(pct_inclusive - pct_not), 2))) %>% 
+  pivot_longer(cols = !c(tag, diff),
+               names_to = c("col", "inclusive"),
+               names_sep = "_",
+               values_to = "value") %>% 
+  pivot_wider(names_from = col,
+              values_from = value) %>% 
+  arrange(desc(diff)) %>% 
+  slice(1:20) %>% 
+
+ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.y = element_blank()) +
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  labs(title = "Largest differences in core practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+       subtitle = "This plot displays the 5 core tags schools selected.",
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown()) +
+  theme(legend.position = "none")
+inclusive_diff3
+ggsave("finding-20b-V2.png", plot = inclusive_diff3, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+# Modification 2 - All Tags
+
+```{r inclusive diff all tags}
+inclusive_diff2 <-
+full %>% 
+  select(school_id, inc = core_all_courses_designed_for_inclusion, marg = core_design_marginalized, starts_with("core")) %>% 
+  mutate(inclusive = case_when(
+    (inc == 1 | marg == 1) ~ "inclusive",
+    (inc == 0 & marg == 0) ~ "not"
+  )) %>%
+  select(!c(inc, marg)) %>% 
+  rename_all(funs(sub("core", "practices", .))) %>%
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  select(!school_id) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(inclusive, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = inclusive,
+              values_from = c(n, rate, pct)) %>% 
+  mutate(diff = abs(round(100*(pct_inclusive - pct_not), 2))) %>% 
+  pivot_longer(cols = !c(tag, diff),
+               names_to = c("col", "inclusive"),
+               names_sep = "_",
+               values_to = "value") %>% 
+  pivot_wider(names_from = col,
+              values_from = value) %>% 
+  arrange(desc(diff)) %>% 
+  slice(1:20) %>% 
+
+ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.y = element_blank()) +
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
+  scale_x_discrete(labels = label_tags(wrap = 25)) +
+  coord_flip() +
+  labs(title = "Largest differences in core practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown()) +
+  theme(legend.position = "none")
+inclusive_diff2
+ggsave("finding-20a-V2.png", plot = inclusive_diff2, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+```{r}
+#model usage
+model_usage<-
+full %>% 
+  select(school_id, starts_with("model")) %>% 
+  mutate(any = case_when(
+    model_usage_bpl == 2 ~ 1,
+    model_usage_ele == 2 ~ 1,
+    model_usage_ib == 2 ~ 1,
+    model_usage_ntn == 2 ~ 1,
+    model_usage_oc == 2 ~ 1,
+    model_usage_sl == 2 ~ 1
+  )) %>% 
+  select(school_id, any) %>% 
+  unique() %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(any) %>% 
+  summarize(sum = sum(rate, na.rm = TRUE),
+            pct = sum/251)
 ```
 

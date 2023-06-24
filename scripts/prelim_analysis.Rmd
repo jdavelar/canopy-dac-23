@@ -23,7 +23,7 @@ library(scales)
 # test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
-theme_update(plot.title = element_text(hjust = 0.5))
+# theme_update(plot.title = element_text(hjust = 0.5))
 dat <- full
 ```
 
@@ -166,7 +166,7 @@ ggplot(level, aes(`School level`, pct, fill = `School level`)) +
   bar_y_scale_percent +
   theme(panel.grid.major.x = element_blank()) +
   labs(title = "Canopy Learning Environments by Level",
-       subtitle = "Note: Some schools serve grades that cross levels, making our total percentage greater than 100%.",
+       subtitle = "Note: Some schools serve grades that cross levels, making our total percentage greater than 100%.\nTotal Canopy learning environments = 251",
        x = "",
        y = "") +
   theme(legend.position = "none") +
@@ -177,7 +177,7 @@ ggplot(level, aes(`School level`, pct, fill = `School level`)) +
             fontface = "bold",
             size = 5,
             family = "sans")
-ggsave("finding-1-V2.png", plot = level_plot, path = here("final_products", "draft-findings"),
+ggsave("finding-1-V3.png", plot = level_plot, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 
@@ -246,14 +246,14 @@ ggplot(type, aes(x = "", y = N, fill = `School Type`)) +
                                   size = 30,
                                   hjust = 0.5),
         legend.position = "none",
-        text = element_text(size = 14,
+        text = element_text(size = 25,
                             family = "sans",
                             color = transcend_grays[1])) +
   labs(title = "Canopy Learning Environments by Type",
        x = "",
        y = "")
 type_plot2
-ggsave("finding-2-V2.png", plot = type_plot2, path = here("final_products", "draft-findings"),
+ggsave("finding-2-V3.png", plot = type_plot2, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 
@@ -413,21 +413,56 @@ top_prac <-
         text = element_text(size = 7),
         axis.text.x = element_text(angle = 45, hjust = 1)
         )
-    # geom_text(aes(label = scales::label_percent(accuracy = 1)(tot_pct)),
-    #         nudge_y = .01,
-    #         vjust = 0,
-    #         color = transcend_cols[3],
-    #         fontface = "bold",
-    #         size = 5,
-    #         family = "sans")
 top_prac
 ggsave("finding-8a-V2.png", plot = top_prac, path = here("final_products", "draft-findings"),
        width = 8, height = 6, units = "in")
 ```
 
+Top 10 Frequency - No Time
+
+```{r top 10 freq}
+top_prac2 <- 
+  plot_time_prac %>% 
+  group_by(Practice) %>% 
+  mutate(sum = sum(N),
+         pct = round(100*(sum/251)), 1) %>% 
+  ungroup() %>% 
+  select(!c(Time, N)) %>% 
+  group_by(Practice) %>% 
+  arrange(desc(sum)) %>% 
+  ungroup() %>% 
+  slice_head(., n = 40) %>%
+  unique()
+pct_labs = paste0(top_prac2$pct, "%")
+top_prac2 <- top_prac2 %>% 
+ggplot(., aes(reorder(Practice, -sum), sum)) +
+  geom_col(fill = transcend_cols[1]) +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_y_continuous(limits=c(0, 100), expand = c(0,0)) +
+  labs(title = "Frequency of Canopy's Top 10 Practices",
+       x = "",
+       y = "Number of learning environments") +
+  scale_x_discrete(labels = label_tags()) +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = rel(1))) +
+    geom_text(aes(label = pct_labs),
+            nudge_y = .5,
+            vjust = 0,
+            color = transcend_cols[3],
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+top_prac2
+ggsave("finding-8a-V3.png", plot = top_prac2, path = here("final_products", "draft-findings"),
+       width = 8, height = 6, units = "in")
+```
+
+
 Alternate view
 ```{r}
-top_prac2 <- 
+top_prac3 <- 
   plot_time_prac %>% 
   group_by(Practice) %>% 
   mutate(sum = sum(N),
@@ -437,30 +472,64 @@ top_prac2 <-
   arrange(desc(sum)) %>% 
   ungroup() %>% 
   slice_head(., n = 40) %>% 
-  ggplot(., aes(Practice, pct, fill = Time)) +
+  #manual rank order tags by 5+ years implementation
+  mutate(ord_time = case_when(
+    Practice == "practices_career_prep" ~ 10,
+    Practice == "practices_community_partnerships" ~ 9,
+    Practice == "practices_pbl" ~ 8,
+    Practice == "practices_all_courses_designed_for_inclusion" ~ 7,
+    Practice == "practices_learning_paths" ~ 6,
+    Practice == "practices_design_marginalized" ~ 5,
+    Practice == "practices_sel_integrated" ~ 4,
+    Practice == "practices_competency_education" ~ 3,
+    Practice == "practices_culturally_responsive" ~ 2,
+    Practice == "practices_restorative" ~ 1
+  )) %>% 
+  ggplot(., aes(reorder(Practice, ord_time), pct, fill = Time)) +
   geom_col() +
   bar_y_scale_percent +
   theme(panel.grid.major.y = element_blank()) +
   scale_fill_manual(values = transcend_cols) +
   coord_flip() +
-  #scale_y_continuous(limits=c(0, 100), expand = c(0,0)) +
-  labs(title = "Top 10 Practices by Time Implemented",
+  labs(title = "Top 10 Core Practices by Time Implemented",
        x = "",
        y = "") +
   scale_x_discrete(labels = label_tags()) +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
-        text = element_text(size = 7)) +
+        text = element_text(size = 10),
+        axis.text.y = element_text(size = rel(1))) +
   guides(fill = guide_legend(reverse = TRUE))
-    # geom_text(aes(y = Practice, label = signif(sum)),
-    #         #nudge_y = .5,
-    #         color = transcend_cols[3],
-    #         fontface = "bold",
-    #         size = 5,
-    #         family = "sans")
-top_prac2
-ggsave("finding-8b-V2.png", plot = top_prac2, path = here("final_products", "draft-findings"),
+top_prac3
+ggsave("finding-8b-V3.png", plot = top_prac3, path = here("final_products", "draft-findings"),
        width = 8, height = 6, units = "in")
+```
+
+
+```{r include = FALSE}
+#how many schools are "established" with 3 or more core practices implemented for 4+ years?
+implementation <- full %>% 
+  select(school_id, starts_with("time")) %>% 
+  pivot_longer(cols = starts_with("time"),
+               names_to = "tag",
+               values_to = "time") %>% 
+  mutate(est = case_when(
+    time == 0 ~ 0,
+    time == 1 ~ 0,
+    time == 2 ~ 0,
+    time == 3 ~ 0,
+    time == 4 ~ 1,
+    time == 5 ~ 1
+  )) %>% #tags are est if implemented 4+ years
+  group_by(school_id) %>% 
+  mutate(n_core = sum(est)) %>% #n_core = total tags that are est
+  ungroup() %>% 
+  select(school_id, n_core) %>% 
+  unique() %>% #limit to just school and n_core
+  mutate(rate = rep(1, nrow(.))) %>% #create rate var to count schools
+  group_by(n_core) %>% 
+  summarize(sum = sum(rate), #n schools with each # of est core prac
+            pct = sum/251) #pct of schools with each # of est core prac
 ```
 
 
@@ -538,5 +607,45 @@ ggplot(tag_bar, aes(x = tag, y = n, fill = tag)) +
 #            practices_heritage_language == 1 |
 #            practices_assessments_bilingual == 1)
 # export(lang_schools, "language.csv")
+```
+
+
+Quick analysis of schools reporting waiver overall and by locale
+
+```{r}
+quick_waiver <-
+  full %>% 
+  select(waiver_application) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(waiver_application) %>% 
+  summarize(sum = sum(rate),
+            pct = sum/251) %>% 
+  mutate(waiver_application = case_when(
+    waiver_application == 0 ~ "No",
+    waiver_application == 1 ~ "Yes + Received",
+    waiver_application == 2 ~ "Yes + Did not receive",
+    waiver_application == 3 ~ "Considered",
+    waiver_application == 4 ~ "Not sure"
+  ))
+quick_waiver <-
+  full %>% 
+  select(waiver_application, exclusive_locale) %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(waiver_application, exclusive_locale) %>% 
+  summarize(sum = sum(rate),
+            pct = sum/251) %>% 
+  mutate(waiver_application = case_when(
+    waiver_application == 0 ~ "No",
+    waiver_application == 1 ~ "Yes",
+    waiver_application == 2 ~ "Yes",
+    waiver_application == 3 ~ "Considered",
+    waiver_application == 4 ~ "Not sure"
+  ))
+
+# "0 = No
+# 1 = Yes, we have received a waiver
+# 2 = Yes, we applied for a waiver, but did not receive it
+# 3 = Yes, we considered applying for a waiver, did not ultimately choose to apply
+# 4 = Not sure"
 ```
 
