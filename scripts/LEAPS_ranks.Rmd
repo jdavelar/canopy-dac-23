@@ -255,7 +255,27 @@ ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage)
 ## ggsave(filename = "finding-7a.png", plot = finding_7a, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 
+
 ```
+
+
+
+```{r}
+
+school_leap
+
+ggplot(school_leap, aes(x = , y = Percentage)) +
+  geom_bar(stat = "identity", position = "dodge", show.legend = FALSE, fill = "#1A4C81") +
+  geom_text(aes(label = paste0(round(Percentage), "%")), color = "black", size = 4, hjust = -.25) +
+  labs(title = "Leaps Shifts in Student Experience Implementation", x = " ", y = " ") +
+  scale_x_discrete(labels = custom_labels)+
+  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0))+
+  coord_flip()
+
+
+
+```
+
 
 ## Distribution of LEAP Rankings
 
