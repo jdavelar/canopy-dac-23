@@ -351,7 +351,6 @@ not_hs_efa_4 <- fa(not_hs_practices_cor, nfactors = 4, rotate = "oblimin", fm = 
 
 High school corr
 ```{r}
-
 hs_cweights <- hs_efa_4 %>% 
 #  rename(all_of(clust_details_r)) %>%
   select(-Complexity, -Uniqueness) %>%
@@ -377,6 +376,34 @@ clusters_by_high_school_wide <- clusters_by_high_school %>%
          blended_flexible_learning = MR4)
 ```
 
+Not HS corr
+```{r}
+not_hs_cweights <- not_hs_efa_4 %>% 
+#  rename(all_of(clust_details_r)) %>%
+  select(-Complexity, -Uniqueness) %>%
+  pivot_longer(cols = -Variable, names_to = "cluster", values_to = "weight") %>%
+  rename(practice = Variable)
+
+not_hs_practices_long <- not_hs_tags %>% 
+  select(school_id, starts_with("practices")) %>%
+  pivot_longer(-school_id, names_to = "practice", values_to = "val")
+
+not_clusters_by_high_school <- not_hs_practices_long %>%
+  left_join(not_hs_cweights, by = "practice") %>%
+  group_by(school_id, cluster) %>% 
+  summarize(cluster_weight = sum(val * weight, na.rm = TRUE), .groups = "drop") %>%
+  arrange(school_id)
+
+not_clusters_by_high_school_wide <- not_clusters_by_high_school %>%
+  pivot_wider(id_cols = school_id, names_from = cluster, values_from = cluster_weight) %>%
+  arrange(school_id) %>% 
+  rename(learning_mastery = MR1,
+         holistic_student_justice = MR2,
+         postsec_pathways_world = MR3,
+         blended_flexible_learning = MR4)
+```
+
+
 ```{r}
 high_school_locale_dat <- full %>%
   filter(grades_high == 1) %>% 
@@ -397,8 +424,8 @@ high_school_locale_clusters <- cor(high_school_locale_dat,
   method = "spearman"
 )
 
-not_high_school_locale_clusters <- cor(high_school_locale_dat, 
-  clusters_by_high_school_wide %>% 
+not_high_school_locale_clusters <- cor(not_high_school_locale_dat, 
+  not_clusters_by_high_school_wide %>% 
   select(-school_id),
   method = "spearman"
 )

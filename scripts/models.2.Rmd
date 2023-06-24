@@ -72,7 +72,6 @@ low_select_tags <- c("practices_other_leaders", "practices_heritage_language", "
                      "practices_translanguaging", "practices_flipped_classroom")
 
 ## remove them for our analysis
-
 mod_prep <- mod_prep %>% 
   filter(!(tag %in% low_select_tags))
 
@@ -140,7 +139,7 @@ bayes_facet =
     aes(y = exp(estimate),
         x = reorder_within(response, estimate, within = term, fun = mean)
     )) +
-  geom_col(aes(fill = term)) + 
+  geom_col(fill = transcend_cols[1]) + 
   labs(y = "Odds multiplier",
        x = "", 
        fill = "Demographic",
@@ -162,6 +161,12 @@ bayes_facet =
 bayes_facet
 ```
 
+```{r}
+# ggsave("finding-9.png", plot = bayes_facet, path = here("final_products", "draft-findings"),
+#        width = 22, height = 9, units = "in")
+```
+
+
 Plot above is clunky, so I am separating into different plots:
 ```{r}
 list_plot <- bayes_facet_dat %>% 
@@ -169,7 +174,7 @@ list_plot <- bayes_facet_dat %>%
   map(~ggplot(., aes(y = exp(estimate), 
              x = reorder_within(response, estimate, within = term, fun = mean)
              )) +
-  geom_col() + 
+  geom_col(fill = transcend_cols[1]) + 
   labs(y = "Odds multiplier",
        x = "", 
        #fill = "Demographic",
@@ -195,7 +200,7 @@ file_names <- stringr::str_c(names(list_plot), ".png")
 
 Run code below only to resave files
 ```{r}
-# pwalk(list(file_names, list_plot), ggsave, path = "output/modeling_low_tag_removed/")
+pwalk(list(file_names, list_plot), ggsave, path = "output/modeling_low_tag_removed/")
 ```
 
 ```{r}
