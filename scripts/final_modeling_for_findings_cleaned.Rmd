@@ -1,0 +1,178 @@
+---
+title: "final_modeling_for_findings"
+author: "Anwesha Guha"
+date: "6/23/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(pacman)
+p_load(here, purrr, tidyverse, ggcorrplot, proxy, plotly, patchwork, psych, GPArotation, parameters, DT, nFactors, broom, scales, rstanarm, broom.mixed, gmodels)
+
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+load(here("data/demo_models_for_findings.RData"))
+```
+
+# DONT RUN ANY OF THE BELOW -- SAVED AUTOMATICALLY IN .RDATA & WILL BE TOO TIME CONSUMING
+
+Cleaning
+```{r data prep}
+mod_prep <- full %>% 
+  select(school_id, school_descriptor, starts_with("practices_"), starts_with("self_reported"), starts_with("grades_")) %>% 
+  select(-c(starts_with("self_reported_grades"), self_reported_locale_multiple, self_reported_ela, self_reported_math, starts_with("self_reported_locale_other"), ends_with("none_collected"))) %>% 
+  pivot_longer(cols = c(starts_with("practices")),
+               names_to = "tag",
+               values_to = "value")
+
+mod_prep <- mod_prep %>% 
+  mutate(black_percent = self_reported_race_black/self_reported_total_enrollment, 
+         hispanic_percent = self_reported_race_hispanic/self_reported_total_enrollment,
+         white_percent = self_reported_race_white/self_reported_total_enrollment,
+         native_percent = self_reported_race_aian/self_reported_total_enrollment,
+         asian_percent = self_reported_race_asian/self_reported_total_enrollment,
+         frpl_percent = self_reported_frpl/self_reported_total_enrollment,
+         swd_percent = self_reported_swd,
+         ell_percent = self_reported_ell,
+         school_descriptor = case_when(school_descriptor == 1 ~ "public_district",
+                                       school_descriptor == 2 ~ "public_charter",
+                                       school_descriptor == 3 ~ "independent_private")) %>% 
+  rename(locale_urban = self_reported_locale_urban,
+         locale_rural = self_reported_locale_rural,
+         locale_suburban = self_reported_locale_suburban)
+
+#pivot school type/descriptor variable for more consistent analysis, like locale and level
+library(fastDummies)
+mod_prep <- mod_prep %>% 
+  dummy_cols(select_columns = "school_descriptor")
+
+#get rid of the columns I don't want (not recommended for replication)
+mod_prep <- mod_prep %>% 
+  select(-c(3:4,8:15))
+
+
+## below is filtering on tags that have been selected at least 25 times
+mod_prep %>% 
+  group_by(tag, value) %>% 
+  summarise(val = n()) %>% 
+  arrange(val) %>% 
+  filter(val <= 25)
+
+## we see that low select tags are the following
+low_select_tags <- c("practices_other_leaders", "practices_heritage_language", "practices_enriched_virtual",
+                     "practices_translanguaging", "practices_flipped_classroom")
+
+## remove them for our analysis
+mod_prep <- mod_prep %>% 
+  filter(!(tag %in% low_select_tags))
+
+
+one_vars = c("self_reported_total_enrollment", "black_percent", "hispanic_percent", "white_percent", "native_percent", "asian_percent", "locale_urban", "locale_rural", "locale_suburban", "frpl_percent", "swd_percent", "ell_percent", "school_descriptor_independent_private", "school_descriptor_public_charter", "school_descriptor_public_district","grades_prek", "grades_elementary", "grades_middle", "grades_high")
+
+
+logistic_one_dat = 
+  mod_prep %>%
+  select(value, tag, one_of(one_vars)) %>%
+  na.omit() %>%
+  group_by(tag) %>%
+  # scaling non-binary predictors
+  mutate_at(vars(
+    c(
+      "self_reported_total_enrollment",
+      "black_percent",
+      "hispanic_percent",
+      "white_percent",
+      "native_percent",
+      "asian_percent",
+      "frpl_percent",
+      "swd_percent",
+      "ell_percent"
+    )
+  ), scale)
+```
+
+Going to run these separately to make combining/modeling/formatting a bit easier. Again, clunky code and not recommended for replication.
+```{r}
+
+# [tag] <- locale_rural ~ self_reported_total_enrollment + black_percent + hispanic_percent + white_percent + native_percent + asian_percent + frpl_percent + swd_percent + ell_percent + school_descriptor + grades_prek + grades_elementary + grades_middle + grades_high
+
+one_form = as.formula(paste("value", "~", paste(one_vars, collapse = "+")))
+
+#plot(xm, "areas", prob = 0.9, prob_outer = 1)
+
+bayes_mods = list()
+
+
+for(x in unique(mod_prep$tag)) {
+  bayes_mods[[x]] = stan_glm(
+    one_form,
+    data = filter(logistic_one_dat, tag == x),
+    family = binomial(link = "logit"),
+    prior = student_t( #df and scale updated to have less extreme values
+      df = 10,
+      location = 0,
+      scale = 2.5
+    )
+  )
+  
+}
+
+bayes_tidy = lapply(bayes_mods, tidy) %>%
+  bind_rows(.id = "response") %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    nice_tag = label_tags()(response),
+    nice_demog = factor(label_dems(term))
+  )
+```
+
+Make plots
+```{r}
+bayes_facet_dat = bayes_tidy %>% 
+  group_by(term) %>%
+  arrange(desc(abs(estimate))) %>%
+  slice(1:10)
+
+list_plot <- bayes_facet_dat %>% 
+  split(.$term) %>% 
+  map(~ggplot(., aes(y = exp(estimate), 
+             x = reorder_within(response, estimate, within = term, fun = mean)
+             )) +
+  geom_col(fill = transcend_cols[1]) + 
+  labs(y = "Odds multiplier",
+       x = "", 
+       #fill = "Demographic",
+       title = "Top 10 tags most/least related to each demographic") +
+  scale_y_continuous(
+    trans = "log",
+    breaks = c(.0625, .125, .25, .5, 1, 2, 4, 8, 16),
+    labels = c("1/16", "1/8", "1/4", "1/2", "1", "2", "4", "8", "16"),
+    expand = expansion(0, 0)
+  ) +
+  scale_x_reordered() + 
+  coord_flip() +
+  guides(fill = "none") +
+  theme(axis.text = element_text(size = 8), strip.text = element_text(size = rel(0.6)),
+        panel.grid.major.y = element_blank(),
+        axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0))
+  )
+```
+
+```{r}
+file_names <- stringr::str_c(names(list_plot), ".png")
+```
+
+Run code below only to resave files
+```{r}
+pwalk(list(file_names, list_plot), ggsave, path = "final_products/draft-findings/finding-9")
+```
+
+```{r}
+list_plot
+```
+# CAN START RUNNING CODE FROM BELOW ONWARDS 
+
+Combine certain plots
+
