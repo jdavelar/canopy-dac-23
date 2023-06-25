@@ -30,7 +30,7 @@ mod_prep <- full %>%
 mod_prep <- mod_prep %>% 
   mutate(black_percent = self_reported_race_black/self_reported_total_enrollment, 
          hispanic_percent = self_reported_race_hispanic/self_reported_total_enrollment,
-         white_percent = self_reported_race_white/self_reported_total_enrollment,
+         bipoc_percent = 1 - (self_reported_race_white/self_reported_total_enrollment),
          native_percent = self_reported_race_aian/self_reported_total_enrollment,
          asian_percent = self_reported_race_asian/self_reported_total_enrollment,
          frpl_percent = self_reported_frpl/self_reported_total_enrollment,
@@ -69,7 +69,7 @@ mod_prep <- mod_prep %>%
   filter(!(tag %in% low_select_tags))
 
 
-one_vars = c("self_reported_total_enrollment", "black_percent", "hispanic_percent", "white_percent", "native_percent", "asian_percent", "locale_urban", "locale_rural", "locale_suburban", "frpl_percent", "swd_percent", "ell_percent", "school_descriptor_independent_private", "school_descriptor_public_charter", "school_descriptor_public_district","grades_prek", "grades_elementary", "grades_middle", "grades_high")
+one_vars = c("self_reported_total_enrollment", "black_percent", "hispanic_percent", "bipoc_percent", "native_percent", "asian_percent", "locale_urban", "locale_rural", "locale_suburban", "frpl_percent", "swd_percent", "ell_percent", "school_descriptor_independent_private", "school_descriptor_public_charter", "school_descriptor_public_district","grades_prek", "grades_elementary", "grades_middle", "grades_high")
 
 
 logistic_one_dat = 
@@ -83,7 +83,7 @@ logistic_one_dat =
       "self_reported_total_enrollment",
       "black_percent",
       "hispanic_percent",
-      "white_percent",
+      "bipoc_percent",
       "native_percent",
       "asian_percent",
       "frpl_percent",
@@ -156,7 +156,7 @@ list_plot <- bayes_facet_dat %>%
   guides(fill = "none") +
   theme(axis.text = element_text(size = rel(1)), strip.text = element_text(size = rel(0.6)),
         panel.grid.major.y = element_blank(),
-        axis.text.x = element_text(angle = -10, size = rel(0.5), vjust = 0.5, hjust = 0))
+        axis.text.x = element_text(angle = -45, size = rel(0.5), vjust = 0.5, hjust = 0))
   )
 ```
 
@@ -205,7 +205,7 @@ level_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likel
 
 level_practices_plot <- plot_grid(level_title, level_plot, ncol = 1, rel_heights = c(0.1, 1))
 
-# ggsave("finding-9a.png", plot = level_practices_plot, path = here("final_products", "draft-findings"), width = 14, height = 8, units = "in")
+ggsave("finding-9a.png", plot = level_practices_plot, path = here("final_products", "draft-findings"), width = 14, height = 8, units = "in")
 ```
 
 Plots grouped to locale
@@ -232,7 +232,7 @@ locale_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Like
 
 locale_practices_plot <- plot_grid(locale_title, locale_plot, ncol = 1, rel_heights = c(0.1, 1))
 
-# ggsave("finding-9b.png", plot = locale_practices_plot, path = here("final_products", "draft-findings"), width = 10, height = 12, units = "in")
+ggsave("finding-9b.png", plot = locale_practices_plot, path = here("final_products", "draft-findings"), width = 10, height = 12, units = "in")
 ```
 
 Plots grouped to school descriptor
@@ -259,5 +259,37 @@ schooltype_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least 
 
 schooltyple_practices_plot <- plot_grid(schooltype_title, schooltype_plot, ncol = 1, rel_heights = c(0.1, 1))
 
-# ggsave("finding-9c.png", plot = schooltyple_practices_plot, path = here("final_products", "draft-findings"), width = 10, height = 12, units = "in")
+ggsave("finding-9c.png", plot = schooltyple_practices_plot, path = here("final_products", "draft-findings"), width = 10, height = 12, units = "in")
+```
+
+Plots grouped to demographic subgroups
+```{r}
+bipoc_plot <- list_plot$bipoc_percent +
+  geom_col(fill = transcend_cols[1]) +
+  labs(title = "Schools with higher-than-average \n% students classified as \nBIPOC")
+
+swd_plot <- list_plot$swd_percent +
+  geom_col(fill = transcend_cols[2]) +
+  labs(title = "Schools with higher-than-average \n% students classified as \nwith disabilities")
+
+frpl_plot <- list_plot$frpl_percent +
+  geom_col(fill = transcend_cols[3]) +
+  labs(title = "Schools with higher-than-average \n% students eligible for \nfree/reduced price lunch")
+
+ell_plot <- list_plot$ell_percent +
+  geom_col(fill = transcend_cols[4]) +
+  labs(title = "Schools with higher-than-average \n% students classified as \nEnglish language learners")
+```
+
+```{r}
+library(cowplot)
+demo_plot <- plot_grid(bipoc_plot, ell_plot, frpl_plot, swd_plot, align = "hv")
+demo_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Student Demographic Characteristics", 
+                                      fontface = "bold",
+                                      color = transcend_grays[2],
+                                      fontfamily = "Bebas Neue")
+
+demo_practices_plot <- plot_grid(demo_title, demo_plot, ncol = 1, rel_heights = c(0.1, 1))
+
+ggsave("finding-9d.png", plot = demo_practices_plot, path = here("final_products", "draft-findings"), width = 18, height = 10, units = "in")
 ```
