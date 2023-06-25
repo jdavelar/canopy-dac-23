@@ -174,5 +174,88 @@ list_plot
 ```
 # CAN START RUNNING CODE FROM BELOW ONWARDS 
 
-Combine certain plots
+Plots grouped to level
+```{r}
+prek_plot <- list_plot$grades_prek +
+  geom_col(fill = transcend_cols[1]) +
+  labs(title = "Pre-K Schools")
 
+elem_plot <- list_plot$grades_elementary +
+  geom_col(fill = transcend_cols[2]) +
+  labs(title = "Elementary Schools")
+
+middle_plot <- list_plot$grades_middle +
+  geom_col(fill = transcend_cols[3]) +
+  labs(title = "Middle Schools")
+
+high_plot <- list_plot$grades_high +
+  geom_col(fill = transcend_cols[4]) +
+  labs(title = "High Schools")
+```
+
+```{r}
+library(cowplot)
+level_plot <- plot_grid(prek_plot, elem_plot, middle_plot, high_plot)
+level_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Level", 
+                                      fontface = "bold",
+                                      color = transcend_grays[2],
+                                      fontfamily = "Bebas Neue")
+
+level_practices_plot <- plot_grid(level_title, level_plot, ncol = 1, rel_heights = c(0.1, 1))
+
+# ggsave("finding-9a.png", plot = level_practices_plot, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+```
+
+Plots grouped to locale
+```{r}
+rural_plot <- list_plot$locale_rural +
+  geom_col(fill = transcend_cols[1]) +
+  labs(title = "Rural Schools")
+
+urban_plot <- list_plot$locale_urban +
+  geom_col(fill = transcend_cols[2]) +
+  labs(title = "Urban Schools")
+
+suburban_plot <- list_plot$locale_suburban +
+  geom_col(fill = transcend_cols[3]) +
+  labs(title = "Suburban Schools")
+```
+
+```{r}
+locale_plot <- plot_grid(rural_plot, urban_plot, suburban_plot, align = "hv", nrow = 1)
+locale_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each Locale", 
+                                      fontface = "bold",
+                                      color = transcend_grays[2],
+                                      fontfamily = "Bebas Neue")
+
+locale_practices_plot <- plot_grid(locale_title, locale_plot, ncol = 1, rel_heights = c(0.1, 1))
+
+# ggsave("finding-9b.png", plot = locale_practices_plot, path = here("final_products", "draft-findings"), width = 15, height = 4, units = "in")
+```
+
+Plots grouped to school descriptor
+```{r}
+independent_plot <- list_plot$school_descriptor_independent_private +
+  geom_col(fill = transcend_cols[1]) +
+  labs(title = "Independent Schools")
+
+charter_plot <- list_plot$school_descriptor_public_charter +
+  geom_col(fill = transcend_cols[2]) +
+  labs(title = "Charter Schools")
+
+district_plot <- list_plot$school_descriptor_public_district +
+  geom_col(fill = transcend_cols[3]) +
+  labs(title = "District Schools")
+```
+
+```{r}
+schooltype_plot <- plot_grid(independent_plot, charter_plot, district_plot, align = "hv", nrow = 1)
+schooltype_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Type", 
+                                      fontface = "bold",
+                                      color = transcend_grays[2],
+                                      fontfamily = "Bebas Neue")
+
+schooltyple_practices_plot <- plot_grid(schooltype_title, schooltype_plot, ncol = 1, rel_heights = c(0.1, 1))
+
+# ggsave("finding-9c.png", plot = schooltyple_practices_plot, path = here("final_products", "draft-findings"), width = 15, height = 4, units = "in")
+```
