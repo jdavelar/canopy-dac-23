@@ -741,7 +741,7 @@ Alternate plot: biggest differences in tagging between PW & BIPOC leaders
 
 ```{r biggest tagging diffs - BIPOC vs. not}
 labs = c("Difference = 14%", "", "Difference = 13%", "", "Difference = 12%","", "Difference = 11%","", "Difference = 10%","", "Difference = 10%","",  "Difference = 9%","", "Difference = 8%","", "Difference = 8%", "", "Difference = 6%", "")
-diff_core <- full %>% 
+diff_core_dat <- full %>% 
   select(school_id, lead = leadership_diversity, starts_with("core")) %>% 
   filter(!lead == 0) %>% 
   filter(!lead == 5) %>% 
@@ -770,8 +770,9 @@ diff_core <- full %>%
   pivot_wider(names_from = col,
               values_from = value) %>% 
   arrange(desc(diff)) %>% 
-  slice(1:20) %>% 
-ggplot(., aes(reorder(tag, -diff), pct, fill = `Leadership Team`)) + 
+  slice(1:20)
+diff_core <-
+ggplot(diff_core_dat, aes(reorder(tag, -diff), pct, fill = `Leadership Team`)) + 
   geom_bar(position = "dodge", stat = "identity") +
   scale_y_continuous(limits = c(0, .55), expand = c(0,0), labels = scales::percent) +
   # bar_y_scale_percent +
@@ -793,6 +794,55 @@ diff_core
 ggsave("finding-17-V3.png", plot = diff_core, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
+
+## BIPOC vs. Not Dumbell plot
+
+This is the same information as above, but displayed in a different manner.
+
+```{r BIPOC vs. not Dumbell}
+dumbell <-
+ggplot(diff_core_dat, aes(x=pct, y=fct_reorder(tag, diff))) + 
+  geom_line(linetype= "dotted", 
+            color = "gray") +
+  geom_point(aes(x=pct, 
+                 y = fct_reorder(tag, diff),
+                 color = `Leadership Team`), 
+                 size=3, 
+                 show.legend = FALSE) +
+  geom_text(aes(x=pct, 
+                y=tag, 
+                label = scales::label_percent(accuracy = 1)(pct)), 
+                nudge_x = .03, 
+                size = 4, 
+                family = "sans",
+                color = transcend_grays[1]) +
+  bar_x_scale_percent +
+    # scale_x_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("BIPOC","White"),
+                    labels=c("Predominantly BIPOC","Predominantly White")) + 
+  labs(title = "Largest differences in core practices between<br>predominantly <span style = 'color: #1A4C81;'>BIPOC</span> and <span style = 'color: #EF464B;'>White</span> Leadership Teams",
+       # subtitle = "When Canopy schools select the practices they use,they also have the option to\nselect up to 5 practices they consider central to their learning environment.\nThe comparison below displays the difference for the 5 practices schools selected.",
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown(),
+        panel.grid.major = element_blank(),
+        legend.position = c(.75,.25)) +
+  scale_y_discrete(labels = label_tags(wrap = 25)) +
+  geom_label(aes(
+           x = .7,
+           y = 6,
+           label = stringr::str_wrap("When Canopy schools select the practices they use, they also have the option to select up to 5 'core practices' they consider central to their learning environment. The comparison displays the largest differences across all selected core practices.", width = 40)),
+           color = transcend_grays[1],
+           size = 5,
+           family = "sans")
+  
+dumbell
+ggsave("finding-17-V4.png", plot = dumbell, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
 
 # What are the biggest tagging differences between "inclusive" schools and those that are not inclusive?
 
@@ -855,7 +905,7 @@ ggsave("finding-20.png", plot = inclusive_diff, path = here("final_products", "d
 ## Modification 1 - All tags
 
 ```{r core inclusive differences}
-inclusive_diff3 <-
+inclusive_dumb_dat <-
 full %>% 
   select(school_id, inc = core_all_courses_designed_for_inclusion, marg = core_design_marginalized, starts_with("practices")) %>% 
   select(!c(practices_all_courses_designed_for_inclusion, practices_design_marginalized)) %>% 
@@ -884,9 +934,9 @@ full %>%
   pivot_wider(names_from = col,
               values_from = value) %>% 
   arrange(desc(diff)) %>% 
-  slice(1:20) %>% 
-
-ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) + 
+  slice(1:20)
+inclusive_diff3<-
+ggplot(inclusive_dumb_dat, aes(reorder(tag, -diff), pct, fill = inclusive)) + 
   geom_bar(position = "dodge", stat = "identity") +
   bar_y_scale_percent +
   theme(panel.grid.major.y = element_blank()) +
@@ -901,6 +951,42 @@ ggplot(., aes(reorder(tag, -diff), pct, fill = inclusive)) +
   theme(legend.position = "none")
 inclusive_diff3
 ggsave("finding-20b-V2.png", plot = inclusive_diff3, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+
+#as dumbell
+inclusive_dumbell <-
+ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) + 
+  geom_line(linetype= "dotted", 
+            color = "gray") +
+  geom_point(aes(x=pct, 
+                 y = fct_reorder(tag, diff),
+                 color = inclusive), 
+                 size=3, 
+                 show.legend = FALSE) +
+  geom_text(aes(x=pct, 
+                y=tag, 
+                label = scales::label_percent(accuracy = 1)(pct)), 
+                nudge_x = .03, 
+                size = 4, 
+                family = "sans",
+                color = transcend_grays[1]) +
+  bar_x_scale_percent +
+    # scale_x_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("inclusive","not"),
+                    labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
+  labs(title = "Largest differences in selected practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+       subtitle = stringr::str_wrap("Schools designing for inclusion are any schools which selected the tags 'desgining for the needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5 core practices central to their learning environment.", width = 95),
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown(),
+        panel.grid.major = element_blank(),
+        legend.position = c(.75,.25)) +
+  scale_y_discrete(labels = label_tags(wrap = 25))
+  
+inclusive_dumbell
+ggsave("finding-20b-V3.png", plot = inclusive_dumbell, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 

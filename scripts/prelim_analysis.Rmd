@@ -592,17 +592,18 @@ comp_core <- full %>%
 #did not repeat = mental health, assessments for deeper learning, multiple opportunities to demonstrate mastery
            ) %>%
   ungroup() %>% 
+  #ranking in order of biggest -> smallest gap
   mutate(rank = case_when(
-    tag == "practices_pbl" ~ 1,
-    tag == "practices_competency_education" ~ 2,
-    tag == "practices_culturally_responsive" ~ 3,
-    tag == "practices_community_partnerships" ~ 4,
-    tag == "practices_sel_integrated" ~ 5,
-    tag == "practices_all_courses_designed_for_inclusion" ~ 6,
-    tag == "practices_career_prep" ~ 7,
-    tag == "practices_restorative" ~ 8,
-    tag == "practices_design_marginalized" ~ 9,
-    tag == "practices_learning_paths" ~ 10
+    tag == "practices_pbl" ~ 7,
+    tag == "practices_competency_education" ~ 10,
+    tag == "practices_culturally_responsive" ~ 5,
+    tag == "practices_community_partnerships" ~ 6,
+    tag == "practices_sel_integrated" ~ 3,
+    tag == "practices_all_courses_designed_for_inclusion" ~ 4,
+    tag == "practices_career_prep" ~ 9,
+    tag == "practices_restorative" ~ 2,
+    tag == "practices_design_marginalized" ~ 1,
+    tag == "practices_learning_paths" ~ 8
     )) %>% 
 #PBL, culturally responsive practices, and integrated SEL were in the top 5 for both school-wide practices and core practices
   ggplot(., aes(reorder(tag, rank), pct, fill = type)) +
@@ -612,13 +613,13 @@ comp_core <- full %>%
   # coord_flip() +
   theme(panel.grid.major.x = element_blank()) +
   scale_fill_manual(values = transcend_cols) +
-  theme(legend.position = "bottom",
-        legend.direction = "horizontal",
+  theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "frequency of top 10 core practices",
-       # subtitle = "When Canopy schools select the practices they use, they may select up to 5 practices as 'core practices' central to their learning environment. The comparison below displays differences in selecting any tag compared to selecting that tag as a core practice.",
+  labs(title = "frequency of top 10 <span style = 'color: #1A4C81;'>core practices</span> compared to<br><span style = 'color: #59C3B4;'>all selected practices</span>",
+       subtitle = stringr::str_wrap("When Canopy schools select the practices they use, they may select up to 5 practices as 'core practices' central to their learning environment.", 75),
        x = "",
        y = "") +
+  theme(plot.title = element_markdown()) +
   geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)),
             size = 5,
             family = "sans",
