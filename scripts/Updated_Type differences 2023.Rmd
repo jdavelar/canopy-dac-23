@@ -14,16 +14,15 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(echo = TRUE)
-load("~/Desktop/canopy-dac-23/data/complete_canopy_2023.RData")
 library(tidyverse)
 library(here)
 library(reshape2)
 library(cowplot)
 library(dplyr)
-library("pacman")
-library("DT")
-pacman::p_load("summarytools")
+library(pacman)
+library(DT)
+library(gt)
+library(summarytools)
 source(here("scripts", "branding.R"))
 load(here("data", "complete_canopy_2023.RData"))
 
@@ -51,7 +50,7 @@ school_counts <- schools %>%
 
 # Create the table
 school_counts_table <- school_counts %>%
-  mutate(school_descriptor = c("Charter", "District", "Independent")) #%>%
+  mutate(school_descriptor = c("Charter", "District", "Independent")) %>%
   gt() %>%
   tab_header(
     title = "Number of Schools by Descriptor"
@@ -293,39 +292,50 @@ var_all <- table_of_differences %>%
 
 # Max variability plot - top 10
 var_max_10 <- var_all %>% 
+  mutate(proportion = proportion/100,
+         `School Type` = str_remove_all(type, "[:punct:]")) %>%
   group_by(type) %>% 
   slice_max(variance, n = 10, with_ties = FALSE) %>% 
-  ggplot(aes(Tag, proportion, fill = type)) + 
+  ggplot(aes(Tag, proportion, fill = `School Type`)) + 
   geom_bar(stat = "identity", position = "dodge") +
-  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  scale_fill_manual(values = transcend_cols) +
+  bar_y_scale_percent +
+  scale_x_discrete(labels = label_tags(wrap = 23)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(.85, .85),
+        panel.grid.major.x = element_blank()) +
   labs(x = "",
-       y = "Tags with Most Variability",
-       title = "Top 10 Tags with Largest Variability for Charter, District, and Independent Schools",
-       subtitle = "In order of increasing variability")
-
+       y = "Percent of schools",
+       title = "Top 10 Tags with Largest Differences by school type",
+       subtitle = "Depicted in order from biggest to smallest difference.")
 var_max_10
-
+ggsave("finding-23b.png", plot = var_max_10, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
 ```
 
 ##Low 10 with largest variability 
 ```{r low var, echo=FALSE}
-
-
-# Max Variability Plot - Lowest 10
+# Min Variability Plot - Lowest 10
 var_min_10 <- var_all %>% 
+  mutate(proportion = proportion/100,
+         `School Type` = str_remove_all(type, "[:punct:]")) %>% 
   group_by(type) %>% 
   slice_min(variance, n = 10, with_ties = FALSE) %>% 
-  ggplot(aes(Tag, proportion, fill = type)) + 
+  ggplot(aes(Tag, proportion, fill = `School Type`)) + 
   geom_bar(stat = "identity", position = "dodge") +
-  theme(axis.text.x = element_text(angle = -55, hjust = 0)) +
+  scale_fill_manual(values = transcend_cols) +
+  bar_y_scale_percent +
+  scale_x_discrete(labels = label_tags(wrap = 23)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(.8, .8),
+        panel.grid.major.x = element_blank()) +
   labs(x = "",
-       y = "Tags with Least Variability",
-       title = "Top 10 Tags with Lowest Variability for Charter, District, and Independent Schools",
-       subtitle = "In order of decreasing variability")
-
+       y = "Percent of schools",
+       title = "Top 10 Tags with Smallest Differences by school type",
+       subtitle = "Depicted in order from biggest to smallest difference.")
 var_min_10
-
-
+ggsave("finding-23a.png", plot = var_min_10, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
 ```
 
 ##Top 15 with largest variability 

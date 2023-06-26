@@ -20,6 +20,7 @@ library(rio)
 library(tidyverse)
 library(DT)
 library(scales)
+library(statebins)
 # test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
@@ -80,6 +81,57 @@ No U.S. territories are represented this round.
 * Oregon  
 * West Virginia  
 * Wyoming  
+
+Alternate visualization for state
+
+```{r state bins}
+#abbreviations list
+st_crosswalk <- tibble(state = state.name) %>%
+   bind_cols(tibble(abb = state.abb)) %>% 
+   bind_rows(tibble(state = "District of Columbia", abb = "DC")) %>% 
+  rename(State = state)
+#missing state list
+na_state <- data.frame("State" = c("Alaska", "Mississippi", "Montana", "Nebraska", "Nevada", "Oklahoma", "Oregon", "West Virginia", "Wyoming"),
+                          "N" = rep(NA, 9)) %>% 
+  #merge missing state with data
+  bind_rows(samp_states) %>% 
+  mutate(color = case_when(
+    is.na(N) ~ paste0(transcend_cols[3]),
+    TRUE ~ paste0(transcend_cols[1])
+  )) %>% #ignore color col for now
+  left_join(st_crosswalk, by = "State") %>% 
+  group_by(State) %>% 
+  mutate(label = paste0({abb},"\nN=",{N}),
+         label = case_when(
+           is.na(N) ~ paste0({abb},"\nN=0"),
+           TRUE ~ as.character(label)
+         ))
+#build plot
+state_bins <-
+statebins(state_data = na_state,
+          font_size = 5,
+          state_border_col = "black",
+          state_border_size = 1,
+          state_col = "State",
+          value_col = "N",
+          labels = "label",
+          round = TRUE,
+          light_label = "white",
+          dark_label = "white") +
+  theme_transcend +
+  scale_fill_gradient(low = transcend_cols[4],
+                       high = transcend_cols[1]) +
+  labs(title = "2022-23 Canopy Learning Environments in the U.S.",
+       subtitle = "Darker color indicates more schools are found in that state.\nGray indicates no schools are found in that state") +
+  theme(legend.position = "none",
+        axis.title = element_blank(),
+        axis.text  = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank())
+ggsave("finding-12-V3.png", plot = state_bins, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
 
 
 # Q2: What's the breakdown of schools in the data by locale?
@@ -420,7 +472,7 @@ ggsave("finding-8a-V2.png", plot = top_prac, path = here("final_products", "draf
 
 Top 10 Frequency - No Time
 
-```{r top 10 freq}
+```{r top 10 freq without time}
 top_prac2 <- 
   plot_time_prac %>% 
   group_by(Practice) %>% 
@@ -439,13 +491,13 @@ ggplot(., aes(reorder(Practice, -sum), sum)) +
   geom_col(fill = transcend_cols[1]) +
   theme(panel.grid.major.x = element_blank()) +
   scale_y_continuous(limits=c(0, 100), expand = c(0,0)) +
-  labs(title = "Frequency of Canopy's Top 10 Practices",
+  labs(title = "Frequency of Canopy's Top 10 Core Practices",
        x = "",
        y = "Number of learning environments") +
   scale_x_discrete(labels = label_tags()) +
   theme(legend.position = "none",
         text = element_text(size = 10),
-        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = rel(1)),
         axis.text.y = element_text(size = rel(1))) +
     geom_text(aes(label = pct_labs),
             nudge_y = .5,
@@ -460,8 +512,9 @@ ggsave("finding-8a-V3.png", plot = top_prac2, path = here("final_products", "dra
 ```
 
 
-Alternate view
-```{r}
+Alternate view focusing on implementation time
+
+```{r top 10 implementation time chart}
 top_prac3 <- 
   plot_time_prac %>% 
   group_by(Practice) %>% 
@@ -505,6 +558,81 @@ ggsave("finding-8b-V3.png", plot = top_prac3, path = here("final_products", "dra
        width = 8, height = 6, units = "in")
 ```
 
+Top 10 frequency comparing core and non-core practices
+
+```{r top 10 core + all}
+core_names = full %>% 
+  select(starts_with("core"))
+prac_names = full %>% 
+  select(starts_with("practices"))
+comp_core <- full %>% 
+  select(starts_with("practices"), starts_with("core")) %>% 
+  pivot_longer(cols = everything(),
+               names_to = "tag",
+               values_to = "value") %>% 
+  mutate(type = case_when(
+    tag %in% names(core_names) ~ "Core Practice",
+    tag %in% names(prac_names) ~ "Practice")) %>% 
+  mutate(tag = str_replace_all(tag, "core", "practices")) %>% 
+  group_by(tag, type) %>% 
+  summarize(sum = sum(value),
+            pct = sum/251) %>% 
+  arrange(desc(pct)) %>% 
+  #manual select top 10 core practice - can't figure out function
+  filter(tag == "practices_pbl" | #repeat
+         tag == "practices_competency_education" |
+         tag == "practices_culturally_responsive" | #repeat
+         tag == "practices_community_partnerships" | #repeat
+         tag == "practices_sel_integrated"| #repeat 
+         tag == "practices_all_courses_designed_for_inclusion" | #repeat
+         tag == "practices_career_prep" |
+         tag == "practices_restorative" | #repeat
+         tag == "practices_design_marginalized" | #repeat
+         tag == "practices_learning_paths"
+#did not repeat = mental health, assessments for deeper learning, multiple opportunities to demonstrate mastery
+           ) %>%
+  ungroup() %>% 
+  mutate(rank = case_when(
+    tag == "practices_pbl" ~ 1,
+    tag == "practices_competency_education" ~ 2,
+    tag == "practices_culturally_responsive" ~ 3,
+    tag == "practices_community_partnerships" ~ 4,
+    tag == "practices_sel_integrated" ~ 5,
+    tag == "practices_all_courses_designed_for_inclusion" ~ 6,
+    tag == "practices_career_prep" ~ 7,
+    tag == "practices_restorative" ~ 8,
+    tag == "practices_design_marginalized" ~ 9,
+    tag == "practices_learning_paths" ~ 10
+    )) %>% 
+#PBL, culturally responsive practices, and integrated SEL were in the top 5 for both school-wide practices and core practices
+  ggplot(., aes(reorder(tag, rank), pct, fill = type)) +
+  geom_col(position = "identity") + #position = "dodge"
+  bar_y_scale_percent +
+  scale_x_discrete(labels = label_tags(wrap = 22)) +
+  # coord_flip() +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_fill_manual(values = transcend_cols) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "frequency of top 10 core practices",
+       # subtitle = "When Canopy schools select the practices they use, they may select up to 5 practices as 'core practices' central to their learning environment. The comparison below displays differences in selecting any tag compared to selecting that tag as a core practice.",
+       x = "",
+       y = "") +
+  geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)),
+            size = 5,
+            family = "sans",
+            fontface = "bold",
+            nudge_y = .025,
+            vjust = .4) +
+  guides(fill = guide_legend(title = "Type of Practice"))
+comp_core
+ggsave("finding-8c-V2.png", plot = comp_core, path = here("final_products", "draft-findings"),
+       width = 8, height = 6, units = "in")
+#I'm not sure if this is going to work, either from building it or interpretation
+#the graph looks pretty misleading because of how stark the differences are
+```
+
 
 ```{r include = FALSE}
 #how many schools are "established" with 3 or more core practices implemented for 4+ years?
@@ -514,13 +642,13 @@ implementation <- full %>%
                names_to = "tag",
                values_to = "time") %>% 
   mutate(est = case_when(
-    time == 0 ~ 0,
-    time == 1 ~ 0,
-    time == 2 ~ 0,
-    time == 3 ~ 0,
-    time == 4 ~ 1,
-    time == 5 ~ 1
-  )) %>% #tags are est if implemented 4+ years
+    time == 0 ~ 0, #not a core tag
+    time == 1 ~ 0, #set to 1 for tags less than a year
+    time == 2 ~ 0, #1-2 years
+    time == 3 ~ 0, #3-4 years
+    time == 4 ~ 1, #5+ years
+    time == 5 ~ 0 #not sure
+  )) %>% #tags are est if implemented 5+ years
   group_by(school_id) %>% 
   mutate(n_core = sum(est)) %>% #n_core = total tags that are est
   ungroup() %>% 

@@ -519,10 +519,11 @@ marg_freq <- full %>%
                      labels = scales::percent) +
   labs(title = "When schools are designing for margianlized groups,\nwhich groups are they designing for?",
        x = "",
-       y = "percentage of schools indicating designing for specific student groups")
+       y = "percentage of schools indicating designing for specific student groups") +
+  theme(panel.grid.major.y = element_blank())
 marg_freq
-# ggsave("finding-18.png", plot = marg_freq, path = here("final_products", "draft-findings"),
-#        width = 12, height = 8, units = "in")
+ggsave("finding-18-V2.png", plot = marg_freq, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
 ```
 
 
@@ -615,18 +616,18 @@ ggplot(., aes(tag, pct, fill = focus)) +
   theme(panel.grid.major.x = element_blank()) +
   scale_fill_manual(values = transcend_cols,
                     labels=c('Students Classified as English Learners', 'All Multilingual Students', 'None')) +
-  labs(title = "Canopy Learning Environments by Student Focus",
+  labs(title = "Language-Related Practices Used by Schools Focusing on Multilingual Learners",
        x = "",
        y = "") +
   scale_x_tag() +
-  theme(legend.position = c(.75,.85)) +
-  geom_text(aes(group = focus, label = scales::label_percent(accuracy = 1)(pct)),
-            nudge_y = .01,
-            vjust = 0,
-            color = "black",
-            fontface = "bold",
-            size = 5,
-            family = "sans")
+  theme(legend.position = c(.75,.85)) 
+  # geom_text(aes(group = focus, label = scales::label_percent(accuracy = 1)(pct)),
+  #           nudge_y = .01,
+  #           vjust = 0,
+  #           color = "black",
+  #           fontface = "bold",
+  #           size = 5,
+  #           family = "sans")
 comp_ml
 ggsave("finding-19-V2.png", plot = comp_ml, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
@@ -851,12 +852,13 @@ ggsave("finding-20.png", plot = inclusive_diff, path = here("final_products", "d
        width = 12, height = 8, units = "in")
 ```
 
-## Modification 1 - Core tags
+## Modification 1 - All tags
 
 ```{r core inclusive differences}
 inclusive_diff3 <-
 full %>% 
-  select(school_id, inc = practices_all_courses_designed_for_inclusion, marg = practices_design_marginalized, starts_with("practices")) %>% 
+  select(school_id, inc = core_all_courses_designed_for_inclusion, marg = core_design_marginalized, starts_with("practices")) %>% 
+  select(!c(practices_all_courses_designed_for_inclusion, practices_design_marginalized)) %>% 
   mutate(inclusive = case_when(
     (inc == 1 | marg == 1) ~ "inclusive",
     (inc == 0 & marg == 0) ~ "not"
@@ -902,7 +904,7 @@ ggsave("finding-20b-V2.png", plot = inclusive_diff3, path = here("final_products
        width = 12, height = 8, units = "in")
 ```
 
-# Modification 2 - All Tags
+# Modification 2 - Core Tags
 
 ```{r inclusive diff all tags}
 inclusive_diff2 <-
