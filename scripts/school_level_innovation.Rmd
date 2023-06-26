@@ -210,11 +210,12 @@ central_percentage %>%
        y = "Percent",
        x = " ") +
   scale_x_discrete(labels = support_labels) +
-  scale_y_continuous(limits = c(0,100), n.breaks = 5)+
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+  scale_y_continuous(limits = c(0,100), n.breaks = 5, expand = c(0,0))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
   
-#ggsave("finding-13.png", plot = supports, path = here("final_products", "draft-findings"),
-#      width = 12, height = 8, units = "in")
+## ggsave("finding-13.png", plot = supports, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 
 ```
 
@@ -390,7 +391,7 @@ Here is a look at the supports received by schools in an innovation network.
 
 support_labels <- c("Exemptions", "Direction \n& Vision", "Policy \nNavigation", "Funding", "Peer \nCohort", "Public Support", "Curriculum \nSupport", "People & \nCapacity")
 
-#supports2 <- 
+# supports2 <- 
 central_importance_pct %>%
   ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = "#59C3B4"))+
   geom_col(show.legend = FALSE) +
@@ -400,7 +401,8 @@ central_importance_pct %>%
        x = " ") +
  scale_x_discrete(labels = support_labels) +
   scale_y_continuous(limits = c(0,100), n.breaks = 5)+
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8))
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.05, hjust = 0.15, size = 8),panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
   
 # ggsave("finding-13-v2.png", plot = supports2, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 
@@ -428,7 +430,9 @@ support_comparison %>%
   scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0)) +
     scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \nsystem iniatives", "Schools part of \nsystem iniative")) +
   coord_flip() +
-  theme(legend.position = c(0.85, 0.2))
+  theme(legend.position = c(0.85, 0.2),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
 
 ## ggsave("finding-13-v3.png", plot = finding_13a, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
 ```
@@ -1029,12 +1033,14 @@ central_odds <- data.frame(odds = c(3.71, 1.77, 2.14, 2.15, 4.22, 5.01, 2.29, 5.
 supports <- c("Direction \n& Vision", "Exemptions", "Funding", "Policy \nNavigation", "Peer Cohort", "People \n& Capacity", "Public Support", "Curriculum \nSupport")
 
 #plot
-#finding_13b <- 
+# finding_13b <- 
 central_odds %>%
   ggplot(aes(reorder(supports, lor), lor)) +
   geom_col(fill = "#1A4C81") +
   theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1)) +
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
   coord_flip() +
   labs(title = "Most Likely Supports for Charter & Public \nSchools in Innovative Networks",
        subtitle = "Interpret with caution: These odds do not account for \nrelevant characteristics and may be skewed.",

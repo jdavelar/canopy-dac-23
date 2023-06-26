@@ -249,10 +249,16 @@ ggplot(leaps_percentage_long, aes(x = reorder(name, Percentage), y = Percentage)
   labs(title = "Leaps Shifts in Student Experience Implementation", x = " ", y = " ") +
   scale_x_discrete(labels = custom_labels)+
   scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0))+
-  coord_flip()
+  coord_flip()+
+  theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+      )
 
 # Finding 7 plot
-## ggsave(filename = "finding-7a.png", plot = finding_7a, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
+# ggsave(filename = "finding-7a.png", plot = finding_7a, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
 
 
 
