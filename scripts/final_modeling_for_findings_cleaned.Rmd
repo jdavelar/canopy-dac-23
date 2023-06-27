@@ -54,15 +54,21 @@ mod_prep <- mod_prep %>%
 
 
 ## below is filtering on tags that have been selected at least 25 times
-mod_prep %>% 
-  group_by(tag, value) %>% 
-  summarise(val = n()) %>% 
-  arrange(val) %>% 
-  filter(val <= 25)
+m <- mod_prep %>% 
+  group_by(tag, value, school_id) %>% 
+  summarise(selected_n = n()) %>% 
+  arrange(selected_n) %>% 
+  filter(value > 0) %>% 
+  select(-2)
+
+s <- full %>% 
+  group_by(school_id) %>% 
+  summarise(count = n())
 
 ## we see that low select tags are the following
+# modified to those selected less than 25%
 low_select_tags <- c("practices_other_leaders", "practices_heritage_language", "practices_enriched_virtual",
-                     "practices_translanguaging", "practices_flipped_classroom")
+                     "practices_translanguaging", "practices_flipped_classroom", "practices_a_la_carte", "practices_dual_language", "practices_industry_leaders", "practices_assessments_bilingual", "practices_flex", "practices_community_leaders", "practices_station_rotation", "practices_assessments_agency", "practices_families_leaders", "practices_interoperability")
 
 ## remove them for our analysis
 mod_prep <- mod_prep %>% 
@@ -198,7 +204,7 @@ high_plot <- list_plot$grades_high +
 ```{r}
 library(cowplot)
 level_plot <- plot_grid(prek_plot, elem_plot, middle_plot, high_plot)
-level_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Level", 
+level_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Level \nNote: Practices used by less than 25% of schools are omitted.", 
                                       fontface = "bold",
                                       color = transcend_grays[2],
                                       fontfamily = "Bebas Neue")
@@ -225,7 +231,7 @@ suburban_plot <- list_plot$locale_suburban +
 
 ```{r}
 locale_plot <- plot_grid(rural_plot, urban_plot, suburban_plot, align = "hv", nrow = 3)
-locale_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each Locale", 
+locale_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each Locale \nNote: Practices used by less than 25% of schools are omitted.", 
                                       fontface = "bold",
                                       color = transcend_grays[2],
                                       fontfamily = "Bebas Neue")
@@ -252,7 +258,7 @@ district_plot <- list_plot$school_descriptor_public_district +
 
 ```{r}
 schooltype_plot <- plot_grid(independent_plot, charter_plot, district_plot, align = "hv", nrow = 3)
-schooltype_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Type", 
+schooltype_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Each School Type \nNote: Practices used by less than 25% of schools are omitted.", 
                                       fontface = "bold",
                                       color = transcend_grays[2],
                                       fontfamily = "Bebas Neue")
@@ -284,7 +290,7 @@ ell_plot <- list_plot$ell_percent +
 ```{r}
 library(cowplot)
 demo_plot <- plot_grid(bipoc_plot, ell_plot, frpl_plot, swd_plot, align = "hv")
-demo_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Student Demographic Characteristics", 
+demo_title <- ggdraw() + draw_label("Top 10 Practices That are Most/Least Likely to be Selected by Student Demographic Characteristics \nNote: Practices used by less than 25% of schools are omitted.", 
                                       fontface = "bold",
                                       color = transcend_grays[2],
                                       fontfamily = "Bebas Neue")
