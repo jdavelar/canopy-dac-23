@@ -130,9 +130,117 @@ statebins(state_data = na_state,
         panel.grid.major = element_blank())
 ggsave("finding-12-V3.png", plot = state_bins, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+
+
+
+sb = ggplot_build(state_bins)
+sb$data[[2]]$label = na_state$label[match(sb$data[[2]]$label, na_state$abb)]
+sb = ggplot_gtable(sb)
+png(filename = here("final_products", "draft-findings", "finding-12-V4.png"),
+    width = 12, height = 8, units = "in", res = 300)
+plot(sb)
+dev.off()
 ```
 
+```{r population, include = FALSE}
+## population for each state in 2020
+## source https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html
+## (used the April 1, 2020 base estimates)
+state_pop = read_tsv(file = "Alabama	5024356
+Alaska	733378
+Arizona	7151507
+Arkansas	3011555
+California	39538245
+Colorado	5773733
+Connecticut	3605942
+Delaware	989957
+District of Columbia	689546
+Florida	21538226
+Georgia	10711937
+Hawaii	1455273
+Idaho	1839092
+Illinois	12812545
+Indiana	6785668
+Iowa	3190372
+Kansas	2937847
+Kentucky	4505893
+Louisiana	4657749
+Maine	1362341
+Maryland	6177213
+Massachusetts	7029949
+Michigan	10077325
+Minnesota	5706504
+Mississippi	2961288
+Missouri	6154920
+Montana	1084197
+Nebraska	1961489
+Nevada	3104624
+New Hampshire	1377518
+New Jersey	9289031
+New Mexico	2117527
+New York	20201230
+North Carolina	10439414
+North Dakota	779091
+Ohio	11799374
+Oklahoma	3959346
+Oregon	4237291
+Pennsylvania	13002689
+Rhode Island	1097371
+South Carolina	5118429
+South Dakota	886677
+Tennessee	6910786
+Texas	29145428
+Utah	3271614
+Vermont	643085
+Virginia	8631384
+Washington	7705247
+West Virginia	1793755
+Wisconsin	5893725
+Wyoming	576837", col_names = c("state", "population"))
+```
 
+```{r per_capita}
+na_state = left_join(na_state, state_pop, by = c("State" = "state"))
+na_state = na_state |>
+  mutate(
+    canopy_per_M = N / population * 1e6,
+    canopy_per_M_label = paste(abb, round(coalesce(canopy_per_M, 0), 1), sep = "\n")
+  )
+
+state_bins_percap <- statebins(
+    state_data = na_state,
+    font_size = 5,
+    state_border_col = "black",
+    state_border_size = 1,
+    state_col = "State",
+    value_col = "canopy_per_M",
+    # labels = "label",
+    round = TRUE,
+    # light_label = "white",
+    # dark_label = "white"
+  ) +
+  theme_statebins() +
+  scale_fill_distiller(type = "div", palette = "RdYlBu", na.value = "gray40") +
+  # scale_fill_gradient2(
+  #   low = transcend_cols[1],
+  #   mid = transcend_cols2[2],
+  #   high = transcend_cols[3],
+  #   midpoint = 2,
+  #   trans = sqrt_trans(),
+  #   limits = c(0, 13.1)
+  # ) +
+  labs(title = "2022-23 Canopy Learning Environments in the U.S.",
+       subtitle = "per million population")
+state_bins_percap
+
+sbpc = ggplot_build(state_bins_percap)
+sbpc$data[[2]]$label = na_state$canopy_per_M_label[match(sbpc$data[[2]]$label, na_state$abb)]
+sbpc = ggplot_gtable(sbpc)
+png(filename = here("final_products", "draft-findings", "finding-12-V5.png"),
+    width = 12, height = 8, units = "in", res = 300)
+plot(sbpc)
+dev.off()
+```
 
 # Q2: What's the breakdown of schools in the data by locale?
 
