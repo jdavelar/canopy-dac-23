@@ -418,17 +418,17 @@ support_comparison <- full_join(central_importance_pct,central_percentage,by = c
 
 support_labels <- c("Exemptions", "Direction \n& Vision", "Peer Cohort", "Policy \nNavigation", "Funding", "Curriculum \nSupport", "Public Support", "People & \nCapacity")
 
-#finding_13a <- 
+# finding_13a <- 
 support_comparison %>%
   ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = factor(innovation)))+
   geom_bar(position = "dodge",stat = "identity") +
-  labs(title = "Schools that are part of system-wide innovation \niniatives receive more Support",
+  labs(title = "Schools that are part of system-wide innovation \ninitiatives receive more Support",
        y = "",
        x = " ",
-      fill = "Innovation Iniative") +
+      fill = "Innovation Initiative") +
   scale_x_discrete(labels = support_labels) +
   scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0)) +
-    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \nsystem iniatives", "Schools part of \nsystem iniative")) +
+    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \nsystem initiatives", "Schools part of \nsystem initiative")) +
   coord_flip() +
   theme(legend.position = c(0.85, 0.2),
         panel.grid.major.y = element_blank(),
