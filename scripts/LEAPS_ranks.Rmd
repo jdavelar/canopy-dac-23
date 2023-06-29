@@ -860,27 +860,26 @@ rank_data <- data.frame(
 )
 
 
-
+c("High \nExpectation", "Connection", "Whole Child", "Rigorous \nLearning", " Relevance", "Customization", "Self Direction", "Affirmation", "Social \nConsciousness", "Anytime \nAnywhere")
 
 leaps_cols
 
-custom_labels <- c("Whole Child", "Anytime Anywhere", "High Expectations", "Self Direction", " Connection",
-                   "Relevance", "Affirmation", "Social Consciousness", "Customization", "Rigorous Learning")
+custom_labels <- rev(c("High Expectation", "Connection", "Whole Child", "Rigorous Learning", " Relevance", "Customization", "Self Direction", "Affirmation", "Social Consciousness", "Anytime Anywhere"))
 # Create the bar chart ordered by rank
-finding_7 <- ggplot(rank_data, aes(x = reorder(Practice, Ranking))) +
+# finding_7 <- 
+  
+ggplot(rank_data, aes(x = reorder(Practice, Implementation))) +
   geom_bar(aes(y = Implementation), stat = "identity", fill = "#1A4C81") +
-  scale_y_continuous(
-    name = "Percentage of Implementation",
-    sec.axis = sec_axis(~./(max(rank_data$Ranking) / max(rank_data$Implementation)), 
-                        name = "")
-  ) +
-  geom_text(aes(y = Ranking, label = Ranking), color = "#EF464B", size = 6, vjust = -0.25) +
-  geom_text(aes(y = Implementation, label = Implementation), color = "white", size = 4, vjust = 2.25) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100), labels = function(x) paste0(x, "%")) +
+ # geom_text(aes(y = Ranking, label = Ranking), color = "#EF464B", size = 6, vjust = -0.25) +
+  geom_text(aes(y = Implementation, label = paste0(round(Implementation), "%")), color = "white", size = 4, vjust = 2.25) +
   scale_x_discrete(labels = custom_labels) +
-  labs(title = "High expectations and connection \nwere the biggest shifts in student experience", x = "", y = "Implementation Percentage") +
-  ylim(0, 100)+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+  labs(title = "High expectations and connection \nwere the biggest shifts in student experience", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.95), 
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
 
 # Finding 7 plot
 ## ggsave(filename = "finding-7.png", plot = finding_7, path = "~/Desktop/canopy-dac-23/final_products/draft-findings/", width = 10, height = 6, dpi = 300)
