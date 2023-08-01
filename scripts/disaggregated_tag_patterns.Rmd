@@ -517,7 +517,7 @@ marg_freq <- full %>%
   scale_y_continuous(limits = c(0, 1), 
                      expand = c(0,0),
                      labels = scales::percent) +
-  labs(title = "When schools are designing for margianlized groups,\nwhich groups are they designing for?",
+  labs(title = "When schools are designing for marginalized groups,\nwhich groups are they designing for?",
        x = "",
        y = "percentage of schools indicating designing for specific student groups") +
   theme(panel.grid.major.y = element_blank())
@@ -603,6 +603,36 @@ not = data.frame(tag = c("practices_dual_language", "practices_heritage_language
                     pct = c(12, 7, 8),
                  focus = rep("none", 3))
 comp_ml <- ml %>% 
+  mutate(focus = rep("MLL", nrow(.))) %>% 
+  bind_rows(el) %>% 
+  mutate(focus = replace_na(focus, "EL")) %>% 
+  mutate(pct = str_remove_all(pct, "[:punct:]"),
+         pct = as.numeric(pct)) %>% 
+  bind_rows(not) %>% 
+  mutate(pct = pct/100) %>% 
+ggplot(., aes(tag, pct, fill = focus)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_fill_manual(values = transcend_cols,
+                    labels=c('Students Classified as English Learners', 'All Multilingual Students', 'None')) +
+  labs(title = "Language-Related Practices Used by Schools Focusing on Multilingual Learners",
+       x = "",
+       y = "") +
+  scale_x_tag() +
+  theme(legend.position = c(.75,.85)) 
+  # geom_text(aes(group = focus, label = scales::label_percent(accuracy = 1)(pct)),
+  #           nudge_y = .01,
+  #           vjust = 0,
+  #           color = "black",
+  #           fontface = "bold",
+  #           size = 5,
+  #           family = "sans")
+comp_ml
+ggsave("finding-19-V2.png", plot = comp_ml, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+###version 2 - collapse ml & el focus
+comp_ml2 <- ml %>% 
   mutate(focus = rep("MLL", nrow(.))) %>% 
   bind_rows(el) %>% 
   mutate(focus = replace_na(focus, "EL")) %>% 
@@ -803,7 +833,7 @@ This is the same information as above, but displayed in a different manner.
 dumbell <-
 ggplot(diff_core_dat, aes(x=pct, y=fct_reorder(tag, diff))) + 
   geom_line(linetype= "dotted", 
-            color = "gray") +
+            color = "black") +
   geom_point(aes(x=pct, 
                  y = fct_reorder(tag, diff),
                  color = `Leadership Team`), 
@@ -850,7 +880,7 @@ We should look at modeling results to draw any strong conclusions, but I've crea
 
 I defined "inclusive" as those schools that indicated they were either designing for the needs of marginalized student groups or have all courses designed for inclusion.
 
-**Analyst note** I do not trust the plot below - simple difference in tagging is good to see, however, the number of schools that fell into the "inclusive" bucket (N = 217) was far bigger than those that were not (N = 34). Might be good to think more about how to account for such a difference in sample.
+**Analyst note** I do not trust the plot below - simple difference in tagging is good to see, however, the number of schools that fell into the "inclusive" bucket (N = 217) was far bigger than those that were not (N = 34). Might be good to think more about how to account for such a difference in sample. *modified 6.25.23*
 
 ```{r inclusive school vs not}
 inclusive_diff <-
@@ -943,7 +973,7 @@ ggplot(inclusive_dumb_dat, aes(reorder(tag, -diff), pct, fill = inclusive)) +
   scale_fill_manual(values = c(transcend_cols[1], transcend_cols[3])) +
   scale_x_discrete(labels = label_tags(wrap = 25)) +
   coord_flip() +
-  labs(title = "Largest differences in core practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+  labs(title = "Largest differences in core practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N = 39)</span> and <span style = 'color: #EF464B;'>not (N = 212)</span>",
        subtitle = "This plot displays the 5 core tags schools selected.",
        x = "",
        y = "") +
@@ -957,7 +987,7 @@ ggsave("finding-20b-V2.png", plot = inclusive_diff3, path = here("final_products
 inclusive_dumbell <-
 ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) + 
   geom_line(linetype= "dotted", 
-            color = "gray") +
+            color = "black") +
   geom_point(aes(x=pct, 
                  y = fct_reorder(tag, diff),
                  color = inclusive), 
@@ -976,7 +1006,7 @@ ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) +
                     values = c(transcend_cols[1],transcend_cols[3]),
                     breaks = c("inclusive","not"),
                     labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
-  labs(title = "Largest differences in selected practices between<br>schools that are <span style = 'color: #1A4C81;'>designing for inclusion</span> and <span style = 'color: #EF464B;'>not</span>",
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N=39)</span> and <span style = 'color: #EF464B;'>not(N=212)</span>",
        subtitle = stringr::str_wrap("Schools designing for inclusion are any schools which selected the tags 'desgining for the needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5 core practices central to their learning environment.", width = 95),
        x = "",
        y = "") +
@@ -987,6 +1017,53 @@ ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) +
   
 inclusive_dumbell
 ggsave("finding-20b-V3.png", plot = inclusive_dumbell, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+
+##for funder slides
+funder_dumbell <- inclusive_dumb_dat %>% 
+  mutate(order = case_when(
+    tag == "practices_mtss_academics" ~ 1,
+    tag == "practices_udl" ~ 2,
+    tag == "practices_mentoring" ~ 3,
+    tag == "practices_competency_framework" ~ 4,
+    tag == "practices_community_partnerships" ~ 5,
+    tag == "practices_co_leaders" ~ 6,
+    tag == "practices_grading_mastery" ~ 7,
+    tag == "practices_assessments_agency" ~ 8,
+    tag == "practices_teachers_leaders" ~ 9,
+    tag == "practices_design_thinking" ~ 10
+  )) %>% 
+ggplot(., aes(x=pct, y=fct_reorder(tag, -order))) + 
+  geom_line(linetype= "dotted", 
+            color = "black") +
+  geom_point(aes(x=pct, 
+                 y = fct_reorder(tag, -order),
+                 color = inclusive), 
+                 size=3, 
+                 show.legend = FALSE) +
+  geom_text(aes(x=pct, 
+                y=tag, 
+                label = scales::label_percent(accuracy = 1)(pct)), 
+                nudge_x = .03, 
+                size = 4, 
+                family = "sans",
+                color = transcend_grays[1]) +
+  bar_x_scale_percent +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("inclusive","not"),
+                    labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N=39)</span> and <span style = 'color: #EF464B;'>not(N=212)</span>",
+       subtitle = stringr::str_wrap("Schools designing for inclusion are any schools which selected the tags 'desgining for the needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5 core practices central to their learning environment.", width = 95),
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown(),
+        panel.grid.major = element_blank(),
+        legend.position = c(.75,.25)) +
+  scale_y_discrete(labels = label_tags(wrap = 25))
+
+funder_dumbell
+ggsave("finding-20b-VFunder.png", plot = funder_dumbell, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 ```
 

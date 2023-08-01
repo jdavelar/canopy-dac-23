@@ -21,6 +21,7 @@ library(tidyverse)
 library(DT)
 library(scales)
 library(statebins)
+library(ggtext)
 # test <- import(here("data", "raw-ip.csv"))
 load(here("data", "complete_canopy_2023.Rdata"))
 source(here("scripts", "branding.R"))
@@ -712,8 +713,48 @@ comp_core <- full %>%
     tag == "practices_restorative" ~ 2,
     tag == "practices_design_marginalized" ~ 1,
     tag == "practices_learning_paths" ~ 8
-    )) %>% 
+    ))
 #PBL, culturally responsive practices, and integrated SEL were in the top 5 for both school-wide practices and core practices
+comp_core_plot <- 
+  ggplot(comp_core, aes(reorder(tag, rank), pct, fill = type)) +
+  geom_col(position = "identity") + #position = "dodge"
+  bar_y_scale_percent +
+  scale_x_discrete(labels = label_tags(wrap = 22)) +
+  # coord_flip() +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_fill_manual(values = transcend_cols) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "frequency of top 10 <span style = 'color: #1A4C81;'>core practices</span> compared to<br><span style = 'color: #59C3B4;'>all selected practices</span>",
+       subtitle = stringr::str_wrap("When Canopy schools select the practices they use, they may select up to 5 practices as 'core practices' central to their learning environment.", 75),
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown()) +
+  geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)),
+            size = 5,
+            family = "sans",
+            fontface = "bold",
+            nudge_y = .025,
+            vjust = .4) +
+  guides(fill = guide_legend(title = "Type of Practice"))
+comp_core_plot
+ggsave("finding-8c-V2.png", plot = comp_core_plot, path = here("final_products", "draft-findings"),
+       width = 8, height = 6, units = "in")
+
+#reordering for funder slides
+comp_core_funder <- comp_core %>% 
+  mutate(rank = case_when(
+    tag == "practices_pbl" ~ 1,
+    tag == "practices_competency_education" ~ 8,
+    tag == "practices_culturally_responsive" ~ 3,
+    tag == "practices_community_partnerships" ~ 5,
+    tag == "practices_sel_integrated" ~ 4,
+    tag == "practices_all_courses_designed_for_inclusion" ~ 6,
+    tag == "practices_career_prep" ~ 9,
+    tag == "practices_restorative" ~ 7,
+    tag == "practices_design_marginalized" ~ 2,
+    tag == "practices_learning_paths" ~ 10
+    )) %>% 
   ggplot(., aes(reorder(tag, rank), pct, fill = type)) +
   geom_col(position = "identity") + #position = "dodge"
   bar_y_scale_percent +
@@ -735,11 +776,9 @@ comp_core <- full %>%
             nudge_y = .025,
             vjust = .4) +
   guides(fill = guide_legend(title = "Type of Practice"))
-comp_core
-ggsave("finding-8c-V2.png", plot = comp_core, path = here("final_products", "draft-findings"),
+comp_core_funder
+ggsave("finding-8c-VFunder.png", plot = comp_core_funder, path = here("final_products", "draft-findings"),
        width = 8, height = 6, units = "in")
-#I'm not sure if this is going to work, either from building it or interpretation
-#the graph looks pretty misleading because of how stark the differences are
 ```
 
 

@@ -19,6 +19,7 @@ library(here)
 library(rio)
 library(tidyverse)
 library(DT)
+library(ggtext)
 #data
 load(here("data", "complete_canopy_2023.Rdata"))
 #branding
@@ -404,5 +405,289 @@ avg_marg_focus <- full %>%
   select(-starts_with("focus")) %>% 
   ungroup() %>% 
   summarize(Average = mean(Total))
+```
+
+# MLL and Cover Essay Specific Questions
+
+Grades offered in MLL sample
+
+```{r mll schools grades}
+mll_dat <- full %>% 
+  filter(school_id == 691|
+         school_id == 694|
+         school_id == 410|
+         school_id == 270|
+         school_id == 76|
+         school_id == 771|
+         school_id == 624|
+         school_id == 715|
+         school_id == 783|
+         school_id == 638|
+         school_id == 764|
+         school_id == 757|
+         school_id == 672)
+#grades offered
+mll_grades <- mll_dat %>% 
+  select(school_name, starts_with("self_reported_grades_")) %>% 
+  mutate(gr_pk = if_else(self_reported_grades_pre_k == 1, 1, 0),
+         gr_k = if_else(self_reported_grades_kindergarten == 1, 1, 0),
+         gr_1 = if_else(self_reported_grades_1st == 1, 1, 0),
+         gr_2 = if_else(self_reported_grades_2nd == 1, 1, 0),
+         gr_3 = if_else(self_reported_grades_3rd == 1, 1, 0),
+         gr_4 = if_else(self_reported_grades_4th == 1, 1, 0),
+         gr_5 = if_else(self_reported_grades_5th == 1, 1, 0),
+         gr_6 = if_else(self_reported_grades_6th == 1, 1, 0),
+         gr_7 = if_else(self_reported_grades_7th == 1, 1, 0),
+         gr_8 = if_else(self_reported_grades_8th == 1, 1, 0),
+         gr_9 = if_else(self_reported_grades_9th == 1, 1, 0),
+         gr_10 = if_else(self_reported_grades_10th == 1, 1, 0),
+         gr_11 = if_else(self_reported_grades_11th == 1, 1, 0),
+         gr_12 = if_else(self_reported_grades_12th == 1, 1, 0)) %>% 
+  select(school_name, starts_with("gr_")) %>% 
+  group_by(school_name) %>% 
+  mutate(n_gr = sum(gr_pk, gr_k, gr_1, gr_2, gr_3, gr_4, gr_5, gr_6, gr_7, gr_8, gr_9, gr_10, gr_11, gr_12)) %>% 
+  ungroup() %>% 
+  mutate(n_gr = case_when(
+    school_name == "Keres Children's Learning Center" ~ 14,
+    TRUE ~ as.numeric(n_gr)),
+    mean_gr = mean(n_gr)) %>% 
+  select(school_name, n_gr, mean_gr)
+```
+
+What tags did schools in our sample select the most?
+
+```{r mll top tags}
+mll_tags <- mll_dat %>% 
+  select(starts_with("practices")) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  group_by(tag) %>% 
+  summarize(sum = sum(n)) %>% 
+  mutate(pct = sum/13) %>% 
+  arrange(desc(pct))
+```
+
+What tags were all schools designing for MLLs more likely to select?
+
+```{r mll tag likelihood}
+mll_comparison <- full %>% 
+  select(school_id, starts_with("practices_"), focus_emergent_bilingual, focus_multilingual, focus_newcomer, inclusive_emergent_bilingual, inclusive_newcomer) %>% 
+  mutate(mll_focus = case_when(
+    focus_emergent_bilingual == 1 ~ "mll",
+    focus_multilingual == 1 ~ "mll",
+    focus_newcomer == 1 ~ "mll",
+    inclusive_emergent_bilingual == 1 ~ "mll",
+    inclusive_newcomer == 1 ~ "mll",
+    TRUE ~ "no_mll"
+  )) %>% #MLL = 170 #Not MLL = 81
+  select(mll_focus, starts_with("practices_")) %>% 
+  pivot_longer(cols = starts_with("practices_"),
+               names_to = "tag",
+               values_to = "n") %>% 
+  mutate(rate = rep(1, nrow(.))) %>% 
+  group_by(mll_focus, tag) %>% 
+  summarize(n = sum(n),
+            rate = sum(rate),
+            pct = n/rate) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = mll_focus,
+              values_from = c(n, rate, pct)) %>% 
+  mutate(diff = abs(round(100*(pct_mll - pct_no_mll), 2))) %>%
+    pivot_longer(cols = !c(tag, diff),
+               names_to = c("col", "mll_focus"),
+               names_sep = "_",
+               values_to = "value") %>% 
+  pivot_wider(names_from = col,
+              values_from = value) %>% 
+  filter(!(tag == "practices_all_courses_designed_for_inclusion" |
+           tag == "practices_design_marginalized")) %>% 
+  arrange(desc(diff)) %>% 
+  slice(1:20)
+#dumbell plot
+mll_dumbell <-
+ggplot(mll_comparison, aes(x=pct, y=fct_reorder(tag, diff))) + 
+  geom_line(linetype= "dotted", 
+            color = "black") +
+  geom_point(aes(x=pct, 
+                 y = fct_reorder(tag, diff),
+                 color = mll_focus), 
+                 size=3, 
+                 show.legend = FALSE) +
+  geom_text(aes(x=pct, 
+                y=tag, 
+                label = scales::label_percent(accuracy = 1)(pct)), 
+                nudge_x = .03, 
+                size = 4, 
+                family = "sans",
+                color = transcend_grays[1]) +
+  bar_x_scale_percent +
+    # scale_x_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("mll","no"),
+                    labels=c("Focused on Multilingual Learners","Not Focused on Multilingual Learners")) + 
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>focusing on multilingual learners </span> and <span style = 'color: #EF464B;'>not</span>",
+       subtitle = stringr::str_wrap("Schools focusing on multilingual learners are any schools which selected the tags 'designing for the needs of marginalized students' or 'all courses designed for inclusion' and indicated the student group they design for are emergent bilinguals, multilingual students, or newcomer students.", width = 95),
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown(),
+        panel.grid.major = element_blank(),
+        legend.position = c(.75,.25)) +
+  scale_y_discrete(labels = label_tags(wrap = 25))
+mll_dumbell
+#save plot
+ggsave("finding-24.png", plot = mll_dumbell, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
+```
+
+How many schools reported designing for mll's or for full inclusion of mlls?
+
+```{r mll design focus}
+focus <- full %>% 
+  select(school_id, focus_emergent_bilingual, focus_multilingual, focus_newcomer, inclusive_emergent_bilingual, inclusive_newcomer) %>% 
+  mutate(all = case_when(
+    focus_emergent_bilingual == 1 ~ 1,
+    focus_multilingual == 1 ~ 1,
+    focus_newcomer == 1 ~ 1,
+    inclusive_emergent_bilingual == 1 ~ 1,
+    inclusive_newcomer == 1 ~ 1,
+    TRUE ~ 0
+  ),
+  el = case_when(
+    focus_emergent_bilingual == 1 ~ 1,
+    focus_newcomer == 1 ~ 1,
+    inclusive_emergent_bilingual == 1 ~ 1,
+    inclusive_newcomer == 1 ~ 1,
+    TRUE ~ 0
+  ),
+  rate = rep(1, nrow(.))) 
+#selecting focus at all
+sum(focus$all)/sum(focus$rate) #.677
+sum(focus$el)/sum(focus$rate) #.669
+#selecting focus as core
+
+core_focus <- full %>% 
+  select(school_id, focus_emergent_bilingual, focus_multilingual, focus_newcomer, inclusive_emergent_bilingual, inclusive_newcomer, core_design_marginalized, core_all_courses_designed_for_inclusion) %>% 
+  mutate(core = case_when(
+    core_all_courses_designed_for_inclusion == 1 ~ 1,
+    core_design_marginalized == 1 ~ 1,
+    TRUE ~ 0
+  ),
+  core_mll = case_when(
+    core == 1 & focus_emergent_bilingual == 1 ~ 1,
+    core == 1 & focus_multilingual == 1 ~ 1,
+    core == 1 & focus_newcomer == 1 ~ 1,
+    core == 1 & inclusive_emergent_bilingual == 1 ~ 1,
+    core == 1 & inclusive_newcomer == 1 ~ 1,
+    TRUE ~ 0
+  ),
+  core_el = case_when(
+    core == 1 & focus_emergent_bilingual == 1 ~ 1,
+    core == 1 & focus_newcomer == 1 ~ 1,
+    core == 1 & inclusive_emergent_bilingual == 1 ~ 1,
+    core == 1 & inclusive_newcomer == 1 ~ 1,
+    TRUE ~ 0
+  ),
+  rate = rep(1, nrow(.))
+  )
+  
+sum(core_focus$core_mll==1)/sum(core_focus$rate) #.23
+sum(core_focus$core_el)/sum(core_focus$rate) #.23
+```
+
+What are the racial demographics of Canopy schools' student bodies?
+
+```{r student racial demog}
+race <- full %>% 
+  select(aian = self_reported_race_aian, asian = self_reported_race_asian, black = self_reported_race_black, latinx = self_reported_race_hispanic, white = self_reported_race_white, nhpi = self_reported_race_nhpi, multiple = self_reported_race_multiple) %>% 
+  mutate(bipoc = 100-white)
+#summarize the mean
+mean <- race %>% 
+  pivot_longer(cols = everything(),
+               names_to = "group",
+               values_to = "pct") %>% 
+  group_by(group) %>% 
+  summarize(mean = mean(pct, na.rm = TRUE))
+#create boxplots
+box <- race %>% 
+  pivot_longer(cols = everything(),
+               names_to = "group",
+               values_to = "pct") %>% 
+  ggplot(., aes(group, pct)) +
+  geom_boxplot()
+box
+#how many are predominantly bipoc?
+bipoc <- race %>% 
+  mutate(predom_bipoc = case_when(
+    bipoc >= 50 ~ 1,
+    bipoc < 50 ~ 0
+  ))
+sum(bipoc$predom_bipoc, na.rm = TRUE) #166 schools are predominantly BIPOC
+sum(bipoc$black == 100, na.rm = TRUE) #2
+sum(bipoc$aian == 100, na.rm = TRUE) #4
+sum(bipoc$asian == 100, na.rm = TRUE) #0
+sum(bipoc$latinx == 100, na.rm = TRUE) #2
+sum(bipoc$nhpi == 100, na.rm = TRUE) #0
+sum(bipoc$multiple == 100, na.rm = TRUE) #1
+sum(bipoc$white == 100, na.rm = TRUE) #2
+```
+
+Recreating language practices bar chart comparing MLL focus vs not
+
+```{r}
+ml_prac <- full %>% 
+    select(school_id, focus_emergent_bilingual, focus_multilingual, focus_newcomer, inclusive_emergent_bilingual, inclusive_newcomer, practices_dual_language, practices_translanguaging, practices_heritage_language) %>% 
+  mutate(mll = case_when(
+    focus_emergent_bilingual == 1 ~ 1,
+    focus_multilingual == 1 ~ 1,
+    focus_newcomer == 1 ~ 1,
+    inclusive_emergent_bilingual == 1 ~ 1,
+    inclusive_newcomer == 1 ~ 1,
+    TRUE ~ 0
+  )) %>% 
+  select(school_id, mll, starts_with("practices")) %>% 
+  group_by(mll) %>% 
+  summarize(practices_dual_language = sum(practices_dual_language),
+            practices_translanguaging = sum(practices_translanguaging),
+            practices_heritage_language = sum(practices_heritage_language)) %>% 
+  ungroup() %>% 
+  mutate(practices_dual_language = case_when(
+    mll == 0 ~ sum(practices_dual_language),
+    TRUE ~ as.numeric(practices_dual_language)
+  ),
+  practices_translanguaging = case_when(
+    mll == 0 ~ sum(practices_translanguaging),
+    TRUE ~ as.numeric(practices_translanguaging)
+  ),
+  practices_heritage_language = case_when(
+    mll == 0 ~ sum(practices_heritage_language),
+    TRUE ~ as.numeric(practices_heritage_language)
+  )) %>% 
+  pivot_longer(cols = starts_with("practices"),
+               names_to = "tag",
+               values_to = "rate") %>% 
+  mutate(pct = case_when(
+    mll == 0 ~ rate/251,
+    mll == 1 ~ rate/170
+  ),
+  `School type` = case_when(
+    mll == 0 ~ "not",
+    mll == 1 ~ "mll"
+  )) %>% 
+  ggplot(., aes(tag, pct, fill = `School type`)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  scale_fill_manual(values = transcend_cols,
+                    labels=c('Focus on multilingual students', 'All Canopy schools')) +
+  labs(title = "Rate of Selection for Language-Related Practices",
+       x = "",
+       y = "") +
+  scale_x_tag() +
+  theme(legend.position = c(.75,.85)) 
+ml_prac
+ggsave("finding-19-V3.png", plot = ml_prac, path = here("final_products", "draft-findings"),
+       width = 12, height = 8, units = "in")
 ```
 
