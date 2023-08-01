@@ -42,7 +42,7 @@ clusters_by_school <- practices_long %>%
   left_join(cweights, by = "practice") %>%
   group_by(school_id, cluster) %>% 
   summarize(cluster_weight = sum(val * weight, na.rm = TRUE), .groups = "drop") %>%
-  arrange(school_id)
+  arrange(school_id) 
 
 clusters_by_school_wide <- clusters_by_school %>%
   pivot_wider(id_cols = school_id, names_from = cluster, values_from = cluster_weight) %>%
@@ -213,7 +213,7 @@ model_data <-
 formulas = sprintf("%s ~ %s", clust_labs, paste(feature_names, collapse = " + "))
 ```
 
-```{r fit_models, message = FALSE, cache = TRUE, include = FALSE}
+```{r fit_models, eval=FALSE, message=FALSE, cache=TRUE, include=FALSE}
 library(rstanarm)
 
 mods = list()
@@ -228,7 +228,7 @@ for(i in seq_along(formulas)) {
 }
 ```
 
-```{r report_models, fig.width = 15, fig.height = 10}
+```{r report_models, eval=FALSE, fig.height=, fig.width=15, include=FALSE}
 
 library(broom.mixed)
 mods %>% map_df(tidy, .id = "response") %>% 
@@ -266,3 +266,93 @@ ggplot(
         #axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0)
       ) 
 ```
+
+
+# Cluster Associations with School Type
+```{r echo=TRUE, fig.width=10, message=FALSE}
+
+clusters_by_school2 <- practices_long %>%
+  left_join(cweights, by = "practice") %>%
+  group_by(school_id, cluster) %>% 
+  summarize(cluster_weight = sum(val * weight, na.rm = TRUE), .groups = "drop") %>%
+  arrange(school_id) %>% 
+  mutate(cluster = case_when(cluster == "MR1" ~ "learning mastery",
+                             cluster == "MR2" ~ "holistic student justice",
+                             cluster == "MR3" ~ "postsecondary pathways",
+                             cluster == "MR4" ~ "blended flexible learning"))  
+
+school_type <- full %>% 
+  select(school_id, school_descriptor) %>% 
+  mutate(school_descriptor = case_when(school_descriptor == 1 ~ "Public district",
+                                       school_descriptor == 2 ~ "Public charter",
+                                       school_descriptor == 3 ~ "Independent private"))
+
+school_type <- left_join(clusters_by_school2, school_type)
+
+ggplot(school_type, aes(x = cluster, y = cluster_weight)) +
+  geom_violin(fill = transcend_cols[2]) +
+  geom_point(
+    color = transcend_cols[3],
+    position = position_jitter(width = 0.2),
+    size = 0.2
+  ) +
+  facet_wrap(~school_descriptor) +
+  labs(
+    x = "", y = "Weight",
+    title = "Distribution of cluster weights"
+  ) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, size = rel(0.5)))
+
+```
+
+
+# Cluster Mutations for retreat
+
+```{r}
+practices_cor <- tags %>%
+  select(starts_with("practices")) %>%
+  cor
+
+efa_4 <- fa(practices_cor, nfactors = 4, rotate = "oblimin", fm = "minres")
+
+c4_max <- efa_4 %>% 
+  model_parameters(sort = TRUE, threshold = "max") %>% 
+  select(-c(6:7))
+```
+
+
+```{r}
+clust <- left_join(c4_max, tag_labels, by = join_by(Variable == tag))
+
+clust[is.na(clust)] <- 0
+
+clust2 <- clust %>% 
+  mutate(cluster = case_when(MR2 != 0 ~ "holistic student justice",
+                             MR3 != 0 ~ "postsecondary pathways",
+                             MR4 != 0 ~ "blended flexible learning",
+                             MR1 != 0 ~ "learning mastery"))
+```
+
+
+```{r}
+clust_prep <- full %>% 
+  select(school_id, starts_with("practices_")) %>% 
+  pivot_longer(cols = c(starts_with("practices")),
+               names_to = "tag",
+               values_to = "value") %>% 
+  filter(value>0)
+
+clust_prep <- clust_prep %>% 
+  group_by(tag) %>% 
+  summarise(sum = n())
+
+clust_count <- left_join(clust2, clust_prep, by = join_by(Variable ==tag)) %>% 
+  select(6:8)
+```
+
+```{r}
+clust_count
+```
+
+
+

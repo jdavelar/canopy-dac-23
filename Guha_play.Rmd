@@ -1,0 +1,189 @@
+---
+title: "Misc. Follow-ups"
+author: "Anwesha Guha"
+date: "7/16/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+pacman::p_load(rio, here, tidyverse, ggrepel, DT, forcats)
+```
+
+```{r}
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+```
+
+## Guiding Questions
+
+A) How many charter and district schools (so, excluding independent) are NEITHER part of a system-wide initiative NOR using a "model" in any way? (We had a survey question about "are you part of a system-wide innovation initiative", and another question about "to what degree are you using any of the following adoptable models." I think you'd want to look at schools that said "no" to the system-wide initiative, AND also said "not at all" to all of the 6 model options - Big Picture Learning, EL Education, etc.)
+
+
+B) Basically the reverse - how many charter and district schools are BOTH part of a system-wide initiative, AND using at least 1 model ("somewhat" or "to a large extent" would both count as yes)
+
+## Data prep
+
+```{r}
+source(here("scripts/branding.R"))
+load(here("data/complete_canopy_2023.RData"))
+```
+
+```{r}
+partial <- full %>% 
+  select(school_id, 
+         school_name,
+         school_state,
+         school_descriptor,
+         innovation_initiative,
+         "Big Picture \nLearning"=model_usage_bpl,
+         "EL Edu"=   model_usage_ele ,
+         "IB" = model_usage_ib,
+         "New Tech \nNetwork" = model_usage_ntn,
+         "Opportunity \nCulture" =  model_usage_oc,
+         "Summit \nLearning" = model_usage_sl)
+```
+
+
+Schools reported implementing adoptable models:
+```{r}
+#Check whether or not school implemented any adoptable models
+partial %>% 
+  mutate(across(c(6:11),
+                ~ case_when(. > 0 ~ "Yes",TRUE ~ "No"))) %>% 
+  pivot_longer(cols = 6:11, 
+               names_to = "models",
+               values_to = "response") %>% 
+  ggplot(aes(x=models, 
+             fill=response))+
+  geom_bar(stat = "count", position = "dodge") + 
+   scale_fill_manual(name="",
+   values = transcend_cols) + 
+  geom_text(stat = "count", aes(label = after_stat(count)), position = position_dodge(width = 1), vjust = -1, size = 3) + 
+  labs(title = "How many schools reported implementing adoptable models?",
+       x="")
+
+```
+
+```{r}
+partial %>% 
+mutate_if(is.numeric , replace_na, replace = 0) %>% 
+  pivot_longer(cols = 6:11, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0"))) %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(stat = "count", position = "fill") + 
+   geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3,
+            color = "white")+
+   scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "To what degree is your school utilizing any of the adoptable models listed below?",
+       ) +
+  theme(legend.position = "bottom") 
+```
+
+Charter vs district
+```{r fig.height=10, fig.width=18}
+partial %>%
+  mutate_if(is.numeric , replace_na, replace = 0) %>% 
+  pivot_longer(cols = 6:11, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0")),
+         school_descriptor = recode(school_descriptor, 
+                              "1" = "Public district",
+                              "2" = "Public Charter",
+                              "3" = "Independent/private")) %>% 
+  filter(school_descriptor != "Independent/private") %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(stat = "count", position = "fill") + 
+   geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), color="white", size =3)+
+  scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "To what degree is your school utilizing any of the adoptable models listed below?",
+       ) +
+  facet_wrap(~school_descriptor) + 
+  theme(legend.position = "bottom",
+        axis.text = element_text(size = rel(1.2)),
+        title = element_text(size = rel(1.6))) 
+  
+```
+
+Part of a larger innovation initiative?
+```{r fig.height=10, fig.width=18}
+partial %>%
+  mutate_if(is.numeric , replace_na, replace = 0) %>% 
+  pivot_longer(cols = 6:11, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0")),
+         school_descriptor = recode(school_descriptor, 
+                              "1" = "Public district",
+                              "2" = "Public Charter",
+                              "3" = "Independent/private")) %>% 
+  filter(school_descriptor != "Independent/private") %>% 
+  filter(innovation_initiative == 0) %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(stat = "count", position = "fill") + 
+   geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), color="white", size =3)+
+  scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "For schools NOT a part of a systems-based initiative, \nto what degree are schools utilizing any of the adoptable models listed below?",
+       ) +
+  facet_wrap(~school_descriptor) + 
+  theme(legend.position = "bottom",
+        axis.title = element_text(size = rel(1.5)),
+        axis.title.x = element_blank(),
+        strip.text = element_text(size = rel(1.2)),
+        legend.box.background = element_rect(fill="white", color="black"),
+        title = element_text(size = rel(1.6))) 
+```
+
+```{r fig.height=10, fig.width=18}
+partial %>%
+  mutate_if(is.numeric , replace_na, replace = 0) %>% 
+  pivot_longer(cols = 6:11, 
+               names_to = "models",
+               values_to = "response") %>% 
+  mutate(response = factor(response, levels = c("2", "1", "0")),
+         school_descriptor = recode(school_descriptor, 
+                              "1" = "Public district",
+                              "2" = "Public Charter",
+                              "3" = "Independent/private")) %>% 
+  filter(school_descriptor != "Independent/private") %>% 
+  filter(innovation_initiative == 1) %>% 
+  ggplot(aes(x=models, 
+             fill=as.factor(response)))+
+  geom_bar(stat = "count", position = "fill") + 
+   geom_text(aes(label = ..count..), stat = "count", position = position_fill(vjust = 0.5), color="white", size =3)+
+  scale_fill_manual(name= "",
+                     values = transcend_cols,
+                     breaks=c("2", "1", "0"),
+                     labels = c("To a large extent", "Somewhat", "Not at all/NA")) +
+  labs(title = "For schools that are a part of a systems-based initiative, \nto what degree are schools utilizing any of the adoptable models listed below?",
+       ) +
+  facet_wrap(~school_descriptor) + 
+  theme(legend.position = "bottom",
+        axis.title = element_text(size = rel(1.5)),
+        axis.title.x = element_blank(),
+        strip.text = element_text(size = rel(1.2)),
+        legend.box.background = element_rect(fill="white", color="black"),
+        title = element_text(size = rel(1.6))) 
+```
