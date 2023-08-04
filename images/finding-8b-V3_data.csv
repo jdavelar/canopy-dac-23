@@ -1,0 +1,41 @@
+Practice,Time,N,sum,pct,ord_time
+practices_pbl,Less than a year,4,84,0.047619047619047616,8
+practices_pbl,1-2 years,4,84,0.047619047619047616,8
+practices_pbl,3-4 years,20,84,0.23809523809523808,8
+practices_pbl,5+ years,56,84,0.6666666666666666,8
+practices_competency_education,Less than a year,3,53,0.05660377358490566,3
+practices_competency_education,1-2 years,8,53,0.1509433962264151,3
+practices_competency_education,3-4 years,15,53,0.2830188679245283,3
+practices_competency_education,5+ years,27,53,0.5094339622641509,3
+practices_culturally_responsive,Less than a year,3,50,0.06,2
+practices_culturally_responsive,1-2 years,10,50,0.2,2
+practices_culturally_responsive,3-4 years,17,50,0.34,2
+practices_culturally_responsive,5+ years,20,50,0.4,2
+practices_community_partnerships,Less than a year,1,47,0.02127659574468085,9
+practices_community_partnerships,1-2 years,5,47,0.10638297872340426,9
+practices_community_partnerships,3-4 years,6,47,0.1276595744680851,9
+practices_community_partnerships,5+ years,35,47,0.7446808510638298,9
+practices_sel_integrated,Less than a year,2,42,0.047619047619047616,4
+practices_sel_integrated,1-2 years,7,42,0.16666666666666666,4
+practices_sel_integrated,3-4 years,9,42,0.21428571428571427,4
+practices_sel_integrated,5+ years,24,42,0.5714285714285714,4
+practices_all_courses_designed_for_inclusion,Less than a year,3,39,0.07692307692307693,7
+practices_all_courses_designed_for_inclusion,1-2 years,5,39,0.1282051282051282,7
+practices_all_courses_designed_for_inclusion,3-4 years,6,39,0.15384615384615385,7
+practices_all_courses_designed_for_inclusion,5+ years,25,39,0.6410256410256411,7
+practices_career_prep,Less than a year,1,38,0.02631578947368421,10
+practices_career_prep,1-2 years,4,38,0.10526315789473684,10
+practices_career_prep,3-4 years,4,38,0.10526315789473684,10
+practices_career_prep,5+ years,29,38,0.7631578947368421,10
+practices_restorative,Less than a year,2,38,0.05263157894736842,1
+practices_restorative,1-2 years,6,38,0.15789473684210525,1
+practices_restorative,3-4 years,16,38,0.42105263157894735,1
+practices_restorative,5+ years,14,38,0.3684210526315789,1
+practices_design_marginalized,Less than a year,3,37,0.08108108108108109,5
+practices_design_marginalized,1-2 years,4,37,0.10810810810810811,5
+practices_design_marginalized,3-4 years,8,37,0.21621621621621623,5
+practices_design_marginalized,5+ years,22,37,0.5945945945945946,5
+practices_learning_paths,Less than a year,2,36,0.05555555555555555,6
+practices_learning_paths,1-2 years,4,36,0.1111111111111111,6
+practices_learning_paths,3-4 years,7,36,0.19444444444444445,6
+practices_learning_paths,5+ years,23,36,0.6388888888888888,6

@@ -339,7 +339,7 @@ full %>%
 
 
 ```{r}
-#locale <- 
+locale_dat <- 
   model %>%
   pivot_longer(cols = starts_with("self_"),
                names_to = "category", 
@@ -347,9 +347,16 @@ full %>%
                names_prefix= "self_reported_locale_") %>% 
   filter(count == "1",
          waiver_application != "4") %>% 
-  mutate(category=str_to_title(category)) %>% 
-  drop_na() %>% 
-  ggplot(aes(x = category, fill = as.factor(waiver_application)))+ 
+  mutate(category=str_to_title(category),
+         waiver_application = factor(waiver_application, levels = c("3", "2", "1", "0"),
+                                     labels = c("Consider, but did not apply",
+                "Applied & Received",
+                "Applied, but did not receive it",
+                "No"))) %>% 
+  drop_na()
+
+locale <- locale_dat %>% 
+  ggplot(aes(x = category, fill = waiver_application))+ 
   geom_bar(position = "fill", width = 0.5, color = "white") + 
  # coord_polar(theta = "y", start = 180) +
   geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
@@ -357,13 +364,7 @@ full %>%
             position = position_fill(vjust = 0.5),
             stat = "count",
             size = 3)+
-  scale_fill_manual(name="",
-   values = transcend_cols2,
-     breaks=c("3","1","2","0"),
-    labels = c("Consider, but did not apply",
-                "Applied & Received",
-                "Applied, but did not receive it",
-                "No"))+
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[2], transcend_cols[3], transcend_cols[4])) +
   scale_y_continuous(expand = c(0,0))+
   labs(title = "Has your school or system ever considered applying for a waiver from a local or state policy or regulation?") +
   coord_flip()+
@@ -371,6 +372,8 @@ full %>%
 
 #ggsave("finding-14b.png", plot = locale, path = here("final_products", "draft-findings"),
       #width = 8, height = 6, units = "in")
+
+ggsave_transcend(locale, "finding-14b")
 ```
 
 ### How did schools respond to the question about political debates? 
@@ -443,7 +446,7 @@ full %>%
 ```
 ### Political Debates by Locale
 ```{r}
-model %>%
+poli_locale <- model %>%
   pivot_longer(cols = starts_with("self_"),
                names_to = "category", 
                values_to = "count",
@@ -472,6 +475,8 @@ model %>%
   labs(title = "By Locale: To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
   coord_flip() +
   theme_2()
+
+ggsave_transcend(poli_locale, "poli_locale")
 ```
 
 

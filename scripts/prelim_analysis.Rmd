@@ -136,10 +136,12 @@ ggsave("finding-12-V3.png", plot = state_bins, path = here("final_products", "dr
 
 sb = ggplot_build(state_bins)
 sb$data[[2]]$label = na_state$label[match(sb$data[[2]]$label, na_state$abb)]
+# sb_dat <- sb$data[[2]]
 sb = ggplot_gtable(sb)
 png(filename = here("final_products", "draft-findings", "finding-12-V4.png"),
     width = 12, height = 8, units = "in", res = 300)
 plot(sb)
+# write_csv(sb_dat, file = sprintf("%s/%s_data.csv", here("images"), "finding-12-V4"))
 dev.off()
 ```
 
@@ -276,6 +278,7 @@ ggplot(., aes(reorder(`Geographic Locale`, N), pct, fill = `Geographic Locale`))
             family = "sans")
 ggsave("finding-11-V2.png", plot = locale_plot, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+ggsave_transcend(locale_plot, "finding-11-V2")
 ```
 
 ## How do schools that identified as Other describe their locale?
@@ -340,6 +343,8 @@ ggplot(level, aes(`School level`, pct, fill = `School level`)) +
             family = "sans")
 ggsave("finding-1-V3.png", plot = level_plot, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+
+ggsave_transcend(level_plot, "finding-1-V3")
 ```
 
 
@@ -416,6 +421,8 @@ ggplot(type, aes(x = "", y = N, fill = `School Type`)) +
 type_plot2
 ggsave("finding-2-V3.png", plot = type_plot2, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+
+# ggsave_transcend(type_plot2, "finding-2-V3")
 ```
 
 
@@ -665,6 +672,8 @@ top_prac3 <-
 top_prac3
 ggsave("finding-8b-V3.png", plot = top_prac3, path = here("final_products", "draft-findings"),
        width = 8, height = 6, units = "in")
+
+ggsave_transcend(top_prac3, "finding-8b-V3")
 ```
 
 Top 10 frequency comparing core and non-core practices
@@ -779,6 +788,8 @@ comp_core_funder <- comp_core %>%
 comp_core_funder
 ggsave("finding-8c-VFunder.png", plot = comp_core_funder, path = here("final_products", "draft-findings"),
        width = 8, height = 6, units = "in")
+
+ggsave_transcend(comp_core_funder, "finding-8c-VFunder")
 ```
 
 

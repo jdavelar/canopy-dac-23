@@ -524,6 +524,8 @@ marg_freq <- full %>%
 marg_freq
 ggsave("finding-18-V2.png", plot = marg_freq, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+
+ggsave_transcend(marg_freq, "finding-18-V2")
 ```
 
 
@@ -1065,6 +1067,8 @@ ggplot(., aes(x=pct, y=fct_reorder(tag, -order))) +
 funder_dumbell
 ggsave("finding-20b-VFunder.png", plot = funder_dumbell, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
+
+ggsave_transcend(funder_dumbell, "finding-20b-VFunder")
 ```
 
 # Modification 2 - Core Tags

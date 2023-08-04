@@ -1,0 +1,21 @@
+tag,type,sum,pct,rank
+practices_pbl,Practice,200,0.796812749003984,1
+practices_design_marginalized,Practice,191,0.7609561752988048,2
+practices_culturally_responsive,Practice,188,0.749003984063745,3
+practices_sel_integrated,Practice,186,0.7410358565737052,4
+practices_all_courses_designed_for_inclusion,Practice,183,0.7290836653386454,6
+practices_community_partnerships,Practice,183,0.7290836653386454,5
+practices_restorative,Practice,182,0.7250996015936255,7
+practices_competency_education,Practice,152,0.6055776892430279,8
+practices_learning_paths,Practice,144,0.5737051792828686,10
+practices_career_prep,Practice,142,0.5657370517928287,9
+practices_pbl,Core Practice,84,0.3346613545816733,1
+practices_competency_education,Core Practice,53,0.21115537848605578,8
+practices_culturally_responsive,Core Practice,50,0.199203187250996,3
+practices_community_partnerships,Core Practice,47,0.18725099601593626,5
+practices_sel_integrated,Core Practice,42,0.16733067729083664,4
+practices_all_courses_designed_for_inclusion,Core Practice,39,0.1553784860557769,6
+practices_career_prep,Core Practice,38,0.15139442231075698,9
+practices_restorative,Core Practice,38,0.15139442231075698,7
+practices_design_marginalized,Core Practice,37,0.14741035856573706,2
+practices_learning_paths,Core Practice,36,0.14342629482071714,10

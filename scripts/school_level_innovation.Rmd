@@ -289,6 +289,9 @@ prop.table(table(central_network$innovation_initiative_importance))
 
 ```
 
+
+
+
 ```{r}
 #pie <- 
   confidential %>% 
