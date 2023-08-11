@@ -23,41 +23,45 @@
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpNTcuMTB8ODQwLjA5fDcwLjI0fDUxNC40NA=='>
-    <rect x='57.10' y='70.24' width='782.99' height='444.20' />
+  <clipPath id='cpNjguNjd8ODQwLjA5fDcwLjI0fDUxNC40NA=='>
+    <rect x='68.67' y='70.24' width='771.42' height='444.20' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpNTcuMTB8ODQwLjA5fDcwLjI0fDUxNC40NA==)'>
-<rect x='57.10' y='70.24' width='782.99' height='444.20' style='stroke-width: 1.36; stroke: none;' />
-<polyline points='57.10,494.25 840.09,494.25 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='57.10,378.22 840.09,378.22 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='57.10,262.19 840.09,262.19 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='57.10,146.15 840.09,146.15 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<rect x='113.03' y='371.26' width='111.86' height='122.99' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='299.45' y='271.47' width='111.86' height='222.78' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #59C3B4;' />
-<rect x='485.88' y='90.46' width='111.86' height='403.79' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #EF464B;' />
-<rect x='672.31' y='104.38' width='111.86' height='389.87' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #ADE0EE;' />
-<text x='168.96' y='371.23' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='15.81px' lengthAdjust='spacingAndGlyphs'>53</text>
-<text x='355.38' y='271.44' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='15.81px' lengthAdjust='spacingAndGlyphs'>96</text>
-<text x='541.81' y='90.43' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='23.72px' lengthAdjust='spacingAndGlyphs'>174</text>
-<text x='728.23' y='104.36' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='23.72px' lengthAdjust='spacingAndGlyphs'>168</text>
-<rect x='57.10' y='70.24' width='782.99' height='444.20' style='stroke-width: 1.36; stroke: #4D4D4F;' />
+<g clip-path='url(#cpNjguNjd8ODQwLjA5fDcwLjI0fDUxNC40NA==)'>
+<rect x='68.67' y='70.24' width='771.42' height='444.20' style='stroke-width: 1.36; stroke: none;' />
+<polyline points='68.67,514.44 840.09,514.44 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='68.67,403.39 840.09,403.39 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='68.67,292.34 840.09,292.34 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='68.67,181.29 840.09,181.29 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='68.67,70.24 840.09,70.24 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<rect x='123.77' y='420.65' width='110.20' height='93.80' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='307.44' y='344.55' width='110.20' height='169.89' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #59C3B4;' />
+<rect x='491.11' y='206.51' width='110.20' height='307.93' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #EF464B;' />
+<rect x='674.79' y='217.13' width='110.20' height='297.31' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #ADE0EE;' />
+<text x='178.87' y='416.20' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>21%</text>
+<text x='362.55' y='340.11' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>38%</text>
+<text x='546.22' y='202.07' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>69%</text>
+<text x='729.89' y='212.69' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>67%</text>
+<rect x='68.67' y='70.24' width='771.42' height='444.20' style='stroke-width: 1.36; stroke: #4D4D4F;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
-<text x='50.82' y='499.25' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>0</text>
-<text x='50.82' y='383.21' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='16.01px' lengthAdjust='spacingAndGlyphs'>50</text>
-<text x='50.82' y='267.18' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='24.02px' lengthAdjust='spacingAndGlyphs'>100</text>
-<text x='50.82' y='151.15' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='24.02px' lengthAdjust='spacingAndGlyphs'>150</text>
-<polyline points='57.10,514.44 840.09,514.44 ' style='stroke-width: 1.36; stroke-linecap: butt;' />
-<text x='168.96' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='64.08px' lengthAdjust='spacingAndGlyphs'>Agency &amp; </text>
-<text x='168.96' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='87.80px' lengthAdjust='spacingAndGlyphs'>Self-Direction</text>
-<text x='355.38' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='47.40px' lengthAdjust='spacingAndGlyphs'>Career </text>
-<text x='355.38' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='66.15px' lengthAdjust='spacingAndGlyphs'>Readiness</text>
-<text x='541.81' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='51.67px' lengthAdjust='spacingAndGlyphs'>Deeper </text>
-<text x='541.81' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
-<text x='728.23' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='22.76px' lengthAdjust='spacingAndGlyphs'>SEL</text>
-<text x='57.10' y='44.79' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='366.29px' lengthAdjust='spacingAndGlyphs'>Note: Some schools selected multiple assessment types.</text>
-<text x='57.10' y='59.91' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='275.76px' lengthAdjust='spacingAndGlyphs'>Total Canopy learning environments = 251</text>
-<text x='57.10' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='391.48px' lengthAdjust='spacingAndGlyphs'>Use of Assessments for Non-Traditional Outcomes</text>
+<text x='62.40' y='519.44' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='19.58px' lengthAdjust='spacingAndGlyphs'>0%</text>
+<text x='62.40' y='408.39' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>25%</text>
+<text x='62.40' y='297.34' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>50%</text>
+<text x='62.40' y='186.29' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>75%</text>
+<text x='62.40' y='75.24' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='35.59px' lengthAdjust='spacingAndGlyphs'>100%</text>
+<polyline points='68.67,514.44 840.09,514.44 ' style='stroke-width: 1.36; stroke-linecap: butt;' />
+<text x='178.87' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='64.08px' lengthAdjust='spacingAndGlyphs'>Agency &amp; </text>
+<text x='178.87' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='87.80px' lengthAdjust='spacingAndGlyphs'>Self-Direction</text>
+<text x='362.55' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='47.40px' lengthAdjust='spacingAndGlyphs'>Career </text>
+<text x='362.55' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='66.15px' lengthAdjust='spacingAndGlyphs'>Readiness</text>
+<text x='546.22' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='51.67px' lengthAdjust='spacingAndGlyphs'>Deeper </text>
+<text x='546.22' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
+<text x='729.89' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='111.77px' lengthAdjust='spacingAndGlyphs'>Social-Emotional </text>
+<text x='729.89' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='32.30px' lengthAdjust='spacingAndGlyphs'>Skills</text>
+<text transform='translate(19.96,292.34) rotate(-90)' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='195.57px' lengthAdjust='spacingAndGlyphs'>Percentage of Canopy schools</text>
+<text x='68.67' y='44.79' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='366.29px' lengthAdjust='spacingAndGlyphs'>Note: Some schools selected multiple assessment types.</text>
+<text x='68.67' y='59.91' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='275.76px' lengthAdjust='spacingAndGlyphs'>Total Canopy learning environments = 251</text>
+<text x='68.67' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='526.71px' lengthAdjust='spacingAndGlyphs'>Non-traditional outcomes that Canopy schools reported assessing</text>
 </g>
 </svg>

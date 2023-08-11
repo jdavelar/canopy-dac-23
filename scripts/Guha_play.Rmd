@@ -202,23 +202,24 @@ assessments_dat <- assessments_dat %>%
 
 assessments_dat2 <- assessments_dat %>% 
   group_by(`Assessment Type`) %>% 
-  summarise(total = sum(N))
+  summarise(total = sum(N)) %>% 
+  mutate(pct = total/251)
 ```
 
 ```{r}
 assessments_plot <-
-ggplot(assessments_dat2, aes(`Assessment Type`, total, fill = `Assessment Type`)) +
+ggplot(assessments_dat2, aes(`Assessment Type`, pct, fill = `Assessment Type`)) +
   geom_col() +
   scale_fill_manual(values = transcend_cols) +
-#  bar_y_scale_percent +
+  bar_y_scale_percent +
   theme(panel.grid.major.x = element_blank()) +
-  labs(title = "Use of Assessments for Non-Traditional Outcomes",
+  labs(title = "Non-traditional outcomes that Canopy schools reported assessing",
        subtitle = "Note: Some schools selected multiple assessment types.\nTotal Canopy learning environments = 251",
        x = "",
-       y = "") +
+       y = "Percentage of Canopy schools") +
   theme(legend.position = "none") +
-  scale_x_discrete(labels = c("Agency & \nSelf-Direction", "Career \nReadiness", "Deeper \nLearning", "SEL")) +
-  geom_text(aes(label = total), 
+  scale_x_discrete(labels = c("Agency & \nSelf-Direction", "Career \nReadiness", "Deeper \nLearning", "Social-Emotional \nSkills")) +
+  geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)), 
             nudge_y = .01,
             vjust = 0,
             color = "black",
