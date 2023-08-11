@@ -187,3 +187,116 @@ partial %>%
         legend.box.background = element_rect(fill="white", color="black"),
         title = element_text(size = rel(1.6))) 
 ```
+
+# Tasks for cover essay
+
+## Figure 12 -- assessment frequency bar
+```{r}
+assessments_dat <- full %>% 
+  select(school_id, practices_assessments_agency, practices_assessments_deeper, practices_assessments_career, practices_assessments_sel)
+
+assessments_dat <- assessments_dat %>% 
+  pivot_longer(-school_id,
+               names_to = "Assessment Type",
+               values_to = "N")
+
+assessments_dat2 <- assessments_dat %>% 
+  group_by(`Assessment Type`) %>% 
+  summarise(total = sum(N))
+```
+
+```{r}
+assessments_plot <-
+ggplot(assessments_dat2, aes(`Assessment Type`, total, fill = `Assessment Type`)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+#  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Use of Assessments for Non-Traditional Outcomes",
+       subtitle = "Note: Some schools selected multiple assessment types.\nTotal Canopy learning environments = 251",
+       x = "",
+       y = "") +
+  theme(legend.position = "none") +
+  scale_x_discrete(labels = c("Agency & \nSelf-Direction", "Career \nReadiness", "Deeper \nLearning", "SEL")) +
+  geom_text(aes(label = total), 
+            nudge_y = .01,
+            vjust = 0,
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+```{r}
+ggsave_transcend(assessments_plot, "cover_figure12", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
+## Figure 13 -- source of assessment
+```{r}
+assessment_source <- full %>% 
+  select(school_id, starts_with("partnership_materials_"), starts_with("vendor_materials_"), starts_with("created_materials_"))
+
+#remove bilingual assessment vars
+assessment_source <- assessment_source %>% 
+  select(-contains("bilingual"))
+
+#create column that will help multiple be selected
+
+assessment_source$partnership_materials_sum <- rowSums(assessment_source[ , c(2:6)], na.rm=TRUE)
+assessment_source$vendor_materials_sum <- rowSums(assessment_source[ , c(7:11)], na.rm=TRUE)
+assessment_source$created_materials_sum <- rowSums(assessment_source[ , c(12:16)], na.rm=TRUE)
+
+
+#simplified materials vars
+assessment_source <- assessment_source %>% 
+  mutate(`combination of 2 or more` = case_when(
+    (partnership_materials_sum != 0 & vendor_materials_sum != 0) ~ 1,
+    (partnership_materials_sum != 0 & created_materials_sum != 0) ~ 1,
+    (vendor_materials_sum != 0 & created_materials_sum != 0) ~ 1,
+    TRUE ~ 0
+         ),
+    `partner-created assessments` = ifelse(partnership_materials_sum > 0, 1, 0),
+    `vendor-created assessments` = ifelse(vendor_materials_sum > 0, 1, 0),
+    `self-created assessments` = ifelse(created_materials_sum > 0, 1, 0))
+```
+
+```{r}
+assessment_viz_dat <- assessment_source %>% 
+  select(1, 20:23) %>% 
+  pivot_longer(-school_id,
+               names_to = "Assessment",
+               values_to = "Times Selected")
+
+assessment_viz_dat2 <- assessment_viz_dat %>% 
+  group_by(`Assessment`) %>% 
+  summarise(total = sum(`Times Selected`)) %>% 
+  mutate(pct = total/251)
+
+```
+
+```{r}
+assessments_source_plot <-
+ggplot(assessment_viz_dat2, aes(`Assessment`, pct, fill = `Assessment`)) +
+  geom_col() +
+  scale_fill_manual(values = transcend_cols) +
+  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Source of Assessments for Non-Traditional Outcomes",
+       subtitle = "Note: Some schools selected multiple sources for assessments. \nTotal Canopy learning environments = 251",
+       x = "",
+       y = "") +
+  theme(legend.position = "none") +
+ scale_x_discrete(labels = c("Combination \nof 2 or more", "Partner-Created \nAssessment", "Self-Created \nAssessment", "Vendor-Created \nAssessment")) +
+  geom_text(aes(label = scales::label_percent(accuracy = 1)(pct)), 
+            nudge_y = .01,
+            vjust = 0,
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+```{r}
+ggsave_transcend(assessments_source_plot, "cover_figure13", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+

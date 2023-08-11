@@ -129,19 +129,19 @@ statebins(state_data = na_state,
         axis.text  = element_blank(),
         axis.ticks = element_blank(),
         panel.grid.major = element_blank())
-ggsave("finding-12-V3.png", plot = state_bins, path = here("final_products", "draft-findings"),
-       width = 12, height = 8, units = "in")
+# ggsave("finding-12-V3.png", plot = state_bins, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 
 
 
 sb = ggplot_build(state_bins)
 sb$data[[2]]$label = na_state$label[match(sb$data[[2]]$label, na_state$abb)]
-# sb_dat <- sb$data[[2]]
+
 sb = ggplot_gtable(sb)
 png(filename = here("final_products", "draft-findings", "finding-12-V4.png"),
     width = 12, height = 8, units = "in", res = 300)
 plot(sb)
-# write_csv(sb_dat, file = sprintf("%s/%s_data.csv", here("images"), "finding-12-V4"))
+
 dev.off()
 ```
 
@@ -276,9 +276,8 @@ ggplot(., aes(reorder(`Geographic Locale`, N), pct, fill = `Geographic Locale`))
             fontface = "bold",
             size = 5,
             family = "sans")
-ggsave("finding-11-V2.png", plot = locale_plot, path = here("final_products", "draft-findings"),
-       width = 12, height = 8, units = "in")
-ggsave_transcend(locale_plot, "finding-11-V2")
+# ggsave("finding-11-V2.png", plot = locale_plot, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 ## How do schools that identified as Other describe their locale?
@@ -343,8 +342,6 @@ ggplot(level, aes(`School level`, pct, fill = `School level`)) +
             family = "sans")
 ggsave("finding-1-V3.png", plot = level_plot, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
-
-ggsave_transcend(level_plot, "finding-1-V3")
 ```
 
 
@@ -419,10 +416,8 @@ ggplot(type, aes(x = "", y = N, fill = `School Type`)) +
        x = "",
        y = "")
 type_plot2
-ggsave("finding-2-V3.png", plot = type_plot2, path = here("final_products", "draft-findings"),
-       width = 12, height = 8, units = "in")
-
-# ggsave_transcend(type_plot2, "finding-2-V3")
+# ggsave("finding-2-V3.png", plot = type_plot2, path = here("final_products", "draft-findings"),
+#        width = 12, height = 8, units = "in")
 ```
 
 
@@ -582,8 +577,8 @@ top_prac <-
         axis.text.x = element_text(angle = 45, hjust = 1)
         )
 top_prac
-ggsave("finding-8a-V2.png", plot = top_prac, path = here("final_products", "draft-findings"),
-       width = 8, height = 6, units = "in")
+# ggsave("finding-8a-V2.png", plot = top_prac, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 ```
 
 Top 10 Frequency - No Time
@@ -623,8 +618,8 @@ ggplot(., aes(reorder(Practice, -sum), sum)) +
             size = 5,
             family = "sans")
 top_prac2
-ggsave("finding-8a-V3.png", plot = top_prac2, path = here("final_products", "draft-findings"),
-       width = 8, height = 6, units = "in")
+# ggsave("finding-8a-V3.png", plot = top_prac2, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 ```
 
 
@@ -670,10 +665,8 @@ top_prac3 <-
         axis.text.y = element_text(size = rel(1))) +
   guides(fill = guide_legend(reverse = TRUE))
 top_prac3
-ggsave("finding-8b-V3.png", plot = top_prac3, path = here("final_products", "draft-findings"),
-       width = 8, height = 6, units = "in")
-
-ggsave_transcend(top_prac3, "finding-8b-V3")
+# ggsave("finding-8b-V3.png", plot = top_prac3, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 ```
 
 Top 10 frequency comparing core and non-core practices
@@ -747,8 +740,8 @@ comp_core_plot <-
             vjust = .4) +
   guides(fill = guide_legend(title = "Type of Practice"))
 comp_core_plot
-ggsave("finding-8c-V2.png", plot = comp_core_plot, path = here("final_products", "draft-findings"),
-       width = 8, height = 6, units = "in")
+# ggsave("finding-8c-V2.png", plot = comp_core_plot, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 
 #reordering for funder slides
 comp_core_funder <- comp_core %>% 
@@ -786,10 +779,8 @@ comp_core_funder <- comp_core %>%
             vjust = .4) +
   guides(fill = guide_legend(title = "Type of Practice"))
 comp_core_funder
-ggsave("finding-8c-VFunder.png", plot = comp_core_funder, path = here("final_products", "draft-findings"),
-       width = 8, height = 6, units = "in")
-
-ggsave_transcend(comp_core_funder, "finding-8c-VFunder")
+# ggsave("finding-8c-VFunder.png", plot = comp_core_funder, path = here("final_products", "draft-findings"),
+#        width = 8, height = 6, units = "in")
 ```
 
 
@@ -858,6 +849,54 @@ ggplot(tag_bar, aes(x = tag, y = n, fill = tag)) +
   geom_col() +
   scale_x_discrete(labels = label_tags(wrap = 10)) +
   scale_fill_manual(values = transcend_cols)
+```
+
+# Code for saving cover essay charts and any modifications
+## for any questions here, ask Anwesha
+
+Figure 1
+```{r}
+sb_dat <- sb$data[[2]]
+write_csv(sb_dat, file = sprintf("%s/%s_data.csv", here("images"), "finding-12-V4"))
+```
+
+Figure 2
+```{r}
+locale_plot <- locale_plot +
+  labs(x = "Locale of learners served",
+       y = "Percentage of Canopy schools")
+
+ggsave_transcend(locale_plot, "cover_figure2", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
+Figure 3
+```{r}
+ggsave_transcend(type_plot2, "cover_figure3", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
+Figure 4
+```{r}
+level_plot <- level_plot +
+  labs(x = "Level based on grades offered",
+       y = "Percentage of Canopy schools")
+
+ggsave_transcend(level_plot, "cover_figure4", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
+Figure 5
+```{r}
+comp_core_funder <- comp_core_funder +
+  labs(y = "Percentage of Canopy schools")
+
+ggsave_transcend(comp_core_funder, "cover_figure5", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
+Figure 6
+```{r}
+top_prac3 <- top_prac3 +
+  labs(y = "Percentage of Canopy schools")
+
+ggsave_transcend(top_prac3, "cover_figure6", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
 
 #Misc. - Ignore

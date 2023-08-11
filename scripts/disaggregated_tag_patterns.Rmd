@@ -525,7 +525,7 @@ marg_freq
 ggsave("finding-18-V2.png", plot = marg_freq, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 
-ggsave_transcend(marg_freq, "finding-18-V2")
+ggsave_transcend(marg_freq, "cover_figure7", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
 
 
@@ -1068,7 +1068,7 @@ funder_dumbell
 ggsave("finding-20b-VFunder.png", plot = funder_dumbell, path = here("final_products", "draft-findings"),
        width = 12, height = 8, units = "in")
 
-ggsave_transcend(funder_dumbell, "finding-20b-VFunder")
+ggsave_transcend(funder_dumbell, "cover_figure8", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
 
 # Modification 2 - Core Tags

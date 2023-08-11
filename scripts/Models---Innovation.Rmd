@@ -373,8 +373,33 @@ locale <- locale_dat %>%
 #ggsave("finding-14b.png", plot = locale, path = here("final_products", "draft-findings"),
       #width = 8, height = 6, units = "in")
 
-ggsave_transcend(locale, "finding-14b")
 ```
+
+Recreate to match cover essay draft
+```{r}
+locale2 <- locale_dat %>% 
+  ggplot(aes(x = category, fill = waiver_application))+ 
+  geom_bar(position = "fill", width = 0.5, color = "white") + 
+ # coord_polar(theta = "y", start = 180) +
+  geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            round= 1,
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 3)+
+  scale_fill_manual(values = c(transcend_cols[1], transcend_cols[2], transcend_cols[3], transcend_cols[4])) +
+  scale_y_continuous(expand = c(0,0))+
+  labs(title = "Waiver Application from a Local of state policy or regulation",
+       legend = "") +
+  coord_flip()+
+  theme(legend.direction = "horizontal",
+        legend.title = element_blank()) +
+  theme_3()
+```
+
+```{r}
+ggsave_transcend(locale, "cover_figure10", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
 
 ### How did schools respond to the question about political debates? 
 
@@ -451,12 +476,13 @@ poli_locale <- model %>%
                names_to = "category", 
                values_to = "count",
                names_prefix= "self_reported_locale_") %>% 
+  mutate(category = str_to_title(category)) %>% 
   filter(count == "1") %>% 
     drop_na() %>% 
   group_by(category) %>% 
     count(political_impact) %>% 
     mutate(perc = round(proportions(n) * 100, 1),
-           res = str_c(n , "(", perc, ")%"),
+           res = str_c(perc, "%"),
            political_impact = factor(political_impact, levels = c("5", "4", "3", "2", "1"))) %>% 
   ggplot(aes( x= as.factor(category), y=n, fill = as.factor(political_impact)))+ 
   geom_bar(position = "fill", stat= "identity", width = 0.5, color = "white", ) + 
@@ -464,7 +490,7 @@ poli_locale <- model %>%
                 position=position_fill(vjust=0.5),
             size=2.5)+
   scale_y_continuous(expand = c(0,0))+
-  scale_fill_manual(values=c("#FFA630", "#FFDE42", "#D1D3D4", "#99C24D","#218380"),
+  scale_fill_manual(values=c("#1B4C81", "#ADE0EE", "#D1D3D4", "#EF454A","#228380"),
    breaks=c("1", "2", "3", "4", "5"),
    labels=c("Strongly Disagree",
             "Disagree",
@@ -472,11 +498,13 @@ poli_locale <- model %>%
             "Agree",
             "Strongly Agree"),
    name="")+
-  labs(title = "By Locale: To what extent do you agree with the following statement? \n“Political debates are detracting from our learning environment’s ability to stay focused on our mission.”") +
+  labs(title = "Political debates are detracting from our learning environment’s ability to stay focused on our mission.") +
   coord_flip() +
+  theme(legend.direction = "horizontal") +
   theme_2()
 
-ggsave_transcend(poli_locale, "poli_locale")
+
+ggsave_transcend(poli_locale, "cover_figure11", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
 
 
