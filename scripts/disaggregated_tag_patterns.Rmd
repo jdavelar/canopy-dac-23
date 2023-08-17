@@ -1011,11 +1011,11 @@ ggsave("finding-20b-V2.png", plot = inclusive_diff3, path = here("final_products
 
 #as dumbell
 inclusive_dumbell <-
-ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) + 
+ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, -diff))) + 
   geom_line(linetype= "dotted", 
             color = "black") +
   geom_point(aes(x=pct, 
-                 y = fct_reorder(tag, diff),
+                 y = fct_reorder(tag, -diff),
                  color = inclusive), 
                  size=3, 
                  show.legend = FALSE) +
@@ -1032,8 +1032,8 @@ ggplot(inclusive_dumb_dat, aes(x=pct, y=fct_reorder(tag, diff))) +
                     values = c(transcend_cols[1],transcend_cols[3]),
                     breaks = c("inclusive","not"),
                     labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
-  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N=39)</span> and <span style = 'color: #EF464B;'>not(N=212)</span>",
-       subtitle = stringr::str_wrap("Schools designing for inclusion are any schools which selected the tags 'desgining for the needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5 core practices central to their learning environment.", width = 95),
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>focused on inclusion </span> and <span style = 'color: #EF464B;'>schools that are not </span>",
+       subtitle = stringr::str_wrap("Schools designing for inclusion (N = 39) were those that selected 'design to meet the needs of students who have been marginalized' or 'all courses designed for inclusion' as one of the top five core practices that are central to their approach. The remainder (N = 212) did not select either of those practices as a core practice.", width = 95),
        x = "",
        y = "") +
   theme(plot.title = element_markdown(),
@@ -1079,7 +1079,7 @@ ggplot(., aes(x=pct, y=fct_reorder(tag, -order))) +
                     values = c(transcend_cols[1],transcend_cols[3]),
                     breaks = c("inclusive","not"),
                     labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
-  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N=39)</span> and <span style = 'color: #EF464B;'>not(N=212)</span>",
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>designing for inclusion (N=39)</span> and <span style = 'color: #EF464B;'>not (N=212)</span>",
        subtitle = stringr::str_wrap("Schools designing for inclusion are any schools which selected the tags 'desgining for the needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5 core practices central to their learning environment.", width = 95),
        x = "",
        y = "") +
@@ -1094,6 +1094,63 @@ ggsave("finding-20b-VFunder.png", plot = funder_dumbell, path = here("final_prod
 
 ggsave_transcend(funder_dumbell, "cover_figure8", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
+
+## Modification for cover essay
+
+```{r}
+inclusive_dumbell2 <- inclusive_dumb_dat %>% 
+  mutate(order = case_when(
+    tag == "practices_mtss_academics" ~ 1,
+    tag == "practices_udl" ~ 2,
+    tag == "practices_mentoring" ~ 3,
+    tag == "practices_competency_framework" ~ 4,
+    tag == "practices_community_partnerships" ~ 5,
+    tag == "practices_co_leaders" ~ 6,
+    tag == "practices_grading_mastery" ~ 7,
+    tag == "practices_assessments_agency" ~ 8,
+    tag == "practices_teachers_leaders" ~ 9,
+    tag == "practices_design_thinking" ~ 10
+  )) %>%
+ggplot(., aes(x=pct, y=fct_reorder(tag, -order))) + 
+  geom_line(linetype= "dotted", 
+            color = "black") +
+  geom_point(aes(x=pct, 
+                 y = fct_reorder(tag, -order),
+                 color = inclusive), 
+                 size=3, 
+                 show.legend = FALSE) +
+  geom_text(aes(x=pct, 
+                y=tag, 
+                label = scales::label_percent(accuracy = 1)(pct)), 
+                nudge_x = .03, 
+                size = 4, 
+                family = "sans",
+                color = transcend_grays[1]) +
+  bar_x_scale_percent +
+    # scale_x_continuous(limits = c(0, 1), labels = scales::percent) +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("inclusive","not"),
+                    labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>focused on inclusion </span> and <span style = 'color: #EF464B;'>schools that are not </span>",
+       subtitle = stringr::str_wrap("Schools designing for inclusion (N = 39) were those that selected 'design to meet the needs of students who have been marginalized' or 'all courses designed for inclusion' as one of the top five core practices that are central to their approach. The remainder (N = 212) did not select either of those practices as a core practice.", width = 95),
+       x = "",
+       y = "") +
+  theme(plot.title = element_markdown(),
+        panel.grid.major = element_blank(),
+        legend.position = c(.75,.25)) +
+  scale_y_discrete(labels = label_tags(wrap = 25)) +
+  geom_hline(yintercept = 7.5, linetype = 5, color = "gray40") +
+  geom_text(x = .99, y = 7.9, color = "#1A4C81", label = "Schools designing for inclusion \nmore frequently selected these", hjust = "right") +
+  geom_text(x = .99, y = 1.1, color = "#EF464B", label = "Schools that did not select designing \nfor inclusion more frequently selected these", hjust = "right")
+  
+inclusive_dumbell2
+```
+
+```{r}
+ggsave_transcend(inclusive_dumbell2, "cover_figure8", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
+```
+
 
 # Modification 2 - Core Tags
 

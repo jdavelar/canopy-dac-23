@@ -23,90 +23,172 @@
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjAxLjk0fDg0MC4wOXwxMDYuMjh8NTI5LjU2'>
-    <rect x='201.94' y='106.28' width='638.15' height='423.28' />
+  <clipPath id='cpMjAxLjk0fDg0MC4wOXwxMjEuNDB8NTI5LjU2'>
+    <rect x='201.94' y='121.40' width='638.15' height='408.16' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjAxLjk0fDg0MC4wOXwxMDYuMjh8NTI5LjU2)'>
-<rect x='201.94' y='106.28' width='638.15' height='423.28' style='stroke-width: 1.36; stroke: none;' />
-<polyline points='417.93,504.66 490.14,504.66 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='496.47,463.17 569.05,463.17 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='280.48,421.67 356.33,421.67 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='516.11,380.17 596.50,380.17 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='535.74,338.67 623.94,338.67 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='594.65,297.17 692.56,297.17 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='378.66,255.68 527.88,255.68 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='483.28,214.18 575.01,214.18 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='514.15,172.68 633.92,172.68 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<polyline points='589.63,131.18 712.46,131.18 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
-<circle cx='378.66' cy='255.68' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='527.88' cy='255.68' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='712.46' cy='131.18' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='589.63' cy='131.18' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='633.92' cy='172.68' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='514.15' cy='172.68' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='594.65' cy='297.17' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='692.56' cy='297.17' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='575.01' cy='214.18' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='483.28' cy='214.18' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='535.74' cy='338.67' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='623.94' cy='338.67' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='516.11' cy='380.17' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='596.50' cy='380.17' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='280.48' cy='421.67' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='356.33' cy='421.67' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='496.47' cy='463.17' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='569.05' cy='463.17' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<circle cx='417.93' cy='504.66' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
-<circle cx='490.14' cy='504.66' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
-<text x='397.81' y='259.76' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>28%</text>
-<text x='547.02' y='259.76' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>51%</text>
-<text x='731.60' y='135.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>80%</text>
-<text x='608.78' y='135.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>61%</text>
-<text x='653.06' y='176.76' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>68%</text>
-<text x='533.30' y='176.76' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>49%</text>
-<text x='613.79' y='301.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>62%</text>
-<text x='711.71' y='301.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>77%</text>
-<text x='594.16' y='218.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>58%</text>
-<text x='502.42' y='218.26' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>44%</text>
-<text x='554.89' y='342.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>52%</text>
-<text x='643.09' y='342.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>66%</text>
-<text x='535.25' y='384.25' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>49%</text>
-<text x='615.64' y='384.25' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>62%</text>
-<text x='299.63' y='425.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>12%</text>
-<text x='375.48' y='425.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>24%</text>
-<text x='515.62' y='467.25' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>46%</text>
-<text x='588.19' y='467.25' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>58%</text>
-<text x='437.08' y='508.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>34%</text>
-<text x='509.28' y='508.75' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>45%</text>
-<rect x='201.94' y='106.28' width='638.15' height='423.28' style='stroke-width: 1.36; stroke: #4D4D4F;' />
+<g clip-path='url(#cpMjAxLjk0fDg0MC4wOXwxMjEuNDB8NTI5LjU2)'>
+<rect x='201.94' y='121.40' width='638.15' height='408.16' style='stroke-width: 1.36; stroke: none;' />
+<polyline points='417.93,505.55 490.14,505.55 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='496.47,465.54 569.05,465.54 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='280.48,425.52 356.33,425.52 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='516.11,385.51 596.50,385.51 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='535.74,345.49 623.94,345.49 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='594.65,305.48 692.56,305.48 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='378.66,265.46 527.88,265.46 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='483.28,225.44 575.01,225.44 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='514.15,185.43 633.92,185.43 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<polyline points='589.63,145.41 712.46,145.41 ' style='stroke-width: 1.07; stroke-dasharray: 1.42,4.27; stroke-linecap: butt;' />
+<circle cx='378.66' cy='265.46' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='527.88' cy='265.46' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='712.46' cy='145.41' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='589.63' cy='145.41' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='633.92' cy='185.43' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='514.15' cy='185.43' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='594.65' cy='305.48' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='692.56' cy='305.48' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='575.01' cy='225.44' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='483.28' cy='225.44' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='535.74' cy='345.49' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='623.94' cy='345.49' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='516.11' cy='385.51' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='596.50' cy='385.51' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='280.48' cy='425.52' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='356.33' cy='425.52' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='496.47' cy='465.54' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='569.05' cy='465.54' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<circle cx='417.93' cy='505.55' r='3.56' style='stroke-width: 0.71; stroke: #1A4C81; fill: #1A4C81;' />
+<circle cx='490.14' cy='505.55' r='3.56' style='stroke-width: 0.71; stroke: #EF464B; fill: #EF464B;' />
+<text x='397.81' y='269.54' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>28%</text>
+<text x='547.02' y='269.54' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>51%</text>
+<text x='731.60' y='149.50' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>80%</text>
+<text x='608.78' y='149.50' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>61%</text>
+<text x='653.06' y='189.51' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>68%</text>
+<text x='533.30' y='189.51' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>49%</text>
+<text x='613.79' y='309.56' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>62%</text>
+<text x='711.71' y='309.56' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>77%</text>
+<text x='594.16' y='229.53' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>58%</text>
+<text x='502.42' y='229.53' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>44%</text>
+<text x='554.89' y='349.57' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>52%</text>
+<text x='643.09' y='349.57' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>66%</text>
+<text x='535.25' y='389.59' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>49%</text>
+<text x='615.64' y='389.59' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>62%</text>
+<text x='299.63' y='429.60' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>12%</text>
+<text x='375.48' y='429.60' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>24%</text>
+<text x='515.62' y='469.62' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>46%</text>
+<text x='588.19' y='469.62' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>58%</text>
+<text x='437.08' y='509.64' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>34%</text>
+<text x='509.28' y='509.64' text-anchor='middle' style='font-size: 11.38px;fill: #4D4D4F; font-family: "Arial";' textLength='22.77px' lengthAdjust='spacingAndGlyphs'>45%</text>
+<line x1='201.94' y1='245.45' x2='840.09' y2='245.45' style='stroke-width: 1.07; stroke: #666666; stroke-dasharray: 9.96,4.27; stroke-linecap: butt;' />
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='225.45' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='154.51px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion </text>
+<text x='833.71' y='241.35' text-anchor='end' style='font-size: 11.04px;fill: #1A4C81; font-family: "Arial";' textLength='150.84px' lengthAdjust='spacingAndGlyphs'>more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<text x='833.71' y='497.56' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='182.13px' lengthAdjust='spacingAndGlyphs'>Schools that did not select designing </text>
+<text x='833.71' y='513.46' text-anchor='end' style='font-size: 11.04px;fill: #EF464B; font-family: "Arial";' textLength='212.76px' lengthAdjust='spacingAndGlyphs'>for inclusion more frequently selected these</text>
+<rect x='201.94' y='121.40' width='638.15' height='408.16' style='stroke-width: 1.36; stroke: #4D4D4F;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
-<text x='195.67' y='509.66' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='153.45px' lengthAdjust='spacingAndGlyphs'>design thinking process</text>
-<text x='195.67' y='468.16' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='145.50px' lengthAdjust='spacingAndGlyphs'>teachers as co-leaders</text>
-<text x='195.67' y='419.10' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='168.86px' lengthAdjust='spacingAndGlyphs'>assessments for agency &amp;</text>
-<text x='195.67' y='434.22' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='137.92px' lengthAdjust='spacingAndGlyphs'>self-directed learning</text>
-<text x='195.67' y='377.61' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='161.19px' lengthAdjust='spacingAndGlyphs'>grading policies focus on</text>
-<text x='195.67' y='392.73' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='52.99px' lengthAdjust='spacingAndGlyphs'>mastery</text>
-<text x='195.67' y='343.67' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='88.29px' lengthAdjust='spacingAndGlyphs'>co-leadership</text>
-<text x='195.67' y='294.61' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='148.33px' lengthAdjust='spacingAndGlyphs'>community &amp; business</text>
-<text x='195.67' y='309.73' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='83.23px' lengthAdjust='spacingAndGlyphs'>partnerships</text>
-<text x='195.67' y='260.67' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='154.66px' lengthAdjust='spacingAndGlyphs'>competency framework</text>
-<text x='195.67' y='219.18' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='91.58px' lengthAdjust='spacingAndGlyphs'>1:1 mentoring</text>
-<text x='195.67' y='170.12' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='128.19px' lengthAdjust='spacingAndGlyphs'>universal design for</text>
-<text x='195.67' y='185.24' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='53.20px' lengthAdjust='spacingAndGlyphs'>learning</text>
-<text x='195.67' y='121.06' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='126.44px' lengthAdjust='spacingAndGlyphs'>multi-tiered system</text>
-<text x='195.67' y='136.18' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='131.55px' lengthAdjust='spacingAndGlyphs'>of support (MTSS) in</text>
-<text x='195.67' y='151.30' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='68.54px' lengthAdjust='spacingAndGlyphs'>academics</text>
+<text x='195.67' y='510.55' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='153.45px' lengthAdjust='spacingAndGlyphs'>design thinking process</text>
+<text x='195.67' y='470.53' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='145.50px' lengthAdjust='spacingAndGlyphs'>teachers as co-leaders</text>
+<text x='195.67' y='422.96' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='168.86px' lengthAdjust='spacingAndGlyphs'>assessments for agency &amp;</text>
+<text x='195.67' y='438.08' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='137.92px' lengthAdjust='spacingAndGlyphs'>self-directed learning</text>
+<text x='195.67' y='382.94' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='161.19px' lengthAdjust='spacingAndGlyphs'>grading policies focus on</text>
+<text x='195.67' y='398.06' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='52.99px' lengthAdjust='spacingAndGlyphs'>mastery</text>
+<text x='195.67' y='350.49' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='88.29px' lengthAdjust='spacingAndGlyphs'>co-leadership</text>
+<text x='195.67' y='302.91' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='148.33px' lengthAdjust='spacingAndGlyphs'>community &amp; business</text>
+<text x='195.67' y='318.03' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='83.23px' lengthAdjust='spacingAndGlyphs'>partnerships</text>
+<text x='195.67' y='270.46' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='154.66px' lengthAdjust='spacingAndGlyphs'>competency framework</text>
+<text x='195.67' y='230.44' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='91.58px' lengthAdjust='spacingAndGlyphs'>1:1 mentoring</text>
+<text x='195.67' y='182.87' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='128.19px' lengthAdjust='spacingAndGlyphs'>universal design for</text>
+<text x='195.67' y='197.99' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='53.20px' lengthAdjust='spacingAndGlyphs'>learning</text>
+<text x='195.67' y='135.29' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='126.44px' lengthAdjust='spacingAndGlyphs'>multi-tiered system</text>
+<text x='195.67' y='150.41' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='131.55px' lengthAdjust='spacingAndGlyphs'>of support (MTSS) in</text>
+<text x='195.67' y='165.53' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='68.54px' lengthAdjust='spacingAndGlyphs'>academics</text>
 <polyline points='201.94,529.56 840.09,529.56 ' style='stroke-width: 1.36; stroke-linecap: butt;' />
 <text x='201.94' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='19.58px' lengthAdjust='spacingAndGlyphs'>0%</text>
 <text x='361.48' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>25%</text>
 <text x='521.02' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>50%</text>
 <text x='680.55' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='27.58px' lengthAdjust='spacingAndGlyphs'>75%</text>
 <text x='840.09' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='35.59px' lengthAdjust='spacingAndGlyphs'>100%</text>
-<text x='201.94' y='65.71' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='577.15px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion are any schools which selected the tags 'desgining for the</text>
-<text x='201.94' y='80.83' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='576.99px' lengthAdjust='spacingAndGlyphs'>needs of marginalized students' or 'all courses designed for inclusion' as one of the top 5</text>
-<text x='201.94' y='95.95' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='339.29px' lengthAdjust='spacingAndGlyphs'>core practices central to their learning environment.</text>
+<text x='201.94' y='65.71' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='606.75px' lengthAdjust='spacingAndGlyphs'>Schools designing for inclusion (N = 39) were those that selected 'design to meet the needs of</text>
+<text x='201.94' y='80.83' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='608.24px' lengthAdjust='spacingAndGlyphs'>students who have been marginalized' or 'all courses designed for inclusion' as one of the top</text>
+<text x='201.94' y='95.95' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='595.08px' lengthAdjust='spacingAndGlyphs'>five core practices that are central to their approach. The remainder (N = 212) did not select</text>
+<text x='201.94' y='111.07' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='278.63px' lengthAdjust='spacingAndGlyphs'>either of those practices as a core practice.</text>
 <text x='201.94' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='61.54px' lengthAdjust='spacingAndGlyphs'>Largest</text>
 <text x='267.21' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='92.38px' lengthAdjust='spacingAndGlyphs'>differences</text>
 <text x='363.32' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='14.44px' lengthAdjust='spacingAndGlyphs'>in</text>
@@ -116,11 +198,13 @@
 <text x='603.68' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='62.78px' lengthAdjust='spacingAndGlyphs'>schools</text>
 <text x='670.19' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='36.13px' lengthAdjust='spacingAndGlyphs'>that</text>
 <text x='201.94' y='47.22' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='27.22px' lengthAdjust='spacingAndGlyphs'>are</text>
-<text x='232.90' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='73.73px' lengthAdjust='spacingAndGlyphs'>designing</text>
-<text x='310.35' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='26.76px' lengthAdjust='spacingAndGlyphs'>for</text>
-<text x='340.85' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='73.22px' lengthAdjust='spacingAndGlyphs'>inclusion</text>
-<text x='417.79' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='50.82px' lengthAdjust='spacingAndGlyphs'>(N=39)</text>
-<text x='472.35' y='47.22' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='28.78px' lengthAdjust='spacingAndGlyphs'>and</text>
-<text x='504.85' y='47.22' style='font-size: 23.33px;fill: #EF464B; font-family: "Bebas Neue";' textLength='87.93px' lengthAdjust='spacingAndGlyphs'>not(N=212)</text>
+<text x='232.90' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='62.28px' lengthAdjust='spacingAndGlyphs'>focused</text>
+<text x='298.91' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='19.29px' lengthAdjust='spacingAndGlyphs'>on</text>
+<text x='321.92' y='47.22' style='font-size: 23.33px;fill: #1A4C81; font-family: "Bebas Neue";' textLength='73.22px' lengthAdjust='spacingAndGlyphs'>inclusion</text>
+<text x='402.60' y='47.22' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='28.78px' lengthAdjust='spacingAndGlyphs'>and</text>
+<text x='435.11' y='47.22' style='font-size: 23.33px;fill: #EF464B; font-family: "Bebas Neue";' textLength='62.78px' lengthAdjust='spacingAndGlyphs'>schools</text>
+<text x='501.61' y='47.22' style='font-size: 23.33px;fill: #EF464B; font-family: "Bebas Neue";' textLength='36.13px' lengthAdjust='spacingAndGlyphs'>that</text>
+<text x='541.47' y='47.22' style='font-size: 23.33px;fill: #EF464B; font-family: "Bebas Neue";' textLength='27.22px' lengthAdjust='spacingAndGlyphs'>are</text>
+<text x='572.43' y='47.22' style='font-size: 23.33px;fill: #EF464B; font-family: "Bebas Neue";' textLength='27.78px' lengthAdjust='spacingAndGlyphs'>not</text>
 </g>
 </svg>

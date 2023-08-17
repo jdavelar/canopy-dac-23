@@ -142,6 +142,9 @@ png(filename = here("final_products", "draft-findings", "finding-12-V4.png"),
     width = 12, height = 8, units = "in", res = 300)
 plot(sb)
 
+#
+png(filename = here("final_products", "essay-charts", "cover_figures", "cover_figure1.1"), width = 12, height = 8)
+
 dev.off()
 ```
 
