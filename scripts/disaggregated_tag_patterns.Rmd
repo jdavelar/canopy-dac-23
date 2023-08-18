@@ -1152,6 +1152,128 @@ ggsave_transcend(inclusive_dumbell2, "cover_figure8", dir = here("final_products
 ```
 
 
+```{r}
+inclusive_dumb_dat = inclusive_dumb_dat |>
+  mutate(
+    real_diff = pct[inclusive == "inclusive"] - pct[inclusive == "not"],
+    sign = factor(sign(real_diff)),
+    is_min = pct == min(pct),
+    .by = tag
+  ) |>
+  mutate(
+    slope_label = ifelse(
+      inclusive == "not",
+      percent_format(accuracy = 1)(pct),
+      paste(percent_format(accuracy = 1)(pct), label_tags()(tag))
+    ),
+    sign_label = ifelse(
+      sign == "1", 
+      "More common when\nfocused on inclusion",
+      "Less common when\nfocused on inclusion") %>%
+      factor() %>% fct_rev()
+  )
+inclusive_dumb_mids = inclusive_dumb_dat |>
+  summarize(
+    mid = mean(pct),
+    diff = first(diff/100),
+    .by = c(tag, sign, sign_label)
+  )
+
+inclusive_dumbell3 = ggplot(
+  data = inclusive_dumb_dat %>%
+    mutate(tag = fct_reorder(tag, real_diff)), 
+  aes(x = pct, y = tag)) + 
+  geom_line(
+    linetype = "dotted", 
+    color = "black"
+  ) +
+  geom_point(
+    aes(color = inclusive), 
+    size = 3, 
+    show.legend = FALSE
+  ) +
+  geom_text(
+    aes(label = scales::label_percent(accuracy = 1)(pct)), 
+    nudge_x = ifelse(inclusive_dumb_dat$is_min, -.03, .03),
+    size = 4, 
+    family = "sans",
+    hjust = 0.5,
+    color = transcend_grays[1]
+  ) +
+  geom_text(data = inclusive_dumb_mids, aes(
+      x = mid, y = tag,
+      label = paste("Δ =", label_percent(accuracy = 1)(diff))
+    ),
+    nudge_y = 0.2,
+    hjust = 0.5
+  ) +
+  bar_x_scale_percent +
+  scale_color_manual(name ="",
+                    values = c(transcend_cols[1],transcend_cols[3]),
+                    breaks = c("inclusive","not"),
+                    labels=c("Designing for Inclusion","Not Designing for Inclusion")) + 
+  labs(title = "Largest differences in selected practices between schools that<br>are <span style = 'color: #1A4C81;'>focused on inclusion </span> and <span style = 'color: #EF464B;'>schools that are not </span>",
+       subtitle = stringr::str_wrap("Schools designing for inclusion (N = 39) were those that selected 'design to meet the needs of students who have been marginalized' or 'all courses designed for inclusion' as one of the top five core practices that are central to their approach. The remainder (N = 212) did not select either of those practices as a core practice.", width = 95),
+       x = "",
+       y = "") +
+  scale_y_discrete(labels = label_tags(wrap = 25)) +
+  facet_grid(rows = vars(sign_label), scales = "free_y", space = "free_y") +
+  theme(
+    plot.title = element_markdown(),
+    panel.grid.major = element_blank(),
+    panel.spacing = unit(0, "lines"),
+    strip.text = element_text(size = rel(0.8), hjust = 0.5),
+    axis.line = element_blank()
+  )
+
+inclusive_dumbell3
+ggsave_transcend(
+  inclusive_dumbell3, "cover_figure8_dumbbell_v3", 
+  dir = here("final_products/essay-charts/cover_figures"), 
+  fig_width = 12, fig_height = 8, write_data = FALSE
+)
+
+# slope chart
+library(ggrepel)
+incl_slopegraph = ggplot(inclusive_dumb_dat,
+       aes(x = inclusive, y = pct, color = sign, group = tag)) +
+  geom_point(size = 2) +
+  geom_line() +
+  geom_text_repel(
+    aes(label = slope_label),
+    nudge_x = ifelse(inclusive_dumb_dat$inclusive == "not", -.08, .1),
+    #direction = "y",
+    min.segment.length = 10
+  ) +
+  labs(
+    x = "", y = "Schools selecting each practice (%)",
+    title = "Practices with the biggest difference in selection\nbetween schools focused vs not focused on inclusion",
+    subtitle = stringr::str_wrap("Schools designing for inclusion (N = 39) were those that selected 'design to meet the needs of students who have been marginalized' or 'all courses designed for inclusion' as one of the top five core practices that are central to their approach. The remainder (N = 212) did not select either of those practices as a core practice.", width = 85)
+  ) +
+  scale_color_discrete(guide = "none") +
+  scale_y_continuous(guide = "none") +
+  scale_x_discrete(
+    limits = c("not", "inclusive"),
+    labels = c("Schools\nnot focused\non inclusion", "Schools\nfocused\non inclusion"),
+    expand = expansion(mult = 0, add = c(0.2, 1.8))
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.border = element_blank(),
+    axis.line.x = element_blank()
+    #axis.text = element_text(size = rel(0.8)),
+    #axis.title = element_text(size = rel(0.8))
+  )
+
+incl_slopegraph
+ggsave_transcend(
+  incl_slopegraph, "cover_figure8_slopegraph", 
+  dir = here("final_products/essay-charts/cover_figures"), 
+  fig_width = 8.1, fig_height = 9
+)
+```
+
+
 # Modification 2 - Core Tags
 
 ```{r inclusive diff all tags}
