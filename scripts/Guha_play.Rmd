@@ -338,3 +338,68 @@ ggplot(assessment_viz_dat2, aes(`Assessment`, pct, fill = `Assessment`)) +
 ggsave_transcend(assessments_source_plot, "cover_figure13", dir = here("final_products/essay-charts/cover_figures"), fig_width = 12, fig_height = 8)
 ```
 
+#Models--Innovation was not working for me for some reason, so code for systems_essay are below.
+
+```{r}
+model <- full %>% 
+  select(school_id, 
+         school_name,
+         school_state,
+         "Big Picture \nLearning"=model_usage_bpl,
+         "EL Edu"=   model_usage_ele ,
+         "IB" = model_usage_ib,
+         "New Tech \nNetwork" = model_usage_ntn,
+         "Opportunity \nCulture" =  model_usage_oc,
+         "Summit \nLearning" = model_usage_sl,
+         grades_high,
+         self_reported_locale_rural,
+         self_reported_locale_suburban,
+         self_reported_locale_urban,
+         self_reported_locale_multiple,
+         waiver_application,
+         political_impact)
+```
+
+## Anwesha edit
+```{r}
+adopt_mods_dat <- model %>% 
+  mutate(across(c(4:9),
+                ~ case_when(. > 0 ~ "Yes", TRUE ~ "No"))) %>% 
+  pivot_longer(cols = 4:9, 
+               names_to = "models",
+               values_to = "response") %>% 
+  select(school_id, models, response) %>% 
+  filter(response == "Yes")
+```
+
+```{r}
+adopt_mods_dat <- adopt_mods_dat %>% 
+  group_by(models) %>% 
+  summarise(pct = round(length(school_id)/251*100)) 
+
+adopted_mod_viz <- adopt_mods_dat %>% 
+  ggplot(aes(x = fct_reorder(models, pct), y = pct)) +
+  geom_col(fill = "#1A4C81") +
+#  scale_fill_manual(values = transcend_cols) +
+#  bar_y_scale_percent +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Rate of adoption of six “models” by Canopy schools",
+       subtitle = "Percentages show the proportion of all Canopy schools that indicated they are using each model “somewhat” or \n“to a large extent.” The remainder selected “Not at all” or did not respond to the question.",
+       x = "",
+       y = "Percentage of all Canopy schools ") +
+  theme(legend.position = "none") +
+# scale_x_discrete(labels = c("Combination \nof 2 or more", "Partner-Created \nAssessment", "Self-Created \nAssessment", "Vendor-Created \nAssessment")) +
+  geom_text(aes(label = paste0(pct, "%")), 
+            nudge_y = .02,
+            vjust = 0,
+            color = "black",
+            fontface = "bold",
+            size = 5,
+            family = "sans")
+```
+
+```{r}
+ggsave_transcend(adopted_mod_viz, "systems_figure1", dir = here("final_products/essay-charts/systems_figures"), fig_width = 12, fig_height = 8)
+```
+
+

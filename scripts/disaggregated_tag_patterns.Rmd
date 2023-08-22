@@ -677,11 +677,11 @@ mll_viz <- mll_dat %>%
   bar_y_scale_percent +
   theme(panel.grid.major.x = element_blank()) +
   scale_fill_manual(values = transcend_cols,
-                    labels=c('All Canopy schools', 'Focus on Multilingual Students')) +
-  labs(title = "Rate of selection for language-related practices",
+                    labels=c('All Canopy schools', 'Schools reporting a focus on multilingual Students')) +
+  labs(title = "Few Canopy schools reported using language-related practices",
        x = "",
        y = "Percentage of Canopy schools",
-       fill = "School type") +
+       fill = "") +
   scale_x_tag() +
   theme(legend.position = c(.75,.85))
 ```

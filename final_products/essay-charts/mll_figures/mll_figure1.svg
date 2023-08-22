@@ -53,14 +53,13 @@
 <text x='454.38' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='171.15px' lengthAdjust='spacingAndGlyphs'>heritage language courses</text>
 <text x='695.45' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='104.92px' lengthAdjust='spacingAndGlyphs'>translanguaging</text>
 <text transform='translate(19.96,282.18) rotate(-90)' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='195.57px' lengthAdjust='spacingAndGlyphs'>Percentage of Canopy schools</text>
-<rect x='528.24' y='74.59' width='237.99' height='68.84' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
-<text x='535.22' y='93.24' style='font-size: 14.00px;fill: #666666; font-family: "Open Sans";' textLength='75.39px' lengthAdjust='spacingAndGlyphs'>School type</text>
-<rect x='535.22' y='101.89' width='17.28' height='17.28' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
-<rect x='535.92' y='102.60' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='535.22' y='119.17' width='17.28' height='17.28' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
-<rect x='535.92' y='119.88' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #59C3B4;' />
-<text x='559.47' y='115.53' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='121.35px' lengthAdjust='spacingAndGlyphs'>All Canopy schools</text>
-<text x='559.47' y='132.81' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='199.79px' lengthAdjust='spacingAndGlyphs'>Focus on Multilingual Students</text>
-<text x='68.67' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='389.81px' lengthAdjust='spacingAndGlyphs'>Rate of selection for language-related practices</text>
+<rect x='464.47' y='74.59' width='365.53' height='68.84' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
+<rect x='471.45' y='101.89' width='17.28' height='17.28' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
+<rect x='472.15' y='102.60' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='471.45' y='119.17' width='17.28' height='17.28' style='stroke-width: 1.36; stroke: none; fill: #FFFFFF;' />
+<rect x='472.15' y='119.88' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #59C3B4;' />
+<text x='495.70' y='115.53' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='121.35px' lengthAdjust='spacingAndGlyphs'>All Canopy schools</text>
+<text x='495.70' y='132.81' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='327.33px' lengthAdjust='spacingAndGlyphs'>Schools reporting a focus on multilingual Students</text>
+<text x='68.67' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='500.57px' lengthAdjust='spacingAndGlyphs'>Few Canopy schools reported using language-related practices</text>
 </g>
 </svg>
