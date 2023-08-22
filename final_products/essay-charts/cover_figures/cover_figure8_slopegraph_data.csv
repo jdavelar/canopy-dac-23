@@ -1,0 +1,41 @@
+tag,diff,inclusive,n,rate,pct,real_diff,sign,is_min,slope_label,sign_label
+practices_competency_framework,23.38,inclusive,18,65,0.27692307692307694,-0.23382961124896606,-1,TRUE,28% competency framework,"Less common when
+focused on inclusion"
+practices_competency_framework,23.38,not,95,186,0.510752688172043,-0.23382961124896606,-1,FALSE,51%,"Less common when
+focused on inclusion"
+practices_mtss_academics,19.25,inclusive,52,65,0.8,0.19247311827956992,1,FALSE,80% multi-tiered system of support (MTSS) in academics,"More common when
+focused on inclusion"
+practices_mtss_academics,19.25,not,113,186,0.6075268817204301,0.19247311827956992,1,TRUE,61%,"More common when
+focused on inclusion"
+practices_udl,18.77,inclusive,44,65,0.676923076923077,0.18767576509511996,1,FALSE,68% universal design for learning,"More common when
+focused on inclusion"
+practices_udl,18.77,not,91,186,0.489247311827957,0.18767576509511996,1,TRUE,49%,"More common when
+focused on inclusion"
+practices_community_partnerships,15.34,inclusive,40,65,0.6153846153846154,-0.15343258891645983,-1,TRUE,62% community & business partnerships,"Less common when
+focused on inclusion"
+practices_community_partnerships,15.34,not,143,186,0.7688172043010753,-0.15343258891645983,-1,FALSE,77%,"Less common when
+focused on inclusion"
+practices_mentoring,14.38,inclusive,38,65,0.5846153846153846,0.1437551695616212,1,FALSE,58% 1:1 mentoring,"More common when
+focused on inclusion"
+practices_mentoring,14.38,not,82,186,0.44086021505376344,0.1437551695616212,1,TRUE,44%,"More common when
+focused on inclusion"
+practices_co_leaders,13.82,inclusive,34,65,0.5230769230769231,-0.13821339950372202,-1,TRUE,52% co-leadership,"Less common when
+focused on inclusion"
+practices_co_leaders,13.82,not,123,186,0.6612903225806451,-0.13821339950372202,-1,FALSE,66%,"Less common when
+focused on inclusion"
+practices_grading_mastery,12.6,inclusive,32,65,0.49230769230769234,-0.1259718775847808,-1,TRUE,49% grading policies focus on mastery,"Less common when
+focused on inclusion"
+practices_grading_mastery,12.6,not,115,186,0.6182795698924731,-0.1259718775847808,-1,FALSE,62%,"Less common when
+focused on inclusion"
+practices_assessments_agency,11.89,inclusive,8,65,0.12307692307692308,-0.11885856079404467,-1,TRUE,12% assessments for agency & self-directed learning,"Less common when
+focused on inclusion"
+practices_assessments_agency,11.89,not,45,186,0.24193548387096775,-0.11885856079404467,-1,FALSE,24%,"Less common when
+focused on inclusion"
+practices_teachers_leaders,11.37,inclusive,30,65,0.46153846153846156,-0.11373035566583956,-1,TRUE,46% teachers as co-leaders,"Less common when
+focused on inclusion"
+practices_teachers_leaders,11.37,not,107,186,0.5752688172043011,-0.11373035566583956,-1,FALSE,58%,"Less common when
+focused on inclusion"
+practices_design_thinking,11.32,inclusive,22,65,0.3384615384615385,-0.11315136476426796,-1,TRUE,34% design thinking process,"Less common when
+focused on inclusion"
+practices_design_thinking,11.32,not,84,186,0.45161290322580644,-0.11315136476426796,-1,FALSE,45%,"Less common when
+focused on inclusion"
