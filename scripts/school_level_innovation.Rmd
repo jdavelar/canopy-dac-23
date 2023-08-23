@@ -336,6 +336,52 @@ theme(
   #      width = 12, height = 8, units = "in")
 ```
 
+## Add for systems essay -- Guha
+```{r}
+fig3 <-  confidential %>% 
+  select(innovation_initiative_importance) %>% 
+  drop_na() %>% 
+  ggplot(aes(x ="", fill = as.factor(innovation_initiative_importance)))+ 
+  geom_bar(position = "fill", width = .5, color = "white") + 
+  coord_polar(theta = "y",start = 2) +
+  geom_text(aes(label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..])),
+            position = position_fill(vjust = 0.5),
+            stat = "count",
+            size = 5, 
+            color = "white",
+            fontface= "bold") +
+  scale_fill_manual(name="",
+   values = transcend_cols,
+    breaks=c("5","4","3","2"),
+    labels = c("Very Important",
+                "Important",
+                "Fairly Important",
+                "Slightly Important"))+
+  scale_y_continuous(expand = c(0,0))+
+  labs(title = "Schools say district/charter innovation initiatives are important to their work",
+       subtitle = "Responses to “How important would you say this initiative is to the \nsuccess of your learning environment’s innovation work?” (N = 62)") +
+theme(
+  #  plot.title.position = "plot",
+   plot.title = element_text(family = "Bebas Neue", color = "black", hjust=0.5),
+    #plot.subtitle = element_text(family = "Open Sans", size = rel(0.8)),
+    plot.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = transcend_grays[1], fill = NA),
+    strip.text = element_text(size = rel(0.8)),
+    plot.margin = margin(10, 24, 10, 10, "pt"),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    legend.position = "right",
+   legend.text=element_text(size=8)
+  ) 
+```
+
+```{r}
+ggsave_transcend(fig3, "systems_figure3", dir = here("final_products/essay-charts/systems_figures"), fig_width = 12, fig_height = 8)
+```
+
 
 A quick look tells us that 68 of the schools, 29%, reported that they were part of a larger innovation initiative within their district or charter network. The remaining schools were either unsure, 13%, or responded no, 58%.
 
@@ -431,13 +477,37 @@ support_comparison %>%
       fill = "Innovation Initiative") +
   scale_x_discrete(labels = support_labels) +
   scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0)) +
-    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \nsystem initiatives", "Schools part of \nsystem initiative")) +
+    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \ninnovation initiatives", "Schools part of \ninnovation initiatives")) +
   coord_flip() +
   theme(legend.position = c(0.85, 0.2),
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank())
 
 ## ggsave("finding-13-v3.png", plot = finding_13a, path = here("final_products", "draft-findings"), width = 12, height = 8, units = "in")
+```
+
+## Edits for systems essay -- Guha
+
+```{r}
+fig2 <- support_comparison %>%
+  ggplot(aes(x=reorder(name, percent_yes), y = percent_yes, fill = factor(innovation)))+
+  geom_bar(position = "dodge",stat = "identity") +
+  labs(title = "Schools in district/charter innovation initiatives receive more central office support ",
+       subtitle = "Responses to “Does your central office provide any of the following related to your innovation work?” \nfrom schools that reported being part of system-wide innovation initiatives compared to those that did not.",
+       y = "Percentage of public schools in Canopy",
+       x = "",
+      fill = "") +
+  scale_x_discrete(labels = support_labels) +
+  scale_y_continuous(limits = c(0,100), n.breaks = 5,labels = function(x) paste0(x, "%"), expand = c(0,0)) +
+    scale_fill_manual(values = c("#1A4C81", "#59C3B4"), labels = c("Schools not part of \ninnovation initiatives", "Schools part of \ninnovation initiatives")) +
+  coord_flip() +
+  theme(legend.position = c(0.85, 0.2),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+```{r}
+ggsave_transcend(fig2, "systems_figure2", dir = here("final_products/essay-charts/systems_figures"), fig_width = 12, fig_height = 8)
 ```
 
 

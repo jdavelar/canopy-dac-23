@@ -23,49 +23,51 @@
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpNDkuMDl8ODQwLjA5fDcwLjI0fDUxNC40NA=='>
-    <rect x='49.09' y='70.24' width='790.99' height='444.20' />
+  <clipPath id='cpNzIuMzF8ODQwLjA5fDcwLjI0fDUxNC40NA=='>
+    <rect x='72.31' y='70.24' width='767.78' height='444.20' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpNDkuMDl8ODQwLjA5fDcwLjI0fDUxNC40NA==)'>
-<rect x='49.09' y='70.24' width='790.99' height='444.20' style='stroke-width: 1.36; stroke: none;' />
-<polyline points='49.09,494.25 840.09,494.25 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='49.09,359.73 840.09,359.73 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='49.09,225.22 840.09,225.22 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<polyline points='49.09,90.70 840.09,90.70 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
-<rect x='597.69' y='131.06' width='76.55' height='363.19' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='725.27' y='90.70' width='76.55' height='403.55' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='87.37' y='440.44' width='76.55' height='53.81' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='214.95' y='373.19' width='76.55' height='121.06' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='342.53' y='346.28' width='76.55' height='147.97' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<rect x='470.11' y='346.28' width='76.55' height='147.97' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
-<text x='635.96' y='130.79' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>27%</text>
-<text x='763.54' y='90.43' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>30%</text>
-<text x='125.64' y='440.18' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='20.55px' lengthAdjust='spacingAndGlyphs'>4%</text>
-<text x='253.22' y='372.92' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='20.55px' lengthAdjust='spacingAndGlyphs'>9%</text>
-<text x='380.80' y='346.01' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>11%</text>
-<text x='508.38' y='346.01' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>11%</text>
-<rect x='49.09' y='70.24' width='790.99' height='444.20' style='stroke-width: 1.36; stroke: #4D4D4F;' />
+<g clip-path='url(#cpNzIuMzF8ODQwLjA5fDcwLjI0fDUxNC40NA==)'>
+<rect x='72.31' y='70.24' width='767.78' height='444.20' style='stroke-width: 1.36; stroke: none;' />
+<polyline points='72.31,494.25 840.09,494.25 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='72.31,393.30 840.09,393.30 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='72.31,292.34 840.09,292.34 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='72.31,191.39 840.09,191.39 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<polyline points='72.31,90.43 840.09,90.43 ' style='stroke-width: 1.36; stroke: #CCCCCC; stroke-linecap: butt;' />
+<rect x='604.80' y='385.22' width='74.30' height='109.03' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='728.64' y='373.11' width='74.30' height='121.15' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='109.46' y='478.10' width='74.30' height='16.15' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='233.29' y='457.91' width='74.30' height='36.34' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='357.13' y='449.83' width='74.30' height='44.42' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<rect x='480.97' y='449.83' width='74.30' height='44.42' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt; stroke-linejoin: miter; fill: #1A4C81;' />
+<text x='641.95' y='385.14' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>27%</text>
+<text x='765.79' y='373.02' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>30%</text>
+<text x='146.61' y='478.02' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='20.55px' lengthAdjust='spacingAndGlyphs'>4%</text>
+<text x='270.44' y='457.83' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='20.55px' lengthAdjust='spacingAndGlyphs'>9%</text>
+<text x='394.28' y='449.75' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>11%</text>
+<text x='518.12' y='449.75' text-anchor='middle' style='font-size: 14.23px; font-weight: bold; font-family: "Arial";' textLength='28.45px' lengthAdjust='spacingAndGlyphs'>11%</text>
+<rect x='72.31' y='70.24' width='767.78' height='444.20' style='stroke-width: 1.36; stroke: #4D4D4F;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NjQuMDB8MC4wMHw1NzYuMDA=)'>
-<text x='42.82' y='499.25' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>0</text>
-<text x='42.82' y='364.73' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='16.01px' lengthAdjust='spacingAndGlyphs'>10</text>
-<text x='42.82' y='230.22' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='16.01px' lengthAdjust='spacingAndGlyphs'>20</text>
-<text x='42.82' y='95.70' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='16.01px' lengthAdjust='spacingAndGlyphs'>30</text>
-<polyline points='49.09,514.44 840.09,514.44 ' style='stroke-width: 1.36; stroke-linecap: butt;' />
-<text x='125.64' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='12.95px' lengthAdjust='spacingAndGlyphs'>IB</text>
-<text x='253.22' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='67.38px' lengthAdjust='spacingAndGlyphs'>New Tech </text>
-<text x='253.22' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='55.73px' lengthAdjust='spacingAndGlyphs'>Network</text>
-<text x='380.80' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='83.48px' lengthAdjust='spacingAndGlyphs'>Opportunity </text>
-<text x='380.80' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='48.10px' lengthAdjust='spacingAndGlyphs'>Culture</text>
-<text x='508.38' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='54.34px' lengthAdjust='spacingAndGlyphs'>Summit </text>
-<text x='508.38' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
-<text x='635.96' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='73.27px' lengthAdjust='spacingAndGlyphs'>Big Picture </text>
-<text x='635.96' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
-<text x='763.54' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='43.64px' lengthAdjust='spacingAndGlyphs'>EL Edu</text>
+<text x='66.03' y='499.25' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='23.21px' lengthAdjust='spacingAndGlyphs'>0 %</text>
+<text x='66.03' y='398.29' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='31.22px' lengthAdjust='spacingAndGlyphs'>25 %</text>
+<text x='66.03' y='297.34' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='31.22px' lengthAdjust='spacingAndGlyphs'>50 %</text>
+<text x='66.03' y='196.38' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='31.22px' lengthAdjust='spacingAndGlyphs'>75 %</text>
+<text x='66.03' y='95.43' text-anchor='end' style='font-size: 14.00px; font-family: "Open Sans";' textLength='39.23px' lengthAdjust='spacingAndGlyphs'>100 %</text>
+<polyline points='72.31,514.44 840.09,514.44 ' style='stroke-width: 1.36; stroke-linecap: butt;' />
+<text x='146.61' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='12.95px' lengthAdjust='spacingAndGlyphs'>IB</text>
+<text x='270.44' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='67.38px' lengthAdjust='spacingAndGlyphs'>New Tech </text>
+<text x='270.44' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='55.73px' lengthAdjust='spacingAndGlyphs'>Network</text>
+<text x='394.28' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='83.48px' lengthAdjust='spacingAndGlyphs'>Opportunity </text>
+<text x='394.28' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='48.10px' lengthAdjust='spacingAndGlyphs'>Culture</text>
+<text x='518.12' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='54.34px' lengthAdjust='spacingAndGlyphs'>Summit </text>
+<text x='518.12' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
+<text x='641.95' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='73.27px' lengthAdjust='spacingAndGlyphs'>Big Picture </text>
+<text x='641.95' y='545.83' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='56.97px' lengthAdjust='spacingAndGlyphs'>Learning</text>
+<text x='765.79' y='530.71' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='43.64px' lengthAdjust='spacingAndGlyphs'>EL Edu</text>
 <text transform='translate(19.96,292.34) rotate(-90)' text-anchor='middle' style='font-size: 14.00px; font-family: "Open Sans";' textLength='217.69px' lengthAdjust='spacingAndGlyphs'>Percentage of all Canopy schools </text>
-<text x='49.09' y='44.79' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='730.35px' lengthAdjust='spacingAndGlyphs'>Percentages show the proportion of all Canopy schools that indicated they are using each model “somewhat” or </text>
-<text x='49.09' y='59.91' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='581.90px' lengthAdjust='spacingAndGlyphs'>“to a large extent.” The remainder selected “Not at all” or did not respond to the question.</text>
-<text x='49.09' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='401.68px' lengthAdjust='spacingAndGlyphs'>Rate of adoption of six “models” by Canopy schools</text>
+<text x='72.31' y='44.79' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='730.35px' lengthAdjust='spacingAndGlyphs'>Percentages show the proportion of all Canopy schools that indicated they are using each model “somewhat” or </text>
+<text x='72.31' y='59.91' style='font-size: 14.00px;fill: #757575; font-family: "Open Sans";' textLength='581.90px' lengthAdjust='spacingAndGlyphs'>“to a large extent.” The remainder selected “Not at all” or did not respond to the question.</text>
+<text x='72.31' y='26.30' style='font-size: 23.33px; font-family: "Bebas Neue";' textLength='401.68px' lengthAdjust='spacingAndGlyphs'>Rate of adoption of six “models” by Canopy schools</text>
 </g>
 </svg>
