@@ -381,7 +381,11 @@ adopted_mod_viz <- adopt_mods_dat %>%
   ggplot(aes(x = fct_reorder(models, pct), y = pct)) +
   geom_col(fill = "#1A4C81") +
 #  scale_fill_manual(values = transcend_cols) +
-#  bar_y_scale_percent +
+  scale_y_continuous(
+    limits = c(0, 100),
+    labels = unit_format(unit = "%")
+  #  expand = expansion(mult = c(0, 0))
+  ) +
   theme(panel.grid.major.x = element_blank()) +
   labs(title = "Rate of adoption of six “models” by Canopy schools",
        subtitle = "Percentages show the proportion of all Canopy schools that indicated they are using each model “somewhat” or \n“to a large extent.” The remainder selected “Not at all” or did not respond to the question.",
