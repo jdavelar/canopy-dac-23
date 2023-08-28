@@ -101,3 +101,14 @@ full %>%
   
 ```
 
+## Are all outliers virtual schools?
+No, only a few of the top schools are.
+75% of schools are falling under ~500 students.
+
+```{r}
+outlier <- full %>% 
+  select(school_name, school_descriptor_virtual, self_reported_total_enrollment, grades_elementary, grades_middle, grades_high, school_descriptor)
+quantile(outlier$self_reported_total_enrollment, probs = c(0,0.25,0.5,0.75,1))
+quantile(full$self_reported_total_enrollment, probs = c(0,0.25,0.5,0.75,1))
+```
+
